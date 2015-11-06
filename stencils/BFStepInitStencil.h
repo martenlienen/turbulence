@@ -9,17 +9,15 @@
  *
  */
 class BFStepInitStencil : public FieldStencil<FlowField> {
-    public:
+ public:
+  BFStepInitStencil(const Parameters& parameters);
 
-        BFStepInitStencil (const Parameters & parameters);
+  void apply(FlowField& flowField, int i, int j);
+  void apply(FlowField& flowField, int i, int j, int k);
 
-        void apply(FlowField & flowField, int i, int j);
-        void apply(FlowField & flowField, int i, int j, int k);
-
-    private:
-
-        const FLOAT xLimit;   //! size of step in x-direction
-        const FLOAT yLimit;   //! Same as for x
+ private:
+  const FLOAT xLimit;  //! size of step in x-direction
+  const FLOAT yLimit;  //! Same as for x
 };
 
 #endif

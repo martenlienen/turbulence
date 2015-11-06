@@ -9,86 +9,80 @@
 #include "../Parameters.h"
 #include "../LinearSolver.h"
 
-const unsigned char LEFT_WALL_BIT   = 1<<0;
-const unsigned char RIGHT_WALL_BIT  = 1<<1;
-const unsigned char BOTTOM_WALL_BIT = 1<<2;
-const unsigned char TOP_WALL_BIT    = 1<<3;
-const unsigned char FRONT_WALL_BIT  = 1<<4;
-const unsigned char BACK_WALL_BIT   = 1<<5;
-
+const unsigned char LEFT_WALL_BIT = 1 << 0;
+const unsigned char RIGHT_WALL_BIT = 1 << 1;
+const unsigned char BOTTOM_WALL_BIT = 1 << 2;
+const unsigned char TOP_WALL_BIT = 1 << 3;
+const unsigned char FRONT_WALL_BIT = 1 << 4;
+const unsigned char BACK_WALL_BIT = 1 << 5;
 
 /** A class to encapsulate information the Petsc builder functions
  *  Petsc used so called context objects to give information to its routines.
  *  We need them to pass the flow field and the parameters in a single argument.
  */
-class PetscUserCtx{
-    private:
-        Parameters & _parameters;  //! Reference to parameters
-        FlowField & _flowField;  //! Reference to the flow field
+class PetscUserCtx {
+ private:
+  Parameters &_parameters;  //! Reference to parameters
+  FlowField &_flowField;    //! Reference to the flow field
 
-        int *_limitsX, *_limitsY, *_limitsZ;
+  int *_limitsX, *_limitsY, *_limitsZ;
 
-        int _rank;
+  int _rank;
 
-    public:
+ public:
+  /** Constructor
+   *
+   * @param parameters A parameters instance
+   * @param flowField The corresponding flow field
+   */
+  PetscUserCtx(Parameters &parameters, FlowField &flowField);
 
-        /** Constructor
-         *
-         * @param parameters A parameters instance
-         * @param flowField The corresponding flow field
-         */
-        PetscUserCtx(Parameters & parameters, FlowField & flowField);
+  /** Returns the parameters */
+  Parameters &getParameters();
 
-        /** Returns the parameters */
-        Parameters & getParameters();
+  /** Returns the flow field */
+  FlowField &getFlowField();
 
-        /** Returns the flow field */
-        FlowField & getFlowField();
+  void setLimits(int *limitsX, int *limitsY, int *limitsZ);
+  void getLimits(int **limitsX, int **limitsY, int **limitsZ);
 
-        void setLimits(int *limitsX, int *limitsY, int *limitsZ);
-        void getLimits(int ** limitsX, int ** limitsY, int ** limitsZ);
+  void setRank(int rank);
+  int getRank() const;
 
-        void setRank (int rank);
-        int getRank() const;
-
-        unsigned char setAsBoundary;    // if set as boundary in the linear system. Use bits
-        int displacement[6];            // Displacements for the boundary treatment
-
+  unsigned char
+      setAsBoundary;    // if set as boundary in the linear system. Use bits
+  int displacement[6];  // Displacements for the boundary treatment
 };
 
+class PetscSolver : public LinearSolver {
+ private:
+  Vec _x;    //! Petsc vectors for solution and RHS
+  DM _da;    //! Topology manager
+  KSP _ksp;  //! Solver context
+  PC _pc;    //! Preconditioner
 
-class PetscSolver : public LinearSolver{
+  PetscUserCtx _ctx;  // Capsule for Petsc builders
 
-    private:
-        Vec _x;  //! Petsc vectors for solution and RHS
-        DM _da;  //! Topology manager
-        KSP _ksp;  //! Solver context
-	PC _pc;  //! Preconditioner
+  // Indices for filling the matrices and right hand side
+  int _limitsX[2], _limitsY[2], _limitsZ[2];
 
-        PetscUserCtx _ctx;        // Capsule for Petsc builders
+  PetscInt _firstX, _lengthX, _firstY, _lengthY, _firstZ, _lengthZ;
 
-        // Indices for filling the matrices and right hand side
-        int _limitsX[2], _limitsY[2], _limitsZ[2];
+  // Additional variables used to determine where to write back the results
+  int _offsetX, _offsetY, _offsetZ;
 
-        PetscInt _firstX, _lengthX, _firstY, _lengthY, _firstZ, _lengthZ;
+ public:
+  /** Constructor */
+  PetscSolver(FlowField &flowField, Parameters &parameters);
 
-        // Additional variables used to determine where to write back the results
-        int _offsetX, _offsetY, _offsetZ;
+  /** Uses petsc to solve the linear system for the pressure */
+  void solve();
 
-    public:
+  /** Returns the grid */
+  const DM &getGrid() const;
 
-        /** Constructor */
-        PetscSolver(FlowField & flowField, Parameters & parameters);
-
-        /** Uses petsc to solve the linear system for the pressure */
-        void solve();
-
-        /** Returns the grid */
-        const DM & getGrid() const;
-
-	/** Reinit the matrix so that it uses the right flag field */
-	void reInitMatrix();
-
+  /** Reinit the matrix so that it uses the right flag field */
+  void reInitMatrix();
 };
 
 #endif

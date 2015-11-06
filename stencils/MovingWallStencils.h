@@ -9,66 +9,65 @@
  *
  * The values for the velocities are stored in the parameters.
  */
-class MovingWallVelocityStencil: public BoundaryStencil<FlowField> {
+class MovingWallVelocityStencil : public BoundaryStencil<FlowField> {
+ public:
+  /** Constructor
+   *
+   * @param parameters Parameters of the problem
+   */
+  MovingWallVelocityStencil(const Parameters& parameters);
 
-    public:
+  //@brief Functions for the 2D problem. Coordinates entered in alphabetical
+  // order.
+  //@{
+  void applyLeftWall(FlowField& flowField, int i, int j);
+  void applyRightWall(FlowField& flowField, int i, int j);
+  void applyBottomWall(FlowField& flowField, int i, int j);
+  void applyTopWall(FlowField& flowField, int i, int j);
+  //@}
 
-        /** Constructor
-         *
-         * @param parameters Parameters of the problem
-         */
-        MovingWallVelocityStencil ( const Parameters & parameters );
-
-        //@brief Functions for the 2D problem. Coordinates entered in alphabetical order.
-        //@{
-        void applyLeftWall   ( FlowField & flowField, int i, int j );
-        void applyRightWall  ( FlowField & flowField, int i, int j );
-        void applyBottomWall ( FlowField & flowField, int i, int j );
-        void applyTopWall    ( FlowField & flowField, int i, int j );
-        //@}
-
-        //@brief Functions for the 3D problem. Coordinates entered in alphabetical order.
-        //@{
-        void applyLeftWall   ( FlowField & flowField, int i, int j, int k );
-        void applyRightWall  ( FlowField & flowField, int i, int j, int k );
-        void applyBottomWall ( FlowField & flowField, int i, int j, int k );
-        void applyTopWall    ( FlowField & flowField, int i, int j, int k );
-        void applyFrontWall  ( FlowField & flowField, int i, int j, int k );
-        void applyBackWall   ( FlowField & flowField, int i, int j, int k );
-        //@}
-
+  //@brief Functions for the 3D problem. Coordinates entered in alphabetical
+  // order.
+  //@{
+  void applyLeftWall(FlowField& flowField, int i, int j, int k);
+  void applyRightWall(FlowField& flowField, int i, int j, int k);
+  void applyBottomWall(FlowField& flowField, int i, int j, int k);
+  void applyTopWall(FlowField& flowField, int i, int j, int k);
+  void applyFrontWall(FlowField& flowField, int i, int j, int k);
+  void applyBackWall(FlowField& flowField, int i, int j, int k);
+  //@}
 };
 
 /** Boundary stencil to set correct values of FGH at the faces.
  *
  * The values for the velocities are stored in the parameters.
  */
-class MovingWallFGHStencil: public BoundaryStencil<FlowField> {
+class MovingWallFGHStencil : public BoundaryStencil<FlowField> {
+ public:
+  /** Constructor
+   *
+   * @param parameters Parameters of the problem
+   */
+  MovingWallFGHStencil(const Parameters& parameters);
 
-    public:
+  //@brief Functions for the 2D problem. Coordinates entered in alphabetical
+  // order.
+  //@{
+  void applyLeftWall(FlowField& flowField, int i, int j);
+  void applyRightWall(FlowField& flowField, int i, int j);
+  void applyBottomWall(FlowField& flowField, int i, int j);
+  void applyTopWall(FlowField& flowField, int i, int j);
+  //@}
 
-        /** Constructor
-         *
-         * @param parameters Parameters of the problem
-         */
-        MovingWallFGHStencil ( const Parameters & parameters );
-
-        //@brief Functions for the 2D problem. Coordinates entered in alphabetical order.
-        //@{
-        void applyLeftWall   ( FlowField & flowField, int i, int j );
-        void applyRightWall  ( FlowField & flowField, int i, int j );
-        void applyBottomWall ( FlowField & flowField, int i, int j );
-        void applyTopWall    ( FlowField & flowField, int i, int j );
-        //@}
-
-        //@brief Functions for the 3D problem. Coordinates entered in alphabetical order.
-        //@{
-        void applyLeftWall   ( FlowField & flowField, int i, int j, int k );
-        void applyRightWall  ( FlowField & flowField, int i, int j, int k );
-        void applyBottomWall ( FlowField & flowField, int i, int j, int k );
-        void applyTopWall    ( FlowField & flowField, int i, int j, int k );
-        void applyFrontWall  ( FlowField & flowField, int i, int j, int k );
-        void applyBackWall   ( FlowField & flowField, int i, int j, int k );
-        //@}
+  //@brief Functions for the 3D problem. Coordinates entered in alphabetical
+  // order.
+  //@{
+  void applyLeftWall(FlowField& flowField, int i, int j, int k);
+  void applyRightWall(FlowField& flowField, int i, int j, int k);
+  void applyBottomWall(FlowField& flowField, int i, int j, int k);
+  void applyTopWall(FlowField& flowField, int i, int j, int k);
+  void applyFrontWall(FlowField& flowField, int i, int j, int k);
+  void applyBackWall(FlowField& flowField, int i, int j, int k);
+  //@}
 };
 #endif

@@ -5,51 +5,51 @@
 #include "../Definitions.h"
 #include <mpi.h>
 
-
-/** Class used to set parameters relevant to the parallel distribution. All functions modify the
+/** Class used to set parameters relevant to the parallel distribution. All
+ * functions modify the
  * parameters instance
  */
 class PetscParallelConfiguration {
+ private:
+  Parameters& _parameters;  //! Reference to the parameters
 
-    private:
+  /** Locates the six neighbors of the current process
+   */
+  void locateNeighbors();
 
-        Parameters & _parameters;   //! Reference to the parameters
+  /** Computes the indices of the current subdomain and stores the data in the
+   * parameters
+   */
+  void createIndices();
 
-        /** Locates the six neighbors of the current process
-         */
-        void locateNeighbors();
+  /** Returns the rank of the process with the indices provided
+   * @param i Intex in the X directon
+   * @param j Intex in the Y directon
+   * @param k Intex in the Z directon
+   * @return Rank of the process with that index, assuming that they are ordered
+   * lexicographically, or MPI_PROC_NULL if outside the domain
+   */
+  int computeRankFromIndices(int i, int j, int k) const;
 
-        /** Computes the indices of the current subdomain and stores the data in the parameters
-         */
-        void createIndices();
+  /** Compute local sizes and sizes in all directions. Requires deallocation of
+   * sizes
+   */
+  void computeSizes();
 
-        /** Returns the rank of the process with the indices provided
-         * @param i Intex in the X directon
-         * @param j Intex in the Y directon
-         * @param k Intex in the Z directon
-         * @return Rank of the process with that index, assuming that they are ordered
-         * lexicographically, or MPI_PROC_NULL if outside the domain
-         */
-        int computeRankFromIndices(int i, int j, int k) const;
+  /** Deletes the arrays allocated in the parameters. To be called in the
+   * destructor of this
+   * class
+   */
+  void freeSizes();
 
-        /** Compute local sizes and sizes in all directions. Requires deallocation of sizes
-         */
-        void computeSizes();
+ public:
+  /** Constructor
+   * @param parameters Reference to the parameters
+   */
+  PetscParallelConfiguration(Parameters& parameters);
 
-        /** Deletes the arrays allocated in the parameters. To be called in the destructor of this
-         * class
-         */
-        void freeSizes();
-
-    public:
-
-        /** Constructor
-         * @param parameters Reference to the parameters
-         */
-        PetscParallelConfiguration(Parameters & parameters);
-
-        /** Destructor */
-        ~PetscParallelConfiguration();
+  /** Destructor */
+  ~PetscParallelConfiguration();
 };
 
 #endif
