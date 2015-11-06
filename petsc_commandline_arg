@@ -1,0 +1,26 @@
+#### this shows the solver used
+#-ksp_view
+-ksp_converged_reason
+### plotting the convergence of the solver
+#-ksp_monitor
+
+#-ksp_type fgmres
+
+### factorization level for the ILU precond -- serial
+#-pc_factor_levels 2
+
+### factorization level for ILU -- parallel
+#-sub_pc_factor_levels 2
+
+
+
+### this only works for non-neumann boundaries
+#-pc_type gamg
+
+
+### Tolerances of the petsc solver
+-ksp_atol 1e-8
+-ksp_rtol 1e-11
+
+### maximum number of iterations
+-ksp_max_it 100000
