@@ -1,0 +1,4 @@
+#!/bin/sh
+find -type d -name 3rdparty -prune -o \
+     \( -name "*.h" -o -name "*.cpp" -o -name "*.cpph" \) -print \
+  | xargs clang-format -i
