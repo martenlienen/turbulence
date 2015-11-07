@@ -1,0 +1,10 @@
+# CMake generated files
+CMakeFiles
+Makefile
+CMakeCache.txt
+cmake_install.cmake
+
+# Build artifacts
+ns
+*.a
+*.o
