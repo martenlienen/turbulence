@@ -50,6 +50,9 @@ class Simulation {
   FieldIterator<FlowField> _velocityIterator;
   FieldIterator<FlowField> _obstacleIterator;
 
+  VTKStencil _vtkStencil;
+  FieldIterator<FlowField> _vtkIterator;
+
   PetscSolver _solver;
 
  public:
@@ -73,6 +76,8 @@ class Simulation {
         _obstacleStencil(parameters),
         _velocityIterator(_flowField, parameters, _velocityStencil),
         _obstacleIterator(_flowField, parameters, _obstacleStencil),
+        _vtkStencil(parameters),
+        _vtkIterator(_flowField, parameters, _vtkStencil),
         _solver(_flowField, parameters) {}
 
   virtual ~Simulation() {}
@@ -140,6 +145,7 @@ class Simulation {
   virtual void plotVTK(int timeStep) {
     // TODO WS1: create VTKStencil and respective iterator; iterate stencil
     //           over _flowField and write flow field information to vtk file
+    this->_vtkStencil.write(_flowField, timeStep);
   }
 
  protected:
