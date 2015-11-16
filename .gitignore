@@ -1,4 +1,5 @@
 # CMake generated files
+cmake
 CMakeFiles
 Makefile
 CMakeCache.txt
@@ -11,3 +12,8 @@ ns
 
 # Simulation results
 *.vtk
+results
+
+#NetBeans
+nbproject
+compile_commands.json
