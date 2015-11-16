@@ -1,5 +1,12 @@
 # Turbulent Flow Simulation
 
+## Libraries
+
+We require the following libraries
+
+- **openmpi** version *1.10.1*
+- **petsc** version *3.5.4*
+
 ## Setup
 
 For development you should install the following tools
