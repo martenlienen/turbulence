@@ -1,21 +1,30 @@
 #ifndef _SIMULATION_H_
 #define _SIMULATION_H_
 
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include <petscksp.h>
 #include <float.h>
+#include <vtk/File.h>
+#include <vtk/Dataset.h>
+#include <vtk/CellData.h>
+
 #include "FlowField.h"
 #include "stencils/FGHStencil.h"
 #include "stencils/MovingWallStencils.h"
 #include "stencils/RHSStencil.h"
 #include "stencils/VelocityStencil.h"
 #include "stencils/ObstacleStencil.h"
-#include "stencils/VTKStencil.h"
 #include "stencils/MaxUStencil.h"
 #include "stencils/PeriodicBoundaryStencils.h"
 #include "stencils/BFStepInitStencil.h"
 #include "stencils/NeumannBoundaryStencils.h"
 #include "stencils/BFInputStencils.h"
 #include "stencils/InitTaylorGreenFlowFieldStencil.h"
+#include "stencils/CellDataStencil.h"
+
 #include "GlobalBoundaryFactory.h"
 #include "Iterators.h"
 #include "Definitions.h"
@@ -23,6 +32,8 @@
 #include "LinearSolver.h"
 #include "solvers/SORSolver.h"
 #include "solvers/PetscSolver.h"
+
+#define GHOST_OFFSET 2
 
 class Simulation {
  protected:
@@ -50,8 +61,36 @@ class Simulation {
   FieldIterator<FlowField> _velocityIterator;
   FieldIterator<FlowField> _obstacleIterator;
 
-  VTKStencil _vtkStencil;
-  FieldIterator<FlowField> _vtkIterator;
+  std::vector<CellDataStencil<double>> scalarStencils{
+      CellDataStencil<double>(this->_parameters, "pressure",
+                              [](FlowField &f, int i, int j) {
+                                FLOAT p;
+                                FLOAT v[3];
+                                f.getPressureAndVelocity(p, v, i, j);
+                                return p;
+                              },
+                              [](FlowField &f, int i, int j, int k) {
+                                FLOAT p;
+                                FLOAT v[3];
+                                f.getPressureAndVelocity(p, v, i, j, k);
+                                return p;
+                              })};
+
+  std::vector<CellDataStencil<std::vector<double>>> vectorStencils{
+      CellDataStencil<std::vector<double>>(
+          this->_parameters, "velocity",
+          [](FlowField &f, int i, int j) {
+            FLOAT p;
+            FLOAT v[3];
+            f.getPressureAndVelocity(p, v, i, j);
+            return std::vector<double>{v[0], v[1], v[2]};
+          },
+          [](FlowField &f, int i, int j, int k) {
+            FLOAT p;
+            FLOAT v[3];
+            f.getPressureAndVelocity(p, v, i, j, k);
+            return std::vector<double>{v[0], v[1], v[2]};
+          })};
 
   PetscSolver _solver;
 
@@ -76,8 +115,6 @@ class Simulation {
         _obstacleStencil(parameters),
         _velocityIterator(_flowField, parameters, _velocityStencil),
         _obstacleIterator(_flowField, parameters, _obstacleStencil),
-        _vtkStencil(parameters),
-        _vtkIterator(_flowField, parameters, _vtkStencil),
         _solver(_flowField, parameters) {}
 
   virtual ~Simulation() {}
@@ -145,7 +182,29 @@ class Simulation {
   virtual void plotVTK(int timeStep) {
     // TODO WS1: create VTKStencil and respective iterator; iterate stencil
     //           over _flowField and write flow field information to vtk file
-    this->_vtkStencil.write(_flowField, timeStep);
+
+    vtk::Dataset dataset = this->datasetFromMesh();
+    std::vector<std::unique_ptr<vtk::CellData>> cellData;
+    cellData.reserve(this->scalarStencils.size() + this->vectorStencils.size());
+
+    for (auto &stencil : this->scalarStencils) {
+      stencil.reset();
+      FieldIterator<FlowField> iterator(this->_flowField, this->_parameters,
+                                        stencil, 0, -1);
+      iterator.iterate();
+      cellData.push_back(stencil.get());
+    }
+
+    for (auto &stencil : this->vectorStencils) {
+      stencil.reset();
+      FieldIterator<FlowField> iterator(this->_flowField, this->_parameters,
+                                        stencil, 0, -1);
+      iterator.iterate();
+      cellData.push_back(stencil.get());
+    }
+
+    vtk::File file(dataset, std::move(cellData));
+    file.write(this->_parameters.vtk.prefix, timeStep);
   }
 
  protected:
@@ -187,6 +246,36 @@ class Simulation {
 
     _parameters.timestep.dt = globalMin;
     _parameters.timestep.dt *= _parameters.timestep.tau;
+  }
+
+ private:
+  vtk::Dataset datasetFromMesh() {
+    Parameters &p = this->_parameters;
+    GeometricParameters &gp = p.geometry;
+    Meshsize *mesh = p.meshsize;
+
+    int cellsX = gp.sizeX;
+    int cellsY = gp.sizeY;
+    int cellsZ = gp.sizeZ;
+    int pointsX = cellsX + 1;
+    int pointsY = cellsY + 1;
+    int pointsZ = gp.dim == 3 ? cellsZ + 1 : 1;
+    int numPoints = pointsX * pointsY * pointsZ;
+
+    std::vector<vtk::Point> points(numPoints);
+
+    for (int k = GHOST_OFFSET, p = 0; k < pointsZ + GHOST_OFFSET; k++) {
+      for (int j = GHOST_OFFSET; j < pointsY + GHOST_OFFSET; j++) {
+        for (int i = GHOST_OFFSET; i < pointsX + GHOST_OFFSET; i++, p++) {
+          points[p].x = mesh->getPosX(i, j, k);
+          points[p].y = mesh->getPosY(i, j, k);
+          points[p].z = mesh->getPosZ(i, j, k);
+        }
+      }
+    }
+
+    return vtk::Dataset(vtk::Point(cellsX, cellsY, cellsZ),
+                         vtk::Point(pointsX, pointsY, pointsZ), points);
   }
 };
 

@@ -22,17 +22,18 @@ add_definitions(${PETSC_DEFINITIONS})
 include_directories(".")
 
 add_subdirectory("3rdparty/tinyxml2")
+add_subdirectory("vtk")
 
 set(root_src Configuration.cpp DataStructures.cpp FlowField.cpp
   GlobalBoundaryFactory.cpp LinearSolver.cpp Meshsize.cpp SimpleTimer.cpp)
 set(parallel_src parallelManagers/PetscParallelConfiguration.cpp)
 set(solvers_src solvers/PetscSolver.cpp solvers/SORSolver.cpp)
 set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp
-  stencils/FGHStencil.cpp stencils/MaxUStencil.cpp stencils/VTKStencil.cpp
+  stencils/FGHStencil.cpp stencils/MaxUStencil.cpp
   stencils/MovingWallStencils.cpp stencils/NeumannBoundaryStencils.cpp
   stencils/ObstacleStencil.cpp stencils/PeriodicBoundaryStencils.cpp
   stencils/RHSStencil.cpp stencils/VelocityStencil.cpp)
 
 add_executable(ns main.cpp ${root_src} ${parallel_src} ${solvers_src}
   ${stencils_src})
-target_link_libraries(ns tinyxml2 ${PETSC_LIBRARIES})
+target_link_libraries(ns tinyxml2 vtk ${PETSC_LIBRARIES})
