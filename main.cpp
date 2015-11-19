@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "Configuration.h"
-#include "Simulation.h"
+#include "FlowFieldSimulation.h"
 #include "parallelManagers/PetscParallelConfiguration.h"
 #include "MeshsizeFactory.h"
 #include <iomanip>
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     if (flowField == NULL) {
       handleError(1, "flowField==NULL!");
     }
-    simulation = new Simulation(parameters, *flowField);
+    simulation = new FlowFieldSimulation<FlowField>(parameters, *flowField);
   } else {
     handleError(
         1, "Unknown simulation type! Currently supported: dns, turbulence");
