@@ -6,6 +6,7 @@ We require the following libraries
 
 - **openmpi** version *1.10.1*
 - **petsc** version *3.5.4*
+- **gtest** version *1.6.0*
 
 ## Setup
 
@@ -14,6 +15,7 @@ For development you should install the following tools
 * `clang`: We use `clang`s `clang-format` to keep our coding style consistent.
 * `cmake`: We use `cmake` to generate a nicer `Makefile` than the one we got
   from the tutors.
+* `gtest`: GTest is used for unit testing. Run the tests with `./tests`.
 
 ```sh
 # Run these once at the start of your session or put it into your

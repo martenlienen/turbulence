@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
+# Disable tests with -Dtests=OFF
+option(tests "Build tests" ON)
+
 # Use mpic++ over g++/c++
 #
 # You have to specify it before the `project` call. Otherwise cmake will go into
@@ -34,6 +37,21 @@ set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp
   stencils/ObstacleStencil.cpp stencils/PeriodicBoundaryStencils.cpp
   stencils/RHSStencil.cpp stencils/VelocityStencil.cpp)
 
-add_executable(ns main.cpp ${root_src} ${parallel_src} ${solvers_src}
-  ${stencils_src})
+set(NS_EOF_SRCS ${root_src} ${parallel_src} ${solvers_src} ${stencils_src})
+
+add_executable(ns main.cpp ${NS_EOF_SRCS})
 target_link_libraries(ns tinyxml2 vtk ${PETSC_LIBRARIES})
+
+if (tests)
+  set(TEST_SRCS)
+
+  enable_testing()
+  find_package(GTest REQUIRED)
+  include_directories(${GTEST_INCLUDE_DIRS})
+
+  add_executable(tests ${TEST_SRCS} ${NS_EOF_SRCS})
+  target_link_libraries(tests tinyxml2 vtk ${PETSC_LIBRARIES})
+
+  target_link_libraries(tests ${GTEST_BOTH_LIBRARIES})
+  add_test(tests tests)
+endif()
