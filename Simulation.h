@@ -13,7 +13,7 @@ class Simulation {
 
   virtual void solveTimestep() = 0;
 
-  virtual void plotVTK(int timeStep) = 0;
+  virtual void plotVTK(int rank, int timeStep) = 0;
 
  protected:
   Parameters &_parameters;

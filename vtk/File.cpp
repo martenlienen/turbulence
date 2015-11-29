@@ -9,6 +9,14 @@ namespace vtk {
 File::File(Dataset dataset, std::vector<std::unique_ptr<CellData>> cellData)
     : dataset(dataset), cellData(std::move(cellData)) {}
 
+bool File::write(std::string prefix, int rank, int timestep) {
+  std::ostringstream path;
+
+  path << prefix << "." << rank << "." << timestep << ".vtk";
+
+  return this->write(path.str());
+}
+
 bool File::write(std::string prefix, int timestep) {
   std::ostringstream path;
 

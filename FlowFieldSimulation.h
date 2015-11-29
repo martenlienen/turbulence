@@ -180,7 +180,7 @@ class FlowFieldSimulation : public Simulation {
   }
 
   /** TODO WS1: plots the flow field. */
-  virtual void plotVTK(int timeStep) {
+  virtual void plotVTK(int rank, int timeStep) {
     // TODO WS1: create VTKStencil and respective iterator; iterate stencil
     //           over _flowField and write flow field information to vtk file
 
@@ -205,7 +205,7 @@ class FlowFieldSimulation : public Simulation {
     }
 
     vtk::File file(dataset, std::move(cellData));
-    file.write(this->_parameters.vtk.prefix, timeStep);
+    file.write(this->_parameters.vtk.prefix, rank, timeStep);
   }
 
  protected:
@@ -252,12 +252,13 @@ class FlowFieldSimulation : public Simulation {
  private:
   vtk::Dataset datasetFromMesh() {
     Parameters &p = this->_parameters;
+    ParallelParameters &pp = p.parallel;
     GeometricParameters &gp = p.geometry;
     Meshsize *mesh = p.meshsize;
 
-    int cellsX = gp.sizeX;
-    int cellsY = gp.sizeY;
-    int cellsZ = gp.sizeZ;
+    int cellsX = pp.localSize[0];
+    int cellsY = pp.localSize[1];
+    int cellsZ = gp.dim == 3 ? pp.localSize[2] : 1;
     int pointsX = cellsX + 1;
     int pointsY = cellsY + 1;
     int pointsZ = gp.dim == 3 ? cellsZ + 1 : 1;

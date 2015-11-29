@@ -14,6 +14,7 @@ class File {
  public:
   File(Dataset dataset, std::vector<std::unique_ptr<CellData>> cellData);
 
+  bool write(std::string prefix, int rank, int timestep);
   bool write(std::string prefix, int timestep);
   bool write(std::string path);
 
