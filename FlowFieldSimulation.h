@@ -191,7 +191,7 @@ class FlowFieldSimulation : public Simulation {
     for (auto &stencil : this->scalarStencils) {
       stencil.reset();
       FieldIterator<FF> iterator(this->_flowField, this->_parameters, stencil,
-                                 0, -1);
+                                 1, 0);
       iterator.iterate();
       cellData.push_back(stencil.get());
     }
@@ -199,7 +199,7 @@ class FlowFieldSimulation : public Simulation {
     for (auto &stencil : this->vectorStencils) {
       stencil.reset();
       FieldIterator<FF> iterator(this->_flowField, this->_parameters, stencil,
-                                 0, -1);
+                                 1, 0);
       iterator.iterate();
       cellData.push_back(stencil.get());
     }
