@@ -117,20 +117,6 @@ class GlobalBoundaryIterator : public Iterator<FlowField> {
   void iterate();
 };
 
-template <class FlowField>
-class ParallelBoundaryIterator : public Iterator<FlowField> {
- private:
-  BoundaryStencil<FlowField>& _stencil;
-
-  const int _lowOffset;
-  const int _highOffset;
-
- public:
-  ParallelBoundaryIterator(FlowField& flowField, const Parameters& parameters,
-                           BoundaryStencil<FlowField>& stencil,
-                           int lowOffset = 0, int highOffset = 0);
-  void iterate();
-};
 #include "Iterators.cpph"
 
 #endif
