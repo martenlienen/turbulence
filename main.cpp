@@ -27,6 +27,11 @@ int main(int argc, char *argv[]) {
   FlowField *flowField = NULL;
   Simulation *simulation = NULL;
 
+  if (parameters.geometry.dim == 2) {
+    parameters.geometry.sizeZ = 1;
+    parameters.parallel.localSize[2] = 1;
+  }
+
 #ifdef DEBUG
   std::cout << "Processor " << parameters.parallel.rank << " with index ";
   std::cout << parameters.parallel.indices[0] << ",";
