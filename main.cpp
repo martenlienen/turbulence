@@ -90,13 +90,13 @@ int main(int argc, char *argv[]) {
       timeStdOut += parameters.stdOut.interval;
     }
 
+    timeSteps++;
+
     // TODO WS1: trigger VTK output
     if (time >= timeVTK) {
       simulation->plotVTK(rank, timeSteps);
       timeVTK += parameters.vtk.interval;
     }
-
-    timeSteps++;
   }
 
   // TODO WS1: plot final output
