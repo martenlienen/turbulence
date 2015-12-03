@@ -1,6 +1,8 @@
 #ifndef _FLOW_FIELD_SIMULATION_H_
 #define _FLOW_FIELD_SIMULATION_H_
 
+#include <algorithm>
+#include <array>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -35,6 +37,8 @@
 #include "solvers/SORSolver.h"
 #include "solvers/PetscSolver.h"
 
+#include "parallelManagers/MPICommunicator.h"
+
 #define GHOST_OFFSET 2
 
 template <typename FF>
@@ -61,6 +65,24 @@ class FlowFieldSimulation : public Simulation {
   ObstacleStencil _obstacleStencil;
   FieldIterator<FF> _velocityIterator;
   FieldIterator<FF> _obstacleIterator;
+
+  MPICommunicator<FLOAT, FF> pressureComm{
+      this->_parameters,
+      [](FF &flowField, int i, int j, int k, FLOAT &p) {
+        p = flowField.getPressure().getScalar(i, j, k);
+      },
+      [](FF &flowField, int i, int j, int k, FLOAT &p) {
+        flowField.getPressure().getScalar(i, j, k) = p;
+      }};
+
+  MPICommunicator<std::array<FLOAT, 3>, FF> velocityComm{
+      this->_parameters,
+      [](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
+        std::copy_n(flowField.getVelocity().getVector(i, j, k), 3, v.data());
+      },
+      [](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
+        std::copy_n(v.data(), 3, flowField.getVelocity().getVector(i, j, k));
+      }};
 
   std::vector<CellDataStencil<double, FF>> scalarStencils{
       CellDataStencil<double, FF>(this->_parameters, "pressure",
@@ -170,11 +192,13 @@ class FlowFieldSimulation : public Simulation {
     // solve for pressure
     _solver.solve();
     // TODO WS2: communicate pressure values
+    pressureComm.communicate(this->_flowField);
     // compute velocity
     _velocityIterator.iterate();
     // set obstacle boundaries
     _obstacleIterator.iterate();
     // TODO WS2: communicate velocity values
+    velocityComm.communicate(this->_flowField);
     // Iterate for velocities on the boundary
     _wallVelocityIterator.iterate();
   }
