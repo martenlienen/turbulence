@@ -52,8 +52,9 @@ class MPICommunicator {
  public:
   MPICommunicator(Parameters& parameters,
                   std::function<void(FF&, int, int, int, T&)> read,
-                  std::function<void(FF&, int, int, int, T&)> write)
-      : parameters(parameters), read(read), write(write) {}
+                  std::function<void(FF&, int, int, int, T&)> write,
+                  int lbfWidth = 1)
+      : parameters(parameters), read(read), write(write), lbfWidth(lbfWidth) {}
 
   void communicate(FF& flowField);
 
@@ -61,6 +62,7 @@ class MPICommunicator {
   Parameters& parameters;
   std::function<void(FF&, int, int, int, T&)> read;
   std::function<void(FF&, int, int, int, T&)> write;
+  int lbfWidth;
 
   void exchangeValues(ParallelBoundaryIterator<FF, T>& lrReadIterator,
                       ParallelBoundaryIterator<FF, T>& lrWriteIterator, int lnb,
@@ -80,18 +82,22 @@ class MPICommunicator {
 template <typename T, typename FF>
 void MPICommunicator<T, FF>::communicate(FF& flowField) {
   Parameters& parameters = this->parameters;
+  int lbf = this->lbfWidth;
   LeftRightBoundaryIterator<FF, T> lrReadIterator(
-      flowField, parameters, {+2, +2, +2}, {-1, -1, -1}, this->read);
+      flowField, parameters, {+2, +2, +2}, {-1, -1, -1}, this->read, 1, lbf);
   LeftRightBoundaryIterator<FF, T> lrWriteIterator(
-      flowField, parameters, {+1, +2, +2}, {+0, -1, -1}, this->write);
+      flowField, parameters, {+2 - lbf, +2, +2}, {+0, -1, -1}, this->write,
+      lbf);
   BottomTopBoundaryIterator<FF, T> btReadIterator(
-      flowField, parameters, {+1, +2, +2}, {+0, -1, -1}, this->read);
+      flowField, parameters, {+1, +2, +2}, {+0, -1, -1}, this->read, 1, lbf);
   BottomTopBoundaryIterator<FF, T> btWriteIterator(
-      flowField, parameters, {+1, +1, +2}, {+0, +0, -1}, this->write);
+      flowField, parameters, {+1, +2 - lbf, +2}, {+0, +0, -1}, this->write,
+      lbf);
   FrontBackBoundaryIterator<FF, T> fbReadIterator(
-      flowField, parameters, {+1, +1, +2}, {+0, +0, -1}, this->read);
+      flowField, parameters, {+1, +1, +2}, {+0, +0, -1}, this->read, 1, lbf);
   FrontBackBoundaryIterator<FF, T> fbWriteIterator(
-      flowField, parameters, {+1, +1, +1}, {+0, +0, +0}, this->write);
+      flowField, parameters, {+1, +1, +2 - lbf}, {+0, +0, +0}, this->write,
+      lbf);
 
   this->exchangeValues(lrReadIterator, lrWriteIterator,
                        parameters.parallel.leftNb, parameters.parallel.rightNb);

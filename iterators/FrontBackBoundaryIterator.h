@@ -9,20 +9,23 @@ class FrontBackBoundaryIterator : public ParallelBoundaryIterator<FF, T> {
   FrontBackBoundaryIterator(
       FF& flowField, const Parameters& parameters, Point lowOffset,
       Point highOffset,
-      std::function<void(FF& flowField, int, int, int, T&)> apply)
+      std::function<void(FF& flowField, int, int, int, T&)> apply,
+      int frontWidth = 1, int backWidth = 1)
       : FrontBackBoundaryIterator(
             flowField, parameters, lowOffset,
             ParallelBoundaryIterator<FF, T>::highOffsetToPoint(flowField,
                                                                highOffset),
-            apply, false) {}
+            apply, frontWidth, backWidth, false) {}
 
  private:
   FrontBackBoundaryIterator(
       FF& flowField, const Parameters& parameters, Point low, Point high,
-      std::function<void(FF& flowField, int, int, int, T&)> apply, bool x)
+      std::function<void(FF& flowField, int, int, int, T&)> apply,
+      int frontWidth, int backWidth, bool x)
       : ParallelBoundaryIterator<FF, T>(
-            flowField, parameters, low, Point(high.x, high.y, low.z),
-            Point(low.x, low.y, high.z), high, apply){};
+            flowField, parameters, low,
+            Point(high.x, high.y, low.z + (frontWidth - 1)),
+            Point(low.x, low.y, high.z - (frontWidth - 1)), high, apply){};
 };
 
 #endif  // _FRONT_BACK_BOUNDARY_ITERATOR_H_
