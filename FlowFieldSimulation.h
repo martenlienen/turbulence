@@ -84,7 +84,8 @@ class FlowFieldSimulation : public Simulation {
       },
       [](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
         std::copy_n(v.data(), 3, flowField.getVelocity().getVector(i, j, k));
-      }};
+      },
+      2};
 
   std::vector<CellDataStencil<double, FF>> scalarStencils{
       CellDataStencil<double, FF>(this->_parameters, "pressure",

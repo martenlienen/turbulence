@@ -55,19 +55,19 @@ class MPICommunicator {
  public:
   MPICommunicator(FF& flowField, Parameters& parameters,
                   std::function<void(FF&, int, int, int, T&)> read,
-                  std::function<void(FF&, int, int, int, T&)> write)
+                  std::function<void(FF&, int, int, int, T&)> write,
+                  int lbf = 1)
       : parameters(parameters),
         read(read),
         write(write),
-        lrReadIterator(flowField, parameters, {+2, +2, +2}, {-1, -1, -1}, read),
-        lrWriteIterator(flowField, parameters, {+1, +2, +2}, {+0, -1, -1},
-                        write),
-        btReadIterator(flowField, parameters, {+1, +2, +2}, {+0, -1, -1}, read),
-        btWriteIterator(flowField, parameters, {+1, +1, +2}, {+0, +0, -1},
-                        write),
-        fbReadIterator(flowField, parameters, {+1, +1, +2}, {+0, +0, -1}, read),
-        fbWriteIterator(flowField, parameters, {+1, +1, +1}, {+0, +0, +0},
-                        write) {}
+        // clang-format off
+        lrReadIterator(flowField, parameters,  {+2      , +2      , +2      }, {-1, -1, -1}, this->read , 1  , lbf),
+        lrWriteIterator(flowField, parameters, {+2 - lbf, +2      , +2      }, {+0, -1, -1}, this->write, lbf, 1  ),
+        btReadIterator(flowField, parameters,  {+2 - lbf, +2      , +2      }, {+0, -1, -1}, this->read , 1  , lbf),
+        btWriteIterator(flowField, parameters, {+2 - lbf, +2 - lbf, +2      }, {+0, +0, -1}, this->write, lbf, 1  ),
+        fbReadIterator(flowField, parameters,  {+2 - lbf, +2 - lbf, +2      }, {+0, +0, -1}, this->read , 1  , lbf),
+        fbWriteIterator(flowField, parameters, {+2 - lbf, +2 - lbf, +2 - lbf}, {+0, +0, +0}, this->write, lbf, 1  ) {}
+  // clang-format on
 
   void communicate(FF& flowField);
 
