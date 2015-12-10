@@ -46,6 +46,9 @@ scripts/cluster/connect ...
 
 # On the cluster
 
+# Start by loading the git module
+module load git
+
 # Clone the repository
 git clone https://github.com/cqql/turbulence
 
