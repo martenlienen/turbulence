@@ -1,0 +1,149 @@
+#!/usr/bin/env python
+
+import fileinput
+import itertools
+import math
+import os
+import subprocess
+import sys
+import time
+import xml.etree.ElementTree as ET
+from argparse import ArgumentParser
+
+# For some documentation see
+# http://www.lrz.de/services/compute/linux-cluster/batch_parallel
+JOB_TEMPLATE = """#!/bin/bash
+#SBATCH -o {out_file}
+#SBATCH -D {out_dir}
+#SBATCH -J turb-flow
+#SBATCH --get-user-env
+#SBATCH --partition={partition}
+#SBATCH --ntasks={mpi_num_ranks}
+#SBATCH --cpus-per-task=2
+#SBATCH --mail-type=end
+#SBATCH --mail-user={notification_email}
+#SBATCH --export=NONE
+#SBATCH --time=00:08:00
+
+# Load the module system
+source /etc/profile.d/modules.sh
+
+mpiexec.hydra -genv OMP_NUM_THREADS 1   \\
+              -ppn {processes_per_node} \\
+              -n {mpi_num_ranks}        \\
+              {ns_executable} {scenario}
+"""
+
+
+def parseArguments():
+    parser = ArgumentParser(description="Submit a simulation as a batch job")
+    parser.add_argument("-e",
+                        "--email",
+                        help="Email-Adress to send a notification email to",
+                        required=True)
+    parser.add_argument("--intel",
+                        action="store_const",
+                        const="intel",
+                        dest="architecture",
+                        default="intel",
+                        help="Run on intel nodes")
+    parser.add_argument("--amd",
+                        action="store_const",
+                        const="amd",
+                        dest="architecture",
+                        help="Run on AMD nodes")
+    parser.add_argument("--nx",
+                        type=int,
+                        help="Number of processes in X direction",
+                        default=1)
+    parser.add_argument("--ny",
+                        type=int,
+                        help="Number of processes in Y direction",
+                        default=1)
+    parser.add_argument("--nz",
+                        type=int,
+                        help="Number of processes in Z direction",
+                        default=1)
+    parser.add_argument(
+        "out",
+        help="Directory to store job configuration and results")
+    parser.add_argument("executable",
+                        help="The executable to run (normally ns)")
+    parser.add_argument("scenario", help="A scenario configuration file")
+
+    return parser.parse_args()
+
+
+def configureScenario(out, templatepath, nx, ny, nz, vtkpath):
+    """Configure a scenario template for parallel execution.
+
+    The configured scenario is written into `out`."""
+    tree = ET.parse(templatepath)
+    root = tree.getroot()
+
+    for child in root.findall("parallel"):
+        child.attrib["numProcessorsX"] = str(nx)
+        child.attrib["numProcessorsY"] = str(ny)
+        child.attrib["numProcessorsZ"] = str(nz)
+
+    for child in root.findall("vtk"):
+        child.text = vtkpath
+
+    tree.write(out)
+
+
+PARTITIONS = {"intel": ("snb", 16), "amd": ("bdz", 64)}
+
+
+def createJob(out, logpath, outdir, scenario, architecture, nranks, email,
+              nspath):
+    (partition, ppn) = PARTITIONS[architecture]
+
+    job = JOB_TEMPLATE.format(out_file=logpath,
+                              out_dir=outdir,
+                              partition=partition,
+                              mpi_num_ranks=nranks,
+                              notification_email=email,
+                              processes_per_node=ppn,
+                              ns_executable=nspath,
+                              scenario=scenario)
+
+    with open(out, "w") as outfile:
+        outfile.write(job)
+
+
+def submitJob(jobpath, logfile):
+    code = subprocess.call(["sbatch", jobpath], stdout=logfile, stderr=logfile)
+
+    return code == 0
+
+
+def main():
+    options = parseArguments()
+
+    options.out = os.path.realpath(options.out)
+
+    if not os.path.isdir(options.out):
+        os.mkdir(options.out)
+
+    log = os.path.join(options.out, "log")
+    jobpath = os.path.join(options.out, "job.cmd")
+    scenario = os.path.join(options.out, "scenario.xml")
+    vtkpath = os.path.join(options.out, "vtks")
+
+    if not os.path.isdir(vtkpath):
+        os.mkdir(vtkpath)
+
+    with open(log, "w") as logfile:
+        configureScenario(scenario, options.scenario, options.nx, options.ny,
+                          options.nz, vtkpath)
+
+        nranks = options.nx * options.ny * options.nz
+        createJob(jobpath, log, options.out, scenario, options.architecture,
+                  nranks, options.email, os.path.realpath(options.executable))
+
+        submitJob(jobpath, logfile)
+
+
+if __name__ == "__main__":
+    main()

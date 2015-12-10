@@ -65,6 +65,9 @@ cd turbulence
 # Compile the simulation
 cmake -DCLUSTER=ON -DCMAKE_BUILD_TYPE=Release .
 make
+
+# Submit a batch job to the cluster
+scripts/cluster/run -e <you@tum.de> <OUTPUT DIR> ns scenario.xml
 ```
 
 ## Style Guide
