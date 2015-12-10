@@ -3,17 +3,30 @@ cmake_minimum_required(VERSION 2.8)
 # Disable tests with -Dtests=OFF
 option(tests "Build tests" ON)
 
+option(CLUSTER "Are we building on the cluster?" OFF)
+
+if (NOT CMAKE_BUILD_TYPE)
+  message(STATUS "No build type selected, default to Debug")
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
 # Use mpic++ over g++/c++
 #
 # You have to specify it before the `project` call. Otherwise cmake will go into
 # an infinite reconfiguration loop.
 #
 # The original Makefile said to use `mpiCC` on the MAC-cluster.
-set(CMAKE_CXX_COMPILER "mpic++")
+if (CLUSTER)
+  set(CMAKE_CXX_COMPILER "mpiCC")
+else()
+  set(CMAKE_CXX_COMPILER "mpic++")
+endif()
 
 project("turbulence")
 
-add_compile_options(-Wall -Werror -Wpedantic -O3 -std=c++14)
+add_compile_options(-std=c++14)
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -Wpedantic")
 
 list(APPEND CMAKE_MODULE_PATH "./cmake/modules")
 
@@ -42,11 +55,12 @@ set(NS_EOF_SRCS ${root_src} ${parallel_src} ${solvers_src} ${stencils_src})
 add_executable(ns main.cpp ${NS_EOF_SRCS})
 target_link_libraries(ns tinyxml2 vtk ${PETSC_LIBRARIES})
 
-if (tests)
+find_package(GTest)
+
+if (tests AND GTEST_FOUND)
   set(TEST_SRCS)
 
   enable_testing()
-  find_package(GTest REQUIRED)
   include_directories(${GTEST_INCLUDE_DIRS})
 
   add_executable(tests ${TEST_SRCS} ${NS_EOF_SRCS})

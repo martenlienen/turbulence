@@ -35,6 +35,41 @@ cmake .
 make
 ```
 
+## Connecting to the cluster
+
+```sh
+# Read the usage information of the cluster connection script
+scripts/cluster/connect -h
+
+# Connect to cluster
+scripts/cluster/connect ...
+
+# On the cluster
+
+# Start by loading the git module
+module load git
+
+# Clone the repository
+git clone https://github.com/cqql/turbulence
+
+# Move into it
+cd turbulence
+
+# Load necessary modules (PETSc etc.)
+#
+# *Note the . at the beginning of the line!* This makes the script modify the
+# environment of your current shell instead of creating a subshell for the
+# execution of the script.
+. scripts/cluster/load-modules
+
+# Compile the simulation
+cmake -DCLUSTER=ON -DCMAKE_BUILD_TYPE=Release .
+make
+
+# Submit a batch job to the cluster
+scripts/cluster/run -e <you@tum.de> <OUTPUT DIR> ns scenario.xml
+```
+
 ## Style Guide
 
 We use
