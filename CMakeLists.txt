@@ -3,6 +3,11 @@ cmake_minimum_required(VERSION 2.8)
 # Disable tests with -Dtests=OFF
 option(tests "Build tests" ON)
 
+if (NOT CMAKE_BUILD_TYPE)
+  message(STATUS "No build type selected, default to Debug")
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
 # Use mpic++ over g++/c++
 #
 # You have to specify it before the `project` call. Otherwise cmake will go into
@@ -13,7 +18,9 @@ set(CMAKE_CXX_COMPILER "mpic++")
 
 project("turbulence")
 
-add_compile_options(-Wall -Werror -Wpedantic -O3 -std=c++14)
+add_compile_options(-std=c++14)
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -Wpedantic")
 
 list(APPEND CMAKE_MODULE_PATH "./cmake/modules")
 
