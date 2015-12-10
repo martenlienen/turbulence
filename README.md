@@ -63,7 +63,7 @@ cd turbulence
 . scripts/cluster/load-modules
 
 # Compile the simulation
-cmake -DCMAKE_BUILD_TYPE=Release .
+cmake -DCLUSTER=ON -DCMAKE_BUILD_TYPE=Release .
 make
 ```
 

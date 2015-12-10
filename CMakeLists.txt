@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 # Disable tests with -Dtests=OFF
 option(tests "Build tests" ON)
 
+option(CLUSTER "Are we building on the cluster?" OFF)
+
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Debug")
   set(CMAKE_BUILD_TYPE "Debug")
@@ -14,7 +16,11 @@ endif()
 # an infinite reconfiguration loop.
 #
 # The original Makefile said to use `mpiCC` on the MAC-cluster.
-set(CMAKE_CXX_COMPILER "mpic++")
+if (CLUSTER)
+  set(CMAKE_CXX_COMPILER "mpiCC")
+else()
+  set(CMAKE_CXX_COMPILER "mpic++")
+endif()
 
 project("turbulence")
 
