@@ -53,7 +53,11 @@ git clone https://github.com/cqql/turbulence
 cd turbulence
 
 # Load necessary modules (PETSc etc.)
-# ...
+#
+# *Note the . at the beginning of the line!* This makes the script modify the
+# environment of your current shell instead of creating a subshell for the
+# execution of the script.
+. scripts/cluster/load-modules
 
 # Compile the simulation
 cmake -Dtests=OFF .

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Initialize the module system
+. /lrz/sys/share/modules/init/bash
+
+module unload gcc/4.9
+module unload mpi.intel/5.0
+module load git
+module load cmake
+module load gcc/5
+module load mpi.intel/4.1
+module load petsc/3.5
+module load binutils/2.25
+
+echo "Loaded modules:"
+module list
+
+# The default petsc module configuration puts both parts in PETSC_ARCH but the
+# CMake-PETSc-module expects the directory and archicture split into two
+# variables.
+if [[ -z "$PETSC_ARCH" ]]; then
+  export PETSC_ARCH=$(basename $PETSC_DIR)
+  export PETSC_DIR=$(dirname $PETSC_DIR)
+fi
