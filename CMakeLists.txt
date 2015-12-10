@@ -42,11 +42,12 @@ set(NS_EOF_SRCS ${root_src} ${parallel_src} ${solvers_src} ${stencils_src})
 add_executable(ns main.cpp ${NS_EOF_SRCS})
 target_link_libraries(ns tinyxml2 vtk ${PETSC_LIBRARIES})
 
-if (tests)
+find_package(GTest)
+
+if (tests AND GTEST_FOUND)
   set(TEST_SRCS)
 
   enable_testing()
-  find_package(GTest REQUIRED)
   include_directories(${GTEST_INCLUDE_DIRS})
 
   add_executable(tests ${TEST_SRCS} ${NS_EOF_SRCS})
