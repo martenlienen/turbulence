@@ -35,6 +35,31 @@ cmake .
 make
 ```
 
+## Connecting to the cluster
+
+```sh
+# Read the usage information of the cluster connection script
+scripts/cluster/connect -h
+
+# Connect to cluster
+scripts/cluster/connect ...
+
+# On the cluster
+
+# Clone the repository
+git clone https://github.com/cqql/turbulence
+
+# Move into it
+cd turbulence
+
+# Load necessary modules (PETSc etc.)
+# ...
+
+# Compile the simulation
+cmake -Dtests=OFF .
+make
+```
+
 ## Style Guide
 
 We use

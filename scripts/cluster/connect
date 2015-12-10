@@ -1,0 +1,116 @@
+#!/bin/sh
+
+# TUM proxy
+PROXY=halle.in.tum.de
+
+# Cluster login point
+CLUSTER=mac-login-intel.tum-mac.cos.lrz.de
+
+function print_usage () {
+  cat <<EOF
+Usage: connect [OPTION]...
+
+Mandatory options:
+  -h, --help
+    Show this usage information.
+  -u, --user USER
+    Your rechnerhalle user at TUM.
+  -cu, --cluster-user CLUSTER_USER
+    Your MAC-Cluster user.
+
+Optional options:
+  -m, --mount MOUNT_POINT
+    If this is given, your cluster user's home directory is mounted at the
+    local directory MOUNT_POINT.
+  -p, --port [PORT=2233]
+    Use the local PORT for the SSH tunnel to TUM.
+EOF
+}
+
+function open_tunnel () {
+  echo Open an SSH tunnel to the cluster
+  echo Please enter your rechnerhalle password
+  ssh -f -N -L $port:$CLUSTER:22 $user@$PROXY
+}
+
+function close_tunnel () {
+  echo Close the SSH tunnel
+  fuser -k $port/tcp
+}
+
+function mount_cluster () {
+  # Ensure that the mount point exists
+  if [[ ! -e $path ]]; then
+    mkdir --parents $path
+  fi
+
+  if [[ -d $path ]]; then
+    echo Mounting cluster at $path
+    echo Please enter your cluster password
+    sshfs -p $port $cluster_user@localhost: $path
+  else
+    echo The mount point is not a directory and could not be created as such
+  fi
+}
+
+function unmount_cluster () {
+  echo Unmount the cluster from $path
+  fusermount -u $path
+}
+
+function ssh_into_cluster () {
+  echo Logging into cluster
+  echo Please enter your cluster password
+  ssh -C -p $port $cluster_user@localhost
+}
+
+# Default values
+port=2233
+
+while [[ $# > 0 ]]; do
+  case "$1" in
+    -p|--port)
+      port="$2"
+      shift
+      ;;
+    -u|--user)
+      user="$2"
+      shift
+      ;;
+    -cu|--cluster-user)
+      cluster_user="$2"
+      shift
+      ;;
+    -m|--mount)
+      path="$2"
+      shift
+      ;;
+    -h|--help)
+      help=1
+      ;;
+  esac
+
+  shift
+done
+
+if [[ "$help" ]]; then
+  print_usage
+elif [[ -z "$user" ]]; then
+  echo You have to provide your rechnerhalle user to set up the tunnel
+elif [[ -z "$cluster_user" ]]; then
+  echo You have to provide your cluster user to log into the cluster
+else
+  open_tunnel
+
+  if [[ "$path" ]]; then
+    mount_cluster
+  fi
+
+  ssh_into_cluster
+
+  if [[ "$path" ]]; then
+    unmount_cluster
+  fi
+
+  close_tunnel
+fi
