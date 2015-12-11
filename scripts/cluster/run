@@ -4,6 +4,7 @@ import fileinput
 import itertools
 import math
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -74,6 +75,14 @@ def parseArguments():
     return parser.parse_args()
 
 
+def copyPetscArguments(jobdir):
+    """Copy the petsc_commandline_arg file to the job directory.
+
+    Our code expects a petsc_commandline_arg file in the working directory."""
+    shutil.copyfile("petsc_commandline_arg",
+                    os.path.join(jobdir, "petsc_commandline_arg"))
+
+
 def configureScenario(out, templatepath, nx, ny, nz, vtkpath):
     """Configure a scenario template for parallel execution.
 
@@ -136,12 +145,15 @@ def main():
         os.mkdir(vtkpath)
 
     with open(log, "w") as logfile:
+        copyPetscArguments(options.out)
+
         configureScenario(scenario, options.scenario, options.nx, options.ny,
                           options.nz, vtkpath)
 
         nranks = options.nx * options.ny * options.nz
-        createJob(jobpath, outpath, options.out, scenario, options.architecture,
-                  nranks, options.email, os.path.realpath(options.executable))
+        createJob(jobpath, outpath, options.out, scenario,
+                  options.architecture, nranks, options.email,
+                  os.path.realpath(options.executable))
 
         submitJob(jobpath, logfile)
 
