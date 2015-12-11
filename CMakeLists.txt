@@ -48,7 +48,8 @@ add_subdirectory("3rdparty/tinyxml2")
 add_subdirectory("vtk")
 
 set(root_src Configuration.cpp DataStructures.cpp FlowField.cpp
-  GlobalBoundaryFactory.cpp LinearSolver.cpp Meshsize.cpp SimpleTimer.cpp)
+  GlobalBoundaryFactory.cpp LinearSolver.cpp Meshsize.cpp MemoizedMesh.cpp
+  SimpleTimer.cpp)
 set(parallel_src parallelManagers/PetscParallelConfiguration.cpp)
 set(solvers_src solvers/PetscSolver.cpp solvers/SORSolver.cpp)
 set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp
