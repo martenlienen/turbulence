@@ -41,10 +41,13 @@ find_package(PETSc REQUIRED)
 include_directories(${PETSC_INCLUDES})
 add_definitions(${PETSC_DEFINITIONS})
 
+include_directories("3rdparty/ann_1.1.2/include")
+
 # Some files expect the root directory to be on the include path
 include_directories(".")
 
 add_subdirectory("3rdparty/tinyxml2")
+add_subdirectory("3rdparty/ann_1.1.2")
 add_subdirectory("vtk")
 
 set(root_src Configuration.cpp DataStructures.cpp FlowFieldLaminar.cpp
@@ -63,7 +66,7 @@ set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp
 set(NS_EOF_SRCS ${root_src} ${parallel_src} ${solvers_src} ${stencils_src})
 
 add_executable(ns main.cpp ${NS_EOF_SRCS})
-target_link_libraries(ns tinyxml2 vtk ${PETSC_LIBRARIES})
+target_link_libraries(ns tinyxml2 vtk ${PETSC_LIBRARIES} ANN)
 
 find_package(GTest)
 
@@ -74,8 +77,9 @@ if (tests AND GTEST_FOUND)
   include_directories(${GTEST_INCLUDE_DIRS})
 
   add_executable(tests ${TEST_SRCS} ${NS_EOF_SRCS})
-  target_link_libraries(tests tinyxml2 vtk ${PETSC_LIBRARIES})
+  target_link_libraries(tests tinyxml2 vtk ${PETSC_LIBRARIES} ANN)
 
-  target_link_libraries(tests ${GTEST_BOTH_LIBRARIES})
+  target_link_libraries(tests ${GTEST_BOTH_LIBRARIES} ANN)
+
   add_test(tests tests)
 endif()
