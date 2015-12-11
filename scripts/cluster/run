@@ -95,11 +95,11 @@ def configureScenario(out, templatepath, nx, ny, nz, vtkpath):
 PARTITIONS = {"intel": ("snb", 16), "amd": ("bdz", 64)}
 
 
-def createJob(out, logpath, outdir, scenario, architecture, nranks, email,
+def createJob(out, outfile, outdir, scenario, architecture, nranks, email,
               nspath):
     (partition, ppn) = PARTITIONS[architecture]
 
-    job = JOB_TEMPLATE.format(out_file=logpath,
+    job = JOB_TEMPLATE.format(out_file=outfile,
                               out_dir=outdir,
                               partition=partition,
                               mpi_num_ranks=nranks,
@@ -127,6 +127,7 @@ def main():
         os.mkdir(options.out)
 
     log = os.path.join(options.out, "log")
+    outpath = os.path.join(options.out, "out")
     jobpath = os.path.join(options.out, "job.cmd")
     scenario = os.path.join(options.out, "scenario.xml")
     vtkpath = os.path.join(options.out, "vtks")
@@ -139,7 +140,7 @@ def main():
                           options.nz, vtkpath)
 
         nranks = options.nx * options.ny * options.nz
-        createJob(jobpath, log, options.out, scenario, options.architecture,
+        createJob(jobpath, outpath, options.out, scenario, options.architecture,
                   nranks, options.email, os.path.realpath(options.executable))
 
         submitJob(jobpath, logfile)
