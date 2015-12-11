@@ -96,7 +96,7 @@ def configureScenario(out, templatepath, nx, ny, nz, vtkpath):
         child.attrib["numProcessorsZ"] = str(nz)
 
     for child in root.findall("vtk"):
-        child.text = vtkpath
+        child.text = os.path.join(vtkpath, "vtk")
 
     tree.write(out)
 
