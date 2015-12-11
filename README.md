@@ -70,6 +70,25 @@ make
 scripts/cluster/run -e <you@tum.de> <OUTPUT DIR> ns scenario.xml
 ```
 
+## Profiling
+
+There is also a `PROFILING` option in our CMake configuration to enable
+profiling that will produce a `gmon.out` that you can analyze with `gprof`.
+
+```sh
+# Configure a profiling build
+cmake -DPROFILING=ON .
+
+# Compile it
+make
+
+# Run it
+./ns ...
+
+# Analyze the results
+gprof ./ns gmon.out
+```
+
 ## Style Guide
 
 We use

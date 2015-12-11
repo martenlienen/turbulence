@@ -5,6 +5,8 @@ option(tests "Build tests" ON)
 
 option(CLUSTER "Are we building on the cluster?" OFF)
 
+option(PROFILING "Compile in extra profiling information for gprof" OFF)
+
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Debug")
   set(CMAKE_BUILD_TYPE "Debug")
@@ -27,6 +29,11 @@ project("turbulence")
 add_compile_options(-std=c++14)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -Wpedantic")
+
+if (PROFILING)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "./cmake/modules")
 
