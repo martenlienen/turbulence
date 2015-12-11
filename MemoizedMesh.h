@@ -7,6 +7,11 @@
 #include "Meshsize.h"
 #include "Parameters.h"
 
+/**
+ * This is a wrapper that precomputes the most commonly used positions but
+ * forwards requests for "unusual" positions (e.g. outside of the local grid) to
+ * the wrapped mesh.
+ */
 class MemoizedMesh : public Meshsize {
  public:
   MemoizedMesh(Parameters& params, std::unique_ptr<Meshsize> mesh);
@@ -32,6 +37,13 @@ class MemoizedMesh : public Meshsize {
  private:
   std::unique_ptr<Meshsize> mesh;
 
+  int cellsX;
+  int cellsY;
+  int cellsZ;
+  int pointsX;
+  int pointsY;
+  int pointsZ;
+
   std::vector<std::vector<std::vector<FLOAT>>> dx;
   std::vector<std::vector<std::vector<FLOAT>>> dy;
   std::vector<std::vector<std::vector<FLOAT>>> dz;
@@ -42,6 +54,8 @@ class MemoizedMesh : public Meshsize {
 
   MemoizedMesh(std::unique_ptr<Meshsize> mesh, int cellsX, int cellsY,
                int cellsZ, int pointsX, int pointsY, int pointsZ);
+
+  bool between(int x, int low, int high) const;
 };
 
 #endif  // _MEMOIZED_MESH_H_
