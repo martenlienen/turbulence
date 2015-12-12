@@ -79,6 +79,18 @@ def parseArguments():
                         action="store_false",
                         dest="vtk",
                         default=True)
+    parser.add_argument("--sx",
+                        type=int,
+                        help="Number of cells in X direction",
+                        default=None)
+    parser.add_argument("--sy",
+                        type=int,
+                        help="Number of cells in Y direction",
+                        default=None)
+    parser.add_argument("--sz",
+                        type=int,
+                        help="Number of cells in Z direction",
+                        default=1)
     parser.add_argument(
         "out",
         help="Directory to store job configuration and results")
@@ -97,8 +109,8 @@ def copyPetscArguments(jobdir):
                     os.path.join(jobdir, "petsc_commandline_arg"))
 
 
-def configureScenario(out, templatepath, nx, ny, nz, vtkpath, enable_timing,
-                      enable_vtk):
+def configureScenario(out, templatepath, nx, ny, nz, sx, sy, sz, vtkpath,
+                      enable_timing, enable_vtk):
     """Configure a scenario template for parallel execution.
 
     The configured scenario is written into `out`."""
@@ -120,6 +132,12 @@ def configureScenario(out, templatepath, nx, ny, nz, vtkpath, enable_timing,
         if not enable_timing:
             root.append(ET.Element("timing", {"enabled": "false"}))
 
+    if sx != None and sy != None:
+      for child in root.findall("geometry"):
+        child.attrib["sizeX"] = str(sx)
+        child.attrib["sizeY"] = str(sy)
+        child.attrib["sizeZ"] = str(sz)
+
     tree.write(out)
 
 
@@ -140,6 +158,7 @@ def createJob(out, outfile, outdir, scenario, architecture, nranks, email,
                               processes_per_node=ppn,
                               ns_executable=nspath,
                               scenario=scenario)
+
 
     with open(out, "w") as outfile:
         outfile.write(job)
@@ -175,7 +194,8 @@ def main():
         copyPetscArguments(options.out)
 
         configureScenario(scenario, options.scenario, options.nx, options.ny,
-                          options.nz, vtkpath, options.timing, options.vtk)
+                          options.nz, options.sx, options.sy, options.sz,
+                          vtkpath, options.timing, options.vtk)
 
         nranks = options.nx * options.ny * options.nz
         createJob(jobpath, outpath, options.out, scenario,

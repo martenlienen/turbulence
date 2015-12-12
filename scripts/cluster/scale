@@ -1,0 +1,179 @@
+#!/usr/bin/env python
+
+import fileinput
+import itertools
+import math
+import os
+import shutil
+import subprocess
+import sys
+import time
+import xml.etree.ElementTree as ET
+from argparse import ArgumentParser
+
+
+def parseArguments():
+    parser = ArgumentParser(description="Submit a simulation as a batch job")
+    parser.add_argument("-e",
+                        "--email",
+                        help="Email-Adress to send a notification email to",
+                        required=True)
+    parser.add_argument("--intel",
+                        action="store_const",
+                        const="intel",
+                        dest="architecture",
+                        default="intel",
+                        help="Run on intel nodes")
+    parser.add_argument("--amd",
+                        action="store_const",
+                        const="amd",
+                        dest="architecture",
+                        help="Run on AMD nodes")
+    parser.add_argument("--strong",
+                        action="store_const",
+                        const="strong",
+                        dest="scaling",
+                        default="strong",
+                        help="Perform strong scaling")
+    parser.add_argument("--weak",
+                        action="store_const",
+                        const="weak",
+                        dest="scaling",
+                        help="Perform weak scaling")
+    parser.add_argument(
+        "out",
+        help="Directory to store job configuration and results")
+    parser.add_argument("executable",
+                        help="The executable to run (normally ns)")
+    parser.add_argument("scenario", help="A scenario configuration file")
+
+    options = parser.parse_args()
+    if os.path.exists(options.out) and len(os.listdir(options.out)) > 0:
+        parser.error("Please enter an empty directory")
+
+    return options
+
+
+def primes(N):
+    factors = []
+    candidates = list(range(2, N + 1))
+
+    while len(candidates) > 0:
+        c = candidates.pop(0)
+        candidates = [x for x in candidates if x % c != 0]
+        factors.append(c)
+
+    return factors
+
+
+def primeFactors(N):
+    factors = []
+    candidates = primes(int(math.ceil(math.sqrt(N))))
+
+    for c in candidates:
+        while N % c == 0:
+            factors.append(c)
+            N = N / c
+
+    if len(factors) > 0:
+        return factors
+    else:
+        return [N]
+
+
+def balance(N, n):
+    factors = primeFactors(N)
+    vector = [1] * n
+
+    while len(factors) > 0:
+        f = factors.pop()
+        m = min(vector)
+        vector[vector.index(m)] = m * f
+
+    return vector
+
+
+def getsize(scenario):
+    tree = ET.parse(scenario)
+    root = tree.getroot()
+
+    for child in root.findall("geometry"):
+        sx = child.attrib["sizeX"]
+        sy = child.attrib["sizeY"]
+        sz = child.attrib["sizeZ"]
+
+    return (sx, sy, sz)
+
+
+def getdim(scenario):
+    tree = ET.parse(scenario)
+    root = tree.getroot()
+
+    for child in root.findall("geometry"):
+        return int(child.attrib["dim"])
+    else:
+        return 3
+
+
+def main():
+    options = parseArguments()
+
+    options.out = os.path.realpath(options.out)
+
+    if not os.path.isdir(options.out):
+        os.mkdir(options.out)
+
+        # TODO add weak scaling
+
+    if options.architecture == "amd":
+        [2**n for n in range]
+        ranks = [2**x for x in range(1, 9)]
+    elif options.architecture == "intel":
+        ranks = [2**x for x in range(1, 11)]
+
+    if options.scaling == "strong":
+        (sx, sy, sz) = getsize(options.scenario)
+    elif options.scaling == "weak":
+        # TODO scale sizes correctly
+        (sx, sy, sz) = getsize(options.scenario)
+
+    dim = getdim(options.scenario)
+
+    SUB_TEMPLATE = os.path.join(options.out, "job-{}_{}-{}-{}")
+
+    for rank in ranks:
+        N = balance(rank, dim)
+
+        combinations = list(itertools.permutations(N, len(N)))
+
+        # Uniquify combinations
+        combinations = list(set(combinations))
+
+        # Pad combinations to length 3
+        combinations = map(tuple, [list(c) + [1] * (3 - len(c))
+                                   for c in combinations])
+
+        for combo in combinations:
+            nx = combo[0]
+            ny = combo[1]
+            nz = combo[2]
+
+            sub = SUB_TEMPLATE.format(rank, nx, ny, nz)
+            os.makedirs(sub)
+
+            logfile = os.path.join(sub, "scaling-log")
+            run = os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), "run")
+
+            with open(logfile, "w") as log:
+                subprocess.call(
+                    map(str, [run, "-e", options.email,
+                              "--" + options.architecture, "--nx", nx, "--ny",
+                              ny, "--nz", nz, "--sx", sx, "--sy", sy, "--sz",
+                              sz, sub, options.executable, options.scenario]),
+                    stdout=log,
+                    stderr=log)
+
+
+if __name__ == "__main__":
+    main()
