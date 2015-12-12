@@ -69,7 +69,7 @@ class FlowFieldSimulation : public Simulation {
   FieldIterator<FF> _obstacleIterator;
 
   MPICommunicator<FLOAT, FF> pressureComm{
-      this->_parameters,
+      this->_flowField, this->_parameters,
       [](FF &flowField, int i, int j, int k, FLOAT &p) {
         p = flowField.getPressure().getScalar(i, j, k);
       },
@@ -78,7 +78,7 @@ class FlowFieldSimulation : public Simulation {
       }};
 
   MPICommunicator<std::array<FLOAT, 3>, FF> velocityComm{
-      this->_parameters,
+      this->_flowField, this->_parameters,
       [](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
         std::copy_n(flowField.getVelocity().getVector(i, j, k), 3, v.data());
       },
@@ -183,7 +183,7 @@ class FlowFieldSimulation : public Simulation {
   }
 
   virtual void solveTimestep() {
-    MultiTimer* timer = MultiTimer::get();
+    MultiTimer *timer = MultiTimer::get();
 
     // determine and set max. timestep which is allowed in this simulation
     setTimeStep();

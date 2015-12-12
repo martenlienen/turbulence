@@ -12,6 +12,9 @@
 #include "../FlowField.h"
 #include "../Parameters.h"
 
+#include "../iterators/BottomTopBoundaryIterator.h"
+#include "../iterators/FrontBackBoundaryIterator.h"
+#include "../iterators/LeftRightBoundaryIterator.h"
 #include "../iterators/ParallelBoundaryIterator.h"
 
 template <typename T>
@@ -50,10 +53,21 @@ const MPI_Datatype MPIType<std::array<double, 3>>::mpiType = MPI_DOUBLE;
 template <typename T, typename FF>
 class MPICommunicator {
  public:
-  MPICommunicator(Parameters& parameters,
+  MPICommunicator(FF& flowField, Parameters& parameters,
                   std::function<void(FF&, int, int, int, T&)> read,
                   std::function<void(FF&, int, int, int, T&)> write)
-      : parameters(parameters), read(read), write(write) {}
+      : parameters(parameters),
+        read(read),
+        write(write),
+        lrReadIterator(flowField, parameters, {+2, +2, +2}, {-1, -1, -1}, read),
+        lrWriteIterator(flowField, parameters, {+1, +2, +2}, {+0, -1, -1},
+                        write),
+        btReadIterator(flowField, parameters, {+1, +2, +2}, {+0, -1, -1}, read),
+        btWriteIterator(flowField, parameters, {+1, +1, +2}, {+0, +0, -1},
+                        write),
+        fbReadIterator(flowField, parameters, {+1, +1, +2}, {+0, +0, -1}, read),
+        fbWriteIterator(flowField, parameters, {+1, +1, +1}, {+0, +0, +0},
+                        write) {}
 
   void communicate(FF& flowField);
 
@@ -61,6 +75,12 @@ class MPICommunicator {
   Parameters& parameters;
   std::function<void(FF&, int, int, int, T&)> read;
   std::function<void(FF&, int, int, int, T&)> write;
+  LeftRightBoundaryIterator<FF, T> lrReadIterator;
+  LeftRightBoundaryIterator<FF, T> lrWriteIterator;
+  BottomTopBoundaryIterator<FF, T> btReadIterator;
+  BottomTopBoundaryIterator<FF, T> btWriteIterator;
+  FrontBackBoundaryIterator<FF, T> fbReadIterator;
+  FrontBackBoundaryIterator<FF, T> fbWriteIterator;
 
   void exchangeValues(ParallelBoundaryIterator<FF, T>& lrReadIterator,
                       ParallelBoundaryIterator<FF, T>& lrWriteIterator, int lnb,
@@ -73,31 +93,15 @@ class MPICommunicator {
 
 #include "Iterators.h"
 
-#include "../iterators/BottomTopBoundaryIterator.h"
-#include "../iterators/FrontBackBoundaryIterator.h"
-#include "../iterators/LeftRightBoundaryIterator.h"
-
 template <typename T, typename FF>
 void MPICommunicator<T, FF>::communicate(FF& flowField) {
   Parameters& parameters = this->parameters;
-  LeftRightBoundaryIterator<FF, T> lrReadIterator(
-      flowField, parameters, {+2, +2, +2}, {-1, -1, -1}, this->read);
-  LeftRightBoundaryIterator<FF, T> lrWriteIterator(
-      flowField, parameters, {+1, +2, +2}, {+0, -1, -1}, this->write);
-  BottomTopBoundaryIterator<FF, T> btReadIterator(
-      flowField, parameters, {+1, +2, +2}, {+0, -1, -1}, this->read);
-  BottomTopBoundaryIterator<FF, T> btWriteIterator(
-      flowField, parameters, {+1, +1, +2}, {+0, +0, -1}, this->write);
-  FrontBackBoundaryIterator<FF, T> fbReadIterator(
-      flowField, parameters, {+1, +1, +2}, {+0, +0, -1}, this->read);
-  FrontBackBoundaryIterator<FF, T> fbWriteIterator(
-      flowField, parameters, {+1, +1, +1}, {+0, +0, +0}, this->write);
 
-  this->exchangeValues(lrReadIterator, lrWriteIterator,
+  this->exchangeValues(this->lrReadIterator, this->lrWriteIterator,
                        parameters.parallel.leftNb, parameters.parallel.rightNb);
-  this->exchangeValues(btReadIterator, btWriteIterator,
+  this->exchangeValues(this->btReadIterator, this->btWriteIterator,
                        parameters.parallel.bottomNb, parameters.parallel.topNb);
-  this->exchangeValues(fbReadIterator, fbWriteIterator,
+  this->exchangeValues(this->fbReadIterator, this->fbWriteIterator,
                        parameters.parallel.frontNb, parameters.parallel.backNb);
 }
 
