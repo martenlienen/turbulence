@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
+#include <map>
 
 #include <sys/time.h>
 
@@ -18,10 +18,10 @@ class MultiTimer {
 
  private:
   // The accumulated time of each timer
-  std::unordered_map<std::string, struct timeval> times;
+  std::map<std::string, struct timeval> times;
 
   // The starting times of currently running timers
-  std::unordered_map<std::string, struct timeval> starts;
+  std::map<std::string, struct timeval> starts;
 
   static MultiTimer* instance;
 
