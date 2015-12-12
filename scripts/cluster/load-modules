@@ -3,17 +3,16 @@
 # Initialize the module system
 . /lrz/sys/share/modules/init/bash
 
-module unload gcc/4.9
-module unload mpi.intel/5.0
-module load git
+# Needed by the simulation
+module load gcc/4.9
 module load cmake
-module load gcc/5
+module unload mpi.intel
 module load mpi.intel/4.1
 module load petsc/3.5
-module load binutils/2.25
+
+# Our python scripts are not compatible with ancient python versions
 module load python/3.3_anaconda_nompi
 
-echo "Loaded modules:"
 module list
 
 # The default petsc module configuration puts both parts in PETSC_ARCH but the
