@@ -335,6 +335,22 @@ void Configuration::loadParameters(Parameters &parameters,
     readIntOptional(parameters.parallel.numProcessors[2], node,
                     "numProcessorsZ", 1);
 
+    //--------------------------------------------------
+    // Timing parameters
+    //--------------------------------------------------
+
+    node = confFile.FirstChildElement()->FirstChildElement("timing");
+
+    if (node) {
+      readBoolOptional(parameters.timing.enabled, node, "enabled", false);
+
+      if (parameters.timing.enabled) {
+        readStringMandatory(parameters.timing.prefix, node);
+      }
+    } else {
+      parameters.timing.enabled = false;
+    }
+
     // Start neighbors on null in case that no parallel configuration is used
     // later.
     parameters.parallel.leftNb = MPI_PROC_NULL;
@@ -488,6 +504,9 @@ void Configuration::loadParameters(Parameters &parameters,
   MPI_Bcast(parameters.walls.vectorTop, 3, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(parameters.walls.vectorFront, 3, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(parameters.walls.vectorBack, 3, MY_MPI_FLOAT, 0, communicator);
+
+  MPI_Bcast(&parameters.timing.enabled, 1, MPI_INT, 0, communicator);
+  broadcastString(parameters.timing.prefix, communicator);
 
   // TODO WS2: broadcast turbulence parameters
 }

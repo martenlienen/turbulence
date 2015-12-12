@@ -1,13 +1,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include "Configuration.h"
 #include "FlowFieldSimulation.h"
 #include "parallelManagers/PetscParallelConfiguration.h"
 #include "MeshsizeFactory.h"
 #include <iomanip>
 
+#include "MultiTimer.h"
+
 int main(int argc, char *argv[]) {
+  MultiTimer* timer = MultiTimer::get();
+  timer->start("total");
+  timer->start("initialization");
+
   // Parallelization related. Initialize and identify
   // ---------------------------------------------------
   int rank;   // This processor's identifier
@@ -17,7 +25,6 @@ int main(int argc, char *argv[]) {
   MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
   std::cout << "Rank: " << rank << ", Nproc: " << nproc << std::endl;
   //----------------------------------------------------
-
   // read configuration and store information in parameters object
   Configuration configuration(argv[1]);
   Parameters parameters;
@@ -82,6 +89,8 @@ int main(int argc, char *argv[]) {
   // TODO WS1: plot initial state
   simulation->plotVTK(rank, 0);
 
+  timer->stop("initialization");
+
   // time loop
   while (time < parameters.simulation.finalTime) {
     simulation->solveTimestep();
@@ -113,4 +122,21 @@ int main(int argc, char *argv[]) {
   flowField = NULL;
 
   PetscFinalize();
+
+  timer->stop("total");
+
+  if (parameters.timing.enabled) {
+    std::ostringstream path;
+    path << parameters.timing.prefix << "rank-" << rank;
+
+    std::fstream file;
+    file.open(path.str().c_str(), std::ios::out);
+
+    if (file.fail()) {
+      std::cout << "Could not open " << std::endl;
+      return 1;
+    }
+
+    file << timer->toString();
+  }
 }

@@ -39,6 +39,8 @@
 
 #include "parallelManagers/MPICommunicator.h"
 
+#include "MultiTimer.h"
+
 #define GHOST_OFFSET 2
 
 template <typename FF>
@@ -67,7 +69,7 @@ class FlowFieldSimulation : public Simulation {
   FieldIterator<FF> _obstacleIterator;
 
   MPICommunicator<FLOAT, FF> pressureComm{
-      this->_parameters,
+      this->_flowField, this->_parameters,
       [](FF &flowField, int i, int j, int k, FLOAT &p) {
         p = flowField.getPressure().getScalar(i, j, k);
       },
@@ -76,7 +78,7 @@ class FlowFieldSimulation : public Simulation {
       }};
 
   MPICommunicator<std::array<FLOAT, 3>, FF> velocityComm{
-      this->_parameters,
+      this->_flowField, this->_parameters,
       [](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
         std::copy_n(flowField.getVelocity().getVector(i, j, k), 3, v.data());
       },
@@ -181,24 +183,53 @@ class FlowFieldSimulation : public Simulation {
   }
 
   virtual void solveTimestep() {
+    MultiTimer *timer = MultiTimer::get();
+
     // determine and set max. timestep which is allowed in this simulation
     setTimeStep();
+
+    timer->start("fgh");
+
     // compute fgh
     _fghIterator.iterate();
+
+    timer->stop("fgh");
+
     // set global boundary values
     _wallFGHIterator.iterate();
     // compute the right hand side
     _rhsIterator.iterate();
+
+    timer->start("poisson");
+
     // solve for pressure
     _solver.solve();
+
+    timer->stop("poisson");
+
+    timer->start("communication");
+    timer->start("pressure-communication");
+
     // TODO WS2: communicate pressure values
     pressureComm.communicate(this->_flowField);
+
+    timer->stop("pressure-communication");
+    timer->stop("communication");
+
     // compute velocity
     _velocityIterator.iterate();
     // set obstacle boundaries
     _obstacleIterator.iterate();
+
+    timer->start("communication");
+    timer->start("velocity-communication");
+
     // TODO WS2: communicate velocity values
     velocityComm.communicate(this->_flowField);
+
+    timer->stop("velocity-communication");
+    timer->stop("communication");
+
     // Iterate for velocities on the boundary
     _wallVelocityIterator.iterate();
   }

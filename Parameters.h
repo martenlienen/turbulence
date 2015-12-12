@@ -132,6 +132,11 @@ class BFStepParameters {
   FLOAT yRatio;
 };
 
+struct TimingParameters {
+  bool enabled;
+  std::string prefix;
+};
+
 //@}
 
 /** A class to store and pass around the parameters
@@ -157,6 +162,7 @@ class Parameters {
   ParallelParameters parallel;
   StdOutParameters stdOut;
   BFStepParameters bfStep;
+  TimingParameters timing;
   // TODO WS2: include parameters for turbulence
   Meshsize *meshsize;
 };
