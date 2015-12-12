@@ -92,6 +92,7 @@ class WallParameters {
 
 class VTKParameters {
  public:
+  bool enabled;
   FLOAT interval;      //! Time interval for file printing
   std::string prefix;  //! Output filename
 };

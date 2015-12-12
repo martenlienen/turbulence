@@ -298,12 +298,16 @@ void Configuration::loadParameters(Parameters &parameters,
 
     node = confFile.FirstChildElement()->FirstChildElement("vtk");
 
-    if (node == NULL) {
-      handleError(1, "Error loading VTK parameters");
-    }
+    if (node) {
+      readBoolOptional(parameters.vtk.enabled, node, "enabled", true);
 
-    readFloatOptional(parameters.vtk.interval, node, "interval");
-    readStringMandatory(parameters.vtk.prefix, node);
+      if (parameters.vtk.enabled) {
+        readFloatOptional(parameters.vtk.interval, node, "interval");
+        readStringMandatory(parameters.vtk.prefix, node);
+      }
+    } else {
+      parameters.vtk.enabled = false;
+    }
 
     //--------------------------------------------------
     // StdOut parameters

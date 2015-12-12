@@ -236,6 +236,10 @@ class FlowFieldSimulation : public Simulation {
 
   /** TODO WS1: plots the flow field. */
   virtual void plotVTK(int rank, int timeStep) {
+    if (!this->_parameters.vtk.enabled) {
+      return;
+    }
+
     // TODO WS1: create VTKStencil and respective iterator; iterate stencil
     //           over _flowField and write flow field information to vtk file
 
