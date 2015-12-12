@@ -14,10 +14,6 @@ from argparse import ArgumentParser
 
 def parseArguments():
     parser = ArgumentParser(description="Submit a simulation as a batch job")
-    parser.add_argument("-e",
-                        "--email",
-                        help="Email-Adress to send a notification email to",
-                        required=True)
     parser.add_argument("--intel",
                         action="store_const",
                         const="intel",
@@ -47,11 +43,12 @@ def parseArguments():
                         help="The executable to run (normally ns)")
     parser.add_argument("scenario", help="A scenario configuration file")
 
-    options = parser.parse_args()
+    (options, rest) = parser.parse_known_args()
+
     if os.path.exists(options.out) and len(os.listdir(options.out)) > 0:
         parser.error("Please enter an empty directory")
 
-    return options
+    return (options, rest)
 
 
 def primes(N):
@@ -116,7 +113,7 @@ def getdim(scenario):
 
 
 def main():
-    options = parseArguments()
+    (options, rest) = parseArguments()
 
     options.out = os.path.realpath(options.out)
 
@@ -167,10 +164,10 @@ def main():
 
             with open(logfile, "w") as log:
                 subprocess.call(
-                    map(str, [run, "-e", options.email,
-                              "--" + options.architecture, "--nx", nx, "--ny",
-                              ny, "--nz", nz, "--sx", sx, "--sy", sy, "--sz",
-                              sz, sub, options.executable, options.scenario]),
+                    map(str,
+                        [run, "--" + options.architecture, "--nx", nx, "--ny",
+                         ny, "--nz", nz, "--sx", sx, "--sy", sy, "--sz", sz,
+                         *rest, sub, options.executable, options.scenario]),
                     stdout=log,
                     stderr=log)
 
