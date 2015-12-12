@@ -20,7 +20,7 @@ JOB_TEMPLATE = """#!/bin/bash
 #SBATCH --get-user-env
 #SBATCH --partition={partition}
 #SBATCH --ntasks={mpi_num_ranks}
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task={cpus_per_task}
 #SBATCH --mail-type=end
 #SBATCH --mail-user={notification_email}
 #SBATCH --export=NONE
@@ -101,17 +101,18 @@ def configureScenario(out, templatepath, nx, ny, nz, vtkpath):
     tree.write(out)
 
 
-PARTITIONS = {"intel": ("snb", 16), "amd": ("bdz", 64)}
+PARTITIONS = {"intel": ("snb", 16, 2), "amd": ("bdz", 64, 1)}
 
 
 def createJob(out, outfile, outdir, scenario, architecture, nranks, email,
               nspath):
-    (partition, ppn) = PARTITIONS[architecture]
+    (partition, ppn, cpt) = PARTITIONS[architecture]
 
     job = JOB_TEMPLATE.format(out_file=outfile,
                               out_dir=outdir,
                               partition=partition,
                               mpi_num_ranks=nranks,
+                              cpus_per_task=cpt,
                               notification_email=email,
                               processes_per_node=ppn,
                               ns_executable=nspath,
