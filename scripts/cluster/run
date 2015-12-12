@@ -65,9 +65,20 @@ def parseArguments():
                         type=int,
                         help="Number of processes in Z direction",
                         default=1)
-    parser.add_argument("--time",
-                        help="Maximum execution time (e.g. 2:00 for two hours)",
-                        default="00:10")
+    parser.add_argument(
+        "--time",
+        help="Maximum execution time (e.g. 2:00 for two hours)",
+        default="00:10")
+    parser.add_argument("--no-timing",
+                        help="Disable timing data collection",
+                        action="store_false",
+                        dest="timing",
+                        default=True)
+    parser.add_argument("--no-vtk",
+                        help="Disable VTK output",
+                        action="store_false",
+                        dest="vtk",
+                        default=True)
     parser.add_argument(
         "out",
         help="Directory to store job configuration and results")
@@ -86,7 +97,8 @@ def copyPetscArguments(jobdir):
                     os.path.join(jobdir, "petsc_commandline_arg"))
 
 
-def configureScenario(out, templatepath, nx, ny, nz, vtkpath):
+def configureScenario(out, templatepath, nx, ny, nz, vtkpath, enable_timing,
+                      enable_vtk):
     """Configure a scenario template for parallel execution.
 
     The configured scenario is written into `out`."""
@@ -99,7 +111,14 @@ def configureScenario(out, templatepath, nx, ny, nz, vtkpath):
         child.attrib["numProcessorsZ"] = str(nz)
 
     for child in root.findall("vtk"):
+        child.attrib["enabled"] = str(enable_vtk).lower()
         child.text = os.path.join(vtkpath, "vtk")
+
+    for child in root.findall("timing"):
+        child.attrib["enabled"] = str(enable_timing).lower()
+    else:
+        if not enable_timing:
+            root.append(ET.Element("timing", {"enabled": "false"}))
 
     tree.write(out)
 
@@ -156,7 +175,7 @@ def main():
         copyPetscArguments(options.out)
 
         configureScenario(scenario, options.scenario, options.nx, options.ny,
-                          options.nz, vtkpath)
+                          options.nz, vtkpath, options.timing, options.vtk)
 
         nranks = options.nx * options.ny * options.nz
         createJob(jobpath, outpath, options.out, scenario,
