@@ -24,7 +24,7 @@ JOB_TEMPLATE = """#!/bin/bash
 #SBATCH --mail-type=end
 #SBATCH --mail-user={notification_email}
 #SBATCH --export=NONE
-#SBATCH --time=00:08:00
+#SBATCH --time={time}
 
 # Load the module system
 source /etc/profile.d/modules.sh
@@ -65,6 +65,9 @@ def parseArguments():
                         type=int,
                         help="Number of processes in Z direction",
                         default=1)
+    parser.add_argument("--time",
+                        help="Maximum execution time (e.g. 2:00 for two hours)",
+                        default="00:10")
     parser.add_argument(
         "out",
         help="Directory to store job configuration and results")
@@ -105,7 +108,7 @@ PARTITIONS = {"intel": ("snb", 16, 2), "amd": ("bdz", 64, 1)}
 
 
 def createJob(out, outfile, outdir, scenario, architecture, nranks, email,
-              nspath):
+              nspath, time):
     (partition, ppn, cpt) = PARTITIONS[architecture]
 
     job = JOB_TEMPLATE.format(out_file=outfile,
@@ -114,6 +117,7 @@ def createJob(out, outfile, outdir, scenario, architecture, nranks, email,
                               mpi_num_ranks=nranks,
                               cpus_per_task=cpt,
                               notification_email=email,
+                              time=time,
                               processes_per_node=ppn,
                               ns_executable=nspath,
                               scenario=scenario)
@@ -136,6 +140,9 @@ def main():
     if not os.path.isdir(options.out):
         os.mkdir(options.out)
 
+    t = time.strptime(options.time, "%H:%M")
+    maxTime = time.strftime("%H:%M:00", t)
+
     log = os.path.join(options.out, "log")
     outpath = os.path.join(options.out, "out")
     jobpath = os.path.join(options.out, "job.cmd")
@@ -154,7 +161,7 @@ def main():
         nranks = options.nx * options.ny * options.nz
         createJob(jobpath, outpath, options.out, scenario,
                   options.architecture, nranks, options.email,
-                  os.path.realpath(options.executable))
+                  os.path.realpath(options.executable), maxTime)
 
         submitJob(jobpath, logfile)
 
