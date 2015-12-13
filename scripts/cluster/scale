@@ -13,7 +13,14 @@ from argparse import ArgumentParser
 
 
 def parseArguments():
-    parser = ArgumentParser(description="Submit a simulation as a batch job")
+    parser = ArgumentParser(
+        description="Perform a weak or strong scaling experiment",
+        epilog="""
+In the case of a strong scaling experiment, SX, SY and SZ describe the total
+number of cells in the scenario. For a weak scaling experiment they give the
+number of cells *per process*, so the sizes are scaled with the number of
+processes in each dimension.
+        """)
     parser.add_argument("--intel",
                         action="store_const",
                         const="intel",
@@ -36,6 +43,18 @@ def parseArguments():
                         const="weak",
                         dest="scaling",
                         help="Perform weak scaling")
+    parser.add_argument("--sx",
+                        type=int,
+                        default=None,
+                        help="Number of cells in X direction")
+    parser.add_argument("--sy",
+                        type=int,
+                        default=None,
+                        help="Number of cells in X direction")
+    parser.add_argument("--sz",
+                        type=int,
+                        default=None,
+                        help="Number of cells in X direction")
     parser.add_argument(
         "out",
         help="Directory to store job configuration and results")
@@ -47,6 +66,20 @@ def parseArguments():
 
     if os.path.exists(options.out) and len(os.listdir(options.out)) > 0:
         parser.error("Please enter an empty directory")
+
+    dim = getdim(options.scenario)
+
+    if not options.sx and not options.sy and not options.sz:
+        (options.sx, options.sy, options.sz) = getsize(options.scenario)
+    elif options.sx and options.sy:
+        if dim == 2:
+            options.sz = 1
+        elif dim == 3 and not options.sz:
+            parser.error("For a 3D simulation you have to set either all or "
+                         "none of SX, SY, SZ")
+    else:
+        parser.error("""A 2D simulation needs either all or none of SX and SY
+while a 3D simulation needs either all or none of SX, SY and SZ""")
 
     return (options, rest)
 
@@ -120,25 +153,16 @@ def main():
     if not os.path.isdir(options.out):
         os.mkdir(options.out)
 
-        # TODO add weak scaling
-
     if options.architecture == "amd":
         ranks = [2**x for x in range(1, 9)]
     elif options.architecture == "intel":
         ranks = [2**x for x in range(1, 11)]
 
-    if options.scaling == "strong":
-        (sx, sy, sz) = getsize(options.scenario)
-    elif options.scaling == "weak":
-        # TODO scale sizes correctly
-        (sx, sy, sz) = getsize(options.scenario)
-
-    dim = getdim(options.scenario)
-
-    SUB_TEMPLATE = os.path.join(options.out, "job-{}_{}-{}-{}")
+    dimension = getdim(options.scenario)
+    wdtemplate = os.path.join(options.out, "job-{}_{}-{}-{}")
 
     for rank in ranks:
-        N = balance(rank, dim)
+        N = balance(rank, dimension)
 
         combinations = list(itertools.permutations(N, len(N)))
 
@@ -154,19 +178,28 @@ def main():
             ny = combo[1]
             nz = combo[2]
 
-            sub = SUB_TEMPLATE.format(rank, nx, ny, nz)
-            os.makedirs(sub)
+            workingdir = wdtemplate.format(rank, nx, ny, nz)
+            os.makedirs(workingdir)
 
-            logfile = os.path.join(sub, "scaling-log")
+            logfile = os.path.join(workingdir, "scaling-log")
             run = os.path.join(
                 os.path.dirname(os.path.realpath(__file__)), "run")
 
-            with open(logfile, "w") as log:
-                command = [run, "--" + options.architecture, "--nx", nx,
-                           "--ny", ny, "--nz", nz, "--sx", sx, "--sy", sy,
-                           "--sz", sz] + rest + [sub, options.executable,
-                                                 options.scenario]
+            command = [run, "--" + options.architecture, "--nx", nx, "--ny",
+                       ny, "--nz", nz]
 
+            if options.scaling == "strong":
+                command += ["--sx", options.sx, "--sy", options.sy, "--sz",
+                            options.sz]
+            else:
+                command += ["--sx", options.sx * nx]
+                command += ["--sy", options.sy * ny]
+                command += ["--sz", options.sz * nz]
+
+            command += rest + [workingdir, options.executable, options.scenario
+                               ]
+
+            with open(logfile, "w") as log:
                 subprocess.call(map(str, command), stdout=log, stderr=log)
 
 
