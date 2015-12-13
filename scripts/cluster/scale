@@ -55,6 +55,7 @@ processes in each dimension.
                         type=int,
                         default=None,
                         help="Number of cells in X direction")
+    parser.add_argument("--limit", type=int, default=8, help="Maximum exponent")
     parser.add_argument(
         "out",
         help="Directory to store job configuration and results")
@@ -154,9 +155,9 @@ def main():
         os.mkdir(options.out)
 
     if options.architecture == "amd":
-        ranks = [2**x for x in range(1, 9)]
+        ranks = [2**x for x in range(0, options.limit + 1)]
     elif options.architecture == "intel":
-        ranks = [2**x for x in range(1, 11)]
+        ranks = [2**x for x in range(0, options.limit + 1)]
 
     dimension = getdim(options.scenario)
     wdtemplate = os.path.join(options.out, "job-{}_{}-{}-{}")
