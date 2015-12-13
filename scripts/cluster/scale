@@ -178,6 +178,19 @@ def main():
             nx = combo[0]
             ny = combo[1]
             nz = combo[2]
+            sx = options.sx
+            sy = options.sy
+            sz = options.sz
+
+            if options.scaling == "strong":
+                if sx % nx != 0:
+                    sx = nx * round(sx / nx)
+
+                if sy % ny != 0:
+                    sy = ny * round(sy / ny)
+
+                if dimension == 3 and sz % nz != 0:
+                    sz = nz * round(sz / nz)
 
             workingdir = wdtemplate.format(rank, nx, ny, nz)
             os.makedirs(workingdir)
@@ -190,15 +203,11 @@ def main():
                        ny, "--nz", nz]
 
             if options.scaling == "strong":
-                command += ["--sx", options.sx, "--sy", options.sy, "--sz",
-                            options.sz]
+                command += ["--sx", sx, "--sy", sy, "--sz", sz]
             else:
-                command += ["--sx", options.sx * nx]
-                command += ["--sy", options.sy * ny]
-                command += ["--sz", options.sz * nz]
+                command += ["--sx", sx * nx, "--sy", sy * ny, "--sz", sz * nz]
 
-            command += rest + [workingdir, options.executable, options.scenario
-                               ]
+            command += rest + [workingdir, options.executable, options.scenario]
 
             with open(logfile, "w") as log:
                 subprocess.call(map(str, command), stdout=log, stderr=log)
