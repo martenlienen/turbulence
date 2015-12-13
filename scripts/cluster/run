@@ -193,6 +193,9 @@ def main():
     if not os.path.isdir(vtkpath):
         os.mkdir(vtkpath)
 
+    if not os.path.isdir(timingpath):
+        os.mkdir(timingpath)
+
     with open(log, "w") as logfile:
         copyPetscArguments(options.out)
 
