@@ -16,7 +16,7 @@ from argparse import ArgumentParser
 JOB_TEMPLATE = """#!/bin/bash
 #SBATCH -o {out_file}
 #SBATCH -D {out_dir}
-#SBATCH -J turb-flow
+#SBATCH -J {name}
 #SBATCH --get-user-env
 #SBATCH --partition={partition}
 #SBATCH --ntasks={mpi_num_ranks}
@@ -42,6 +42,7 @@ def parseArguments():
                         "--email",
                         help="Email-Adress to send a notification email to",
                         required=True)
+    parser.add_argument("-n", "--name", help="Name of job", default="turb-flow")
     parser.add_argument("--intel",
                         action="store_const",
                         const="intel",
@@ -146,12 +147,13 @@ def configureScenario(out, templatepath, nx, ny, nz, sx, sy, sz, vtkpath,
 PARTITIONS = {"intel": ("snb", 16, 2), "amd": ("bdz", 64, 1)}
 
 
-def createJob(out, outfile, outdir, scenario, architecture, nranks, email,
+def createJob(out, outfile, outdir, name, scenario, architecture, nranks, email,
               nspath, time):
     (partition, ppn, cpt) = PARTITIONS[architecture]
 
     job = JOB_TEMPLATE.format(out_file=outfile,
                               out_dir=outdir,
+                              name=name,
                               partition=partition,
                               mpi_num_ranks=nranks,
                               cpus_per_task=cpt,
@@ -204,7 +206,7 @@ def main():
                           vtkpath, options.timing, timingpath, options.vtk)
 
         nranks = options.nx * options.ny * options.nz
-        createJob(jobpath, outpath, options.out, scenario,
+        createJob(jobpath, outpath, options.out, options.name, scenario,
                   options.architecture, nranks, options.email,
                   os.path.realpath(options.executable), maxTime)
 
