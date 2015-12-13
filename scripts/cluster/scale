@@ -99,12 +99,12 @@ def primes(N):
 
 def primeFactors(N):
     factors = []
-    candidates = primes(int(math.ceil(math.sqrt(N))))
+    candidates = primes(int(math.ceil(N / 2)))
 
     for c in candidates:
         while N % c == 0:
             factors.append(c)
-            N = N / c
+            N = int(N / c)
 
     if len(factors) > 0:
         return factors
