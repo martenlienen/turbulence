@@ -110,7 +110,7 @@ def copyPetscArguments(jobdir):
 
 
 def configureScenario(out, templatepath, nx, ny, nz, sx, sy, sz, vtkpath,
-                      enable_timing, enable_vtk):
+                      enable_timing, timingpath, enable_vtk):
     """Configure a scenario template for parallel execution.
 
     The configured scenario is written into `out`."""
@@ -128,9 +128,11 @@ def configureScenario(out, templatepath, nx, ny, nz, sx, sy, sz, vtkpath,
 
     for child in root.findall("timing"):
         child.attrib["enabled"] = str(enable_timing).lower()
+        child.text = timingpath
     else:
-        if not enable_timing:
-            root.append(ET.Element("timing", {"enabled": "false"}))
+        node = ET.Element("timing", {"enabled": str(enable_timing).lower()})
+        node.text = timingpath
+        root.append(node)
 
     if sx != None and sy != None:
       for child in root.findall("geometry"):
@@ -186,6 +188,7 @@ def main():
     jobpath = os.path.join(options.out, "job.cmd")
     scenario = os.path.join(options.out, "scenario.xml")
     vtkpath = os.path.join(options.out, "vtks")
+    timingpath = os.path.join(options.out, "timing", "")
 
     if not os.path.isdir(vtkpath):
         os.mkdir(vtkpath)
@@ -195,7 +198,7 @@ def main():
 
         configureScenario(scenario, options.scenario, options.nx, options.ny,
                           options.nz, options.sx, options.sy, options.sz,
-                          vtkpath, options.timing, options.vtk)
+                          vtkpath, options.timing, timingpath, options.vtk)
 
         nranks = options.nx * options.ny * options.nz
         createJob(jobpath, outpath, options.out, scenario,
