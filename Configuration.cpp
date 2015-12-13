@@ -483,6 +483,7 @@ void Configuration::loadParameters(Parameters &parameters,
   MPI_Bcast(&(parameters.simulation.finalTime), 1, MY_MPI_FLOAT, 0,
             communicator);
 
+  MPI_Bcast(&(parameters.vtk.enabled), 1, MPI_INT, 0, communicator);
   MPI_Bcast(&(parameters.vtk.interval), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.stdOut.interval), 1, MPI_INT, 0, communicator);
 
