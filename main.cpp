@@ -138,5 +138,6 @@ int main(int argc, char *argv[]) {
     }
 
     file << timer->toString();
+    file << "timesteps " << timeSteps << std::endl;
   }
 }
