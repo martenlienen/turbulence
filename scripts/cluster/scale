@@ -163,13 +163,12 @@ def main():
                 os.path.dirname(os.path.realpath(__file__)), "run")
 
             with open(logfile, "w") as log:
-                subprocess.call(
-                    map(str,
-                        [run, "--" + options.architecture, "--nx", nx, "--ny",
-                         ny, "--nz", nz, "--sx", sx, "--sy", sy, "--sz", sz,
-                         *rest, sub, options.executable, options.scenario]),
-                    stdout=log,
-                    stderr=log)
+                command = [run, "--" + options.architecture, "--nx", nx,
+                           "--ny", ny, "--nz", nz, "--sx", sx, "--sy", sy,
+                           "--sz", sz] + rest + [sub, options.executable,
+                                                 options.scenario]
+
+                subprocess.call(map(str, command), stdout=log, stderr=log)
 
 
 if __name__ == "__main__":
