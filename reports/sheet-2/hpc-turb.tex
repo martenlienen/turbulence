@@ -48,7 +48,7 @@ be reused for different quantities, data types and ghost layer widths.
 \begin{figure}[h]
   \centering
   \includegraphics[width=\textwidth]{border-exchange}
-  \caption{Two Dimensional Border Exchange\footnote[1]{\emph{http://parlab.eecs.berkeley.edu/wiki/\_media/patterns/ghostcell.pdf}}}
+  \caption{Two Dimensional Border Exchange}
   \label{fig:border-exchange}
 \end{figure}
 
@@ -78,20 +78,26 @@ of the performance loss that can result when a job does not fit the used
 nodes. Since we have limited influence on the performance of the PETSc solver
 itself we have also plotted the speedup of everything \emph{except} PETSc. This
 scales nicely as well but has two notable dips at 36 and 52 nodes. These result
-from the fact
+from the fact 36 is split into $9$ times $4$ and 52 into $13$ times $4$
+processes along the X and Y axis, which stretch the cells and lead to a worse
+ratio of volume to surface area.
 
-In the resulting speed up curve a large loss of speed up can be observed
-between jobs with 32 and 36 processes, which can be attributed to the "start" of
-using a new node but without using it to it's to its full potential.\ref{fig:}.
-
-When scaling a channel configuration in a weak manner, the time proved to be
-relatively constant. The trend represents an effective weak scalability.
+Figure \ref{fig:scaling-channel-weak} shows the analysis of a weak scaling
+experiment with a channel scenario. The total speedup graph shows that we have
+scaled the work per process linearly.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\textwidth]{scaling/channel-strong}
-  \caption{}
+  \caption{\emph{Strong} scaling experiment with a channel scenario}
   \label{fig:scaling-channel-strong}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{scaling/channel-weak}
+  \caption{\emph{Weak} scaling experiment with a channel scenario}
+  \label{fig:scaling-channel-weak}
 \end{figure}
 
 \section{Navier-Stokes}
