@@ -73,27 +73,27 @@ FLOAT MemoizedMesh::getDy(int i, int j) const {
       this->between(j, -1, this->cellsY - 2)) {
     return this->dy[i + 1][j + 1][1];
   } else {
-    return this->mesh->getDx(i, j, 0);
+    return this->mesh->getDy(i, j, 0);
   }
 }
 
 FLOAT MemoizedMesh::getDx(int i, int j, int k) const {
   if (this->between(i, -1, this->cellsX - 2) &&
       this->between(j, -1, this->cellsY - 2) &&
-      this->between(k, -1, this->cellsZ)) {
+      this->between(k, -1, this->cellsZ - 2)) {
     return this->dx[i + 1][j + 1][k + 1];
   } else {
-    return this->mesh->getDx(i, j, 0);
+    return this->mesh->getDx(i, j, k);
   }
 }
 
 FLOAT MemoizedMesh::getDy(int i, int j, int k) const {
   if (this->between(i, -1, this->cellsX - 2) &&
       this->between(j, -1, this->cellsY - 2) &&
-      this->between(k, -1, this->cellsZ)) {
+      this->between(k, -1, this->cellsZ - 2)) {
     return this->dy[i + 1][j + 1][k + 1];
   } else {
-    return this->mesh->getDx(i, j, 0);
+    return this->mesh->getDy(i, j, k);
   }
 }
 
@@ -103,37 +103,37 @@ FLOAT MemoizedMesh::getDz(int i, int j, int k) const {
       this->between(k, -1, this->cellsZ)) {
     return this->dz[i + 1][j + 1][k + 1];
   } else {
-    return this->mesh->getDx(i, j, 0);
+    return this->mesh->getDz(i, j, k);
   }
 }
 
 FLOAT MemoizedMesh::getPosX(int i, int j, int k) const {
   if (this->between(i, -1, this->pointsX - 2) &&
       this->between(j, -1, this->pointsY - 2) &&
-      this->between(k, -1, this->pointsZ)) {
+      this->between(k, -1, this->pointsZ - 2)) {
     return this->posX[i + 1][j + 1][k + 1];
   } else {
-    return this->mesh->getDx(i, j, 0);
+    return this->mesh->getPosX(i, j, k);
   }
 }
 
 FLOAT MemoizedMesh::getPosY(int i, int j, int k) const {
   if (this->between(i, -1, this->pointsX - 2) &&
       this->between(j, -1, this->pointsY - 2) &&
-      this->between(k, -1, this->pointsZ)) {
+      this->between(k, -1, this->pointsZ - 2)) {
     return this->posY[i + 1][j + 1][k + 1];
   } else {
-    return this->mesh->getDx(i, j, 0);
+    return this->mesh->getPosY(i, j, k);
   }
 }
 
 FLOAT MemoizedMesh::getPosZ(int i, int j, int k) const {
   if (this->between(i, -1, this->pointsX - 2) &&
       this->between(j, -1, this->pointsY - 2) &&
-      this->between(k, -1, this->pointsZ)) {
+      this->between(k, -1, this->pointsZ - 2)) {
     return this->posZ[i + 1][j + 1][k + 1];
   } else {
-    return this->mesh->getDx(i, j, 0);
+    return this->mesh->getPosZ(i, j, k);
   }
 }
 
@@ -142,7 +142,7 @@ FLOAT MemoizedMesh::getPosX(int i, int j) const {
       this->between(j, -1, this->pointsY - 2)) {
     return this->posX[i + 1][j + 1][1];
   } else {
-    return this->mesh->getDx(i, j, 0);
+    return this->mesh->getPosX(i, j, 0);
   }
 }
 
@@ -151,7 +151,7 @@ FLOAT MemoizedMesh::getPosY(int i, int j) const {
       this->between(j, -1, this->pointsY - 2)) {
     return this->posY[i + 1][j + 1][1];
   } else {
-    return this->mesh->getDx(i, j, 0);
+    return this->mesh->getPosY(i, j, 0);
   }
 }
 
