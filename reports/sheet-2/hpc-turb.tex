@@ -26,6 +26,32 @@
 
 \section{Parallelization}
 
+\subsection{MPI}
+
+We have implemented the communication of flow quantities as explained in a
+Berkeley paper on ghost
+cells\footnote{\emph{http://parlab.eecs.berkeley.edu/wiki/\_media/patterns/ghostcell.pdf}}
+and illustrated in figure \ref{fig:border-exchange}. The general approach is as follows
+
+\begin{itemize}
+\item First we exchange the flow quantity with the neighbors in one direction spare the corners respectively edges
+\item In the second phase we exchange in another direction but include the corners
+\item For a 3D simulation we finally exchange values in the third direction and include the remaining edge
+\end{itemize}
+
+This incremental sending of more edge values ensures that you send the minimal
+amount of data to update all ghost layer.
+
+A quite general implementation can be found in \textsc{MPICommunicator} that can
+be reused for different quantities, data types and ghost layer widths.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{border-exchange}
+  \caption{Two Dimensional Border Exchange\footnote[1]{\emph{http://parlab.eecs.berkeley.edu/wiki/\_media/patterns/ghostcell.pdf}}}
+  \label{fig:border-exchange}
+\end{figure}
+
 \subsection{Validation}
 
 We compared simulation results obtained with different domain decompositions and
