@@ -79,11 +79,13 @@ class FlowFieldSimulation : public Simulation {
 
   MPICommunicator<std::array<FLOAT, 3>, FF> velocityComm{
       this->_flowField, this->_parameters,
-      [](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
-        std::copy_n(flowField.getVelocity().getVector(i, j, k), 3, v.data());
+      [this](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
+        std::copy_n(flowField.getVelocity().getVector(i, j, k),
+                    this->_parameters.geometry.dim, v.data());
       },
-      [](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
-        std::copy_n(v.data(), 3, flowField.getVelocity().getVector(i, j, k));
+      [this](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
+        std::copy_n(v.data(), this->_parameters.geometry.dim,
+                    flowField.getVelocity().getVector(i, j, k));
       },
       2};
 
