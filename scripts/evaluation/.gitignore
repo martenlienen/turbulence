@@ -1,0 +1,4 @@
+# Compiled or cached python
+*.pyc
+*.pyo
+__pycache__

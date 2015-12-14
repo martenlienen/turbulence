@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+import argparse
+import csv
+
+import numpy as np
+from matplotlib import pyplot as pl
+
+from sklearn.gaussian_process import GaussianProcess
+
+
+def parseArguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("value", help="Value to plot")
+    parser.add_argument("csv", help="CSV with data")
+
+    return parser.parse_args()
+
+
+def main():
+    arguments = parseArguments()
+    with open(arguments.csv, "r") as f:
+        csvdata = csv.reader(f)
+        header = None
+        alldata = []
+
+        for row in csvdata:
+            if header == None:
+                header = row
+            else:
+                alldata += [row]
+
+    cols = ["rank", arguments.value + "-mean", arguments.value + "-var"]
+    colIndices = [header.index(c) for c in cols]
+    n = len(alldata)
+    data = np.empty((n, 3))
+
+    for i in range(n):
+        for j in range(3):
+            data[i, j] = alldata[i][colIndices[j]]
+
+    ns = data[:, 0].reshape((-1, 1))
+    means = data[:, 1].reshape((-1, 1))
+    variances = data[:, 2].reshape((-1, 1))
+
+    nugget = (variances / (means**2)).reshape(-1)
+    gp = GaussianProcess(corr="squared_exponential",
+                         theta0=1e-1,
+                         thetaL=1e-3,
+                         thetaU=1,
+                         nugget=nugget)
+
+    gp.fit(ns, means)
+
+    X = np.linspace(np.min(ns), np.max(ns), num=200).reshape(-1, 1)
+    Y, MSE = gp.predict(X, eval_MSE=True)
+    sigma = np.sqrt(MSE)
+
+    pl.plot(ns, means, "rx")
+    pl.plot(X, Y, "b-")
+    pl.fill(
+        np.concatenate([X, X[::-1]]),
+        np.concatenate([Y - 1.0 * sigma, (Y + 1.0 * sigma)[::-1]]),
+        alpha=0.5,
+        fc="g",
+        ec="None")
+    pl.xlabel("Number of Processors")
+    pl.ylabel(arguments.value)
+    pl.show()
+
+
+if __name__ == "__main__":
+    main()
