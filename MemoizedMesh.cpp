@@ -10,10 +10,10 @@ MemoizedMesh::MemoizedMesh(Parameters& params, std::unique_ptr<Meshsize> mesh)
     : MemoizedMesh(
           std::move(mesh), params.parallel.localSize[0] + 3 + 2,
           params.parallel.localSize[1] + 3 + 2,
-          (params.geometry.dim == 3 ? params.parallel.localSize[2] : 0) + 3 + 2,
+          (params.geometry.dim == 3 ? params.parallel.localSize[2] + 3 : 1) + 2,
           params.parallel.localSize[0] + 4 + 2,
           params.parallel.localSize[1] + 4 + 2,
-          (params.geometry.dim == 3 ? params.parallel.localSize[2] : 0) + 4 +
+          (params.geometry.dim == 3 ? params.parallel.localSize[2] + 4 : 1) +
               2) {}
 
 MemoizedMesh::MemoizedMesh(std::unique_ptr<Meshsize> mesh, int cellsX,
