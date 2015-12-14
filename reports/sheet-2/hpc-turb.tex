@@ -100,58 +100,6 @@ scaled the work per process linearly.
   \label{fig:scaling-channel-weak}
 \end{figure}
 
-\section{Navier-Stokes}
-\subsection{Equations to solve}
-\begin{align}
-\abl{u_i}{x_i}=0
-\end{align}
-\begin{align}
-\abl{u_i	}{t}+\abl{u_i\,u_j}{x_j}=-\frac{1}{\rho}\,\abl{p}{x_i}+2\,\nu\,\abl{S_{ij}}{x_j}+f_i \qquad
-\text{with: }S_{ij}=\frac{1}{2}\left(\abl{u_i}{x_j}+\abl{u_j}{x_i}\right)
-\end{align}
-%\begin{align}
-%\rho\,\abl{u_j}{x_i}\abl{u_i}{x_j}=- \abll{p}{x_i}
-%\end{align}
-with FGH-notation:
-\begin{align}
-\abl{u_i	}{t}=-\frac{1}{\rho}\,\abl{p}{x_i}+\tilde F_i
-\end{align}
-%\subsection{Time discrete}
-%\begin{align}
-%\abl{u_i^+}{x_i}=0
-%\end{align}
-%\begin{align}
-%\frac{u_i^+-u_i^\circ}{\Delta t}=-\frac{1}{\rho}\,\abl{p^+}{x_i}+\tilde F_i^\circ
-%\quad\rightarrow\quad
-%u_i^+=u_i^\circ+\Delta t\left( -\frac{1}{\rho}\,\abl{p^+}{x_i}+\tilde F_i^\circ  \right)
-%=F_i^\circ-\frac{\Delta t}{\rho}\,\abl{p^+}{x_i}
-%\end{align}
-%Combination (Pressure-Poisson-Equv.):
-%\begin{align}
-%\frac{\rho}{\Delta t} \abl{F_i^\circ}{x_i}  =
-%\frac{\partial^2 p^+}{\partial x_i\,\partial x_i}
-%\end{align}
-
-
-\subsection{Steps}
-\begin{itemize}
-\item[1] Calculate $F_i^\circ$:
-\begin{align*}
-F_i^\circ=u_i^\circ+\Delta t\left(-\abl{u_i\,u_j}{x_j} +2\,\nu\,\abl{S_{ij}}{x_j}+f_i  \right)
-\end{align*}
-\item[2] Solve Pressure-Poission-Equv. for $p^+$:
-\begin{align*}
-\frac{\rho}{\Delta t} \abl{F_i^\circ}{x_i}  =
-\frac{\partial^2 p^+}{\partial x_i\,\partial x_i}
-\end{align*}
-\item[3] Calculate velocities $u_i^+$:
-\begin{align*}
-u_i^+
-=F_i^\circ-\frac{\Delta t}{\rho}\,\abl{p^+}{x_i}
-\end{align*}
-\end{itemize}
-
-
 \clearpage
 
 \section{RANS (Eddy viscosity model)}
@@ -196,7 +144,7 @@ Following steps are performed in our program to solve the RANS with the help of 
 F_i^\circ=u_i^\circ+\Delta t\left(-\abl{u_i^\circ\,u_j^\circ}{x_j} +2\,\new{\abl{}{x_j} \left( \,\left(\nu+\nu_T^\circ\right)S_{ij}^\circ\right)}+f_i^\circ  \right)
 \end{align}
 The appendix shows the discrete form of the local derivatives necessary to express the red term.
-\item[3.] Solve Pressure-Poission-Equv. for $(p^+/\rho)$:
+\item[3.] Solve Pressure-Poission-Equation for $(p^+/\rho)$:
 \begin{align}
 \frac{1}{\Delta t} \abl{F_i^\circ}{x_i}  =
 \frac{\partial^2 (p^+/\rho)}{\partial x_i\,\partial x_i}
@@ -206,7 +154,7 @@ The appendix shows the discrete form of the local derivatives necessary to expre
 u_i^+
 =F_i^\circ-\frac{\Delta t}{\rho}\,\abl{(p^+/\rho)}{x_i}
 \end{align}
-\item[5.] Calculate eddy viscosity $\nu_T^+$ and communicate values with MPI
+\item[5.] Calculate eddy viscosity $\nu_T^+$ and communicate values with MPI:
 \begin{align}
 \nu_{t}=l_m^2\sqrt{2\,S_{ij}\,S_{ij}}\quad\text{with} \quad l_m=min(0.41\,h;0.09\,\delta)
 \end{align}
@@ -222,13 +170,13 @@ u'=l_m\sqrt{2\,S_{ij}\,S_{ij}}\qquad\qquad
 These thoughts lead us to:
 
 \begin{itemize}
-\item Creating a new FlowField-Class \textsc{FlowFieldTurbA}. Based on the Adpater/Decorator Pattern, which has an instance of an laminar flow field and implements the \textsc{FlowField}-interface. The created flow field has addtional scalar fields (vortex viscosity $\nu_t$, local distance to the nearest wall $h$, mixing length $l_m$, velocity variation $u'$).
+\item A new FlowField-Class \textsc{FlowFieldTurbA} was created (based on the Adapter/Decorator Pattern), which has an instance of a laminar flow field and implements the \textsc{FlowField}-interface. The created flow field has addtional scalar fields (vortex viscosity $\nu_t$, local distance to the nearest wall $h$, mixing length $l_m$, velocity variation $u'$).
 \item A new implementation of the Simulation-interface was created: \textsc{SimulationTurbA}. It incorporates the algorithm described in section~\ref{sec:appendix}. It uses the newly created stencils (\textsc{NutStencil}, \textsc{FGHStencilTurb}).
-\item For the purpose of measuring the shortest distance from the middlepoint of a cell to a wall \textsc{WallDistanceManager} was written. It is called for each cell from the \textsc{HStencil} at the initialising of the turbulent simulation. WallDistanceManager is using the library ANN, which saves the coordinate of each wall-cell in a k-d tree, enabling to find the nearest wall cell in $\sim\ln(n)$-steps (with n = number of wall cells). We performed test simulations in which we could confirm the performance.
+\item For the purpose of measuring the shortest distance from the middlepoint of a cell to a wall, the \textsc{WallDistanceManager} was written. It is called for each cell from the \textsc{HStencil} at the initialising of the turbulent simulation. WallDistanceManager is using the library ANN, which saves the coordinate of each wall-cell in a k-d tree, enabling to find the nearest wall cell in $\sim\ln(n)$-steps (with n = number of wall cells). We performed test simulations, in which we could confirm the performance.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=1.0\textwidth]{ann}
+    \includegraphics[width=0.8\textwidth]{ann}
     \caption{\textsc{WallDistanceManager}-perfomance test}
     \label{fig:vels}
 \end{figure}
@@ -251,7 +199,7 @@ Different cases (laminar, turbulent with Re=100, with Re=1000 and with Re=5600 w
 \end{itemize}
 
 \subsubsection{Velocities}
-\noindent Figure~\ref{fig:vels} shows the u-velocity components along the cross section for each simulation case. The position of measurement and time was adjusted according to the case, so that the flow profile was stationary and fully developed.
+\noindent Figure~\ref{fig:vels} shows the u-velocity components along the cross section for each simulation case. The position of measurement and time were adjusted according to the case, so that the flow profile was stationary and fully developed.
 
 \begin{figure}[h]
     \centering
@@ -260,7 +208,7 @@ Different cases (laminar, turbulent with Re=100, with Re=1000 and with Re=5600 w
     \label{fig:vels}
 \end{figure}
 
-\noindent The velocities behave as expected. In the laminar case, the velocity profile has a parabolic form with a maximum of 1.5m/s. The turbulent simulations result in lower velocities (u$\le$1.5m/s): the higher the Reynolds-number the lower  the maximal velocity and the stouter the profile is (the slope of the velocities are higher near the wall).
+\noindent The velocities behave as expected. In the laminar case, the velocity profile has a parabolic form with a maximum of 1.5m/s. The turbulent simulations result in lower velocities (u$\le$1.5m/s): the higher the Reynolds-number the lower  the maximal velocity and the stouter the profile (the slope of the velocities is higher near the wall).
 
 \subsubsection{Shear stress}
 
@@ -274,13 +222,13 @@ Figure~\ref{fig:taus} shows the shear stress profile along the cross section for
 \begin{figure}[h]
     \centering
     \includegraphics[width=1.0\textwidth]{tau}
-    \caption{a nice plot}
+    \caption{Viscous and Reynolds stresses}
     \label{fig:taus}
 \end{figure}
 
 \noindent Additionally the shear stress components are plotted over $y^+$. Self-similarity is clearly recognisable.
 
-\subsubsection{Comparison with literature}\label{sec:lit}
+\subsubsection{Comparison with the literature}\label{sec:lit}
 Following additional values have been calculated for the turbulent Re=5600 case.
 \begin{align}
 u_\tau=\sqrt{\tau_w/\rho}
@@ -289,7 +237,7 @@ l^+=\nu/u_\tau
 \qquad\qquad
 Re_\tau=u_\tau\cdot\delta/\nu
 \end{align}
-Dimensionless dimensions were created with these and were compared to measurement values from the literature [Lit-82]:
+Dimensionless dimensions were created with these and were compared to the measurement values from the literature [Kim, John; Moin, Parviz; Moser, Robert: Turbulence statistics in fully developed channel flow at low Reynolds number, in: J. Fluid Mech. (1987), vol. 177, p. 133-166]:
 
 \begin{center}
 \begin{tabular}{|l|c|c|c|}
@@ -305,39 +253,45 @@ $C_f = \tau_w / (0.5 \rho u_m^2)$ & 8.18$\times$10$^{-3}$ & 31.6$\times$10$^{-3}
 \end{tabular}
 \end{center}
 
-\noindent The simulated maximal velocity $u_c/u_m$ match well with the value from the literature. However, all the $\tau_w$-related variables ($Re_\tau$, $C_f$, $u_\tau$...) differ. Apparently $\tau_w$  was overestimated by a factor 3,86. The reason for this discrepancy is still uncle. If we decrease $\tau_w$ by 3,86, the simulated values (Simulation *) match well with the literature.
+\noindent The simulated maximal velocity $u_c/u_m$ matches well with the value from the literature. However, all the $\tau_w$-related variables ($Re_\tau$, $C_f$, $u_\tau$...) differ. Apparently $\tau_w$  was overestimated by a factor 3,86. The reason for this discrepancy is still unclear. If we decrease $\tau_w$ by 3,86, the simulated values (Simulation *) match well with the literature.
 
 \newpage
 \subsubsection{Sublayers}
-Figure~\ref{fig:sublayers} left shows the normalized velocity $w^+$  over $y^+$ and the expected velocity profile. They do not match. The reason for this is the discrepancy in simulated $\tau_w$ (neither $l^+$ and $u_{\tau}$ could be calculated the right way).
+Figure~\ref{fig:sublayers}-left shows the normalized velocity $w^+$  over $y^+$ and the expected velocity profile. They do not match. The reason for this is the discrepancy in simulated $\tau_w$ (neither $l^+$ and $u_{\tau}$ could be calculated the right way).
 
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.49\textwidth]{wy1}
     \includegraphics[width=0.49\textwidth]{wy2}
-    \caption{a nice plot}
+    \caption{Sublayers: $w^+$ over $y^+$}
     \label{fig:sublayers}
 \end{figure}
 
-\noindent Figure~\ref{fig:sublayers} right shows the a modified normalized velocity $w^+$ over $y^+$ . In this case $l^+$ and $u_{\tau}$ was calculated with an adjusted $\tau_w$-value (as discussed in section~\ref{sec:lit}).
+\noindent Figure~\ref{fig:sublayers}-right shows a modified normalized velocity $w^+$ over $y^+$ . In this case, $l^+$ and $u_{\tau}$ was calculated with an adjusted $\tau_w$-value (as discussed in section~\ref{sec:lit}).
 
 \subsubsection{Eddy viscosity limiter models}
 
 Two different ways of limiting the eddy viscosity were implemented:
 \begin{itemize}
 \item[3.] compute the local boundary layer thickness by assuming a laminar flat plate Blasius boundary layer
-\item[4.] compute the local boundary layer thickness by assuming a turbulent flat plate boundary layer
+\item[4.] compute the local boundary layer thickness by assuming a turbulent flat plate boundary layer.
 \end{itemize}
 
 \noindent Plot~\ref{fig:devel} shows the velocity profiles for different cross sections on the x-axis of different models (laminar, turbulent without $\nu_t$-limitation, turbulent with $\nu_t$-limitation 3 and 4). You can see that:
 \begin{itemize}
-\item the flow in the laminar simulation needs much longer to fully develop than in the case of the turbulent simulation without any limitation of eddy-viscosity.
+\item The flow in the laminar simulation needs much longer to fully develop than in the case of the turbulent simulation without any limitation of eddy-viscosity.
 \item $\nu_t$-limitation leads to faster development of the flow field. The maximal velocities are in the range of 10-16m higher than without any limitation (laminar-turbulent transition). It is expected that the maximal velocities will decrease to the values of the turbulent simulation with limitation.
 \end{itemize}
 
-\clearpage
+\begin{figure}[h]
+    \centering
+    \includegraphics[trim={5cm 1.5cm 4cm 1.5cm},clip,angle=90,origin=c, width=0.8\textwidth]{yu}
+    \caption{Development of the velocity profile for different $\nu_t$-limiters (uniform inlet profile)}
+    \label{fig:devel}
+\end{figure}
 
+\clearpage
 
 %\begin{figure}
 %    \centering
@@ -484,7 +438,7 @@ Stencils for momentum equation in z-direction:
 \clearpage
 
 \subsubsection*{Notes}
-\noindent Be aware that the implemented method does not produce the same results for laminar flow ($\nu_T=0$) on a stretched mesh as the original implementation. This is due to a slight difference in the definition in the stencils.
+\noindent Be aware that the implemented method does not produce the same results for laminar flow ($\nu_T=0$) on a stretched mesh as the original implementation. This is due to a slight difference in the definition of the stencils.
 
 \vspace{0.5cm}
 
@@ -548,7 +502,7 @@ u_{i,j,k}\left(
 
 \vspace{0.5cm}
 
-\noindent For a stretched mesh (tanh) and a parabolic flow field (n=2) the method 1 produces exact results in contrast to method 2. Method 2 shows a quadratic convergence. This method was used because the first derivatives were needed at the nodes to be able to multiply with matching $\nu_t$.
+\noindent For a stretched mesh (tanh) and a parabolic flow field (n=2), the method 1 produces exact results in contrast to method 2. Method 2 shows a quadratic convergence. This method was used because the first derivatives were needed at the nodes to be able to multiply with matching $\nu_t$.
 
 \vfill
 with:
@@ -557,7 +511,5 @@ with:
 \delta y_{i,j,k}^+ &= \delta y_{i,j+1,k}+\delta y_{i,j,k} \\
 \delta y_{i,j,k}^=&=\delta y_{i,j,k}/2+ \delta y_{i,j,k}+\delta y_{i,j,k}/2
 \end{align*}
-
-\clearpage
 
 \end{document}
