@@ -57,6 +57,43 @@ be reused for different quantities, data types and ghost layer widths.
 We compared simulation results obtained with different domain decompositions and
 they were identical up to the 8th decimal place.
 
+\section{Scaling and Parallelisation}
+\subsection{Scalabilty}
+
+As expected, linear scalability was not achieved, never the less, the overall
+scalability of our implementation was satisfactory inversely quadratic when
+scaled "strongly". Our weak scaling implementation also achieved an almost
+constant running time and thus speed up when the PETSc solver was ignored. It
+should be noted, that the PETSc solver generally did not scale well, most likely
+due to insufficient PETSc-tuning. We therefore also observed the execution time
+of our NS solver both with and without the PETSc overhead.
+
+Figure \ref{fig:scaling-channel-strong} presents the analysis of a strong
+scaling experiment with a channel flow configuration. Most importantly one can
+see that the total speedup scales roughly linearly with the number of processes
+and a slope of about $0.5$. One can observe that the ratio of communication time
+rises abruptly from 16 to 20 processes. This exemplifies the advantageousness of
+keeping communication local to a node and avoiding network traffic and the size
+of the performance loss that can result when a job does not fit the used
+nodes. Since we have limited influence on the performance of the PETSc solver
+itself we have also plotted the speedup of everything \emph{except} PETSc. This
+scales nicely as well but has two notable dips at 36 and 52 nodes. These result
+from the fact
+
+In the resulting speed up curve a large loss of speed up can be observed
+between jobs with 32 and 36 processes, which can be attributed to the "start" of
+using a new node but without using it to it's to its full potential.\ref{fig:}.
+
+When scaling a channel configuration in a weak manner, the time proved to be
+relatively constant. The trend represents an effective weak scalability.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{scaling/channel-strong}
+  \caption{}
+  \label{fig:scaling-channel-strong}
+\end{figure}
+
 \section{Navier-Stokes}
 \subsection{Equations to solve}
 \begin{align}
@@ -293,14 +330,8 @@ Two different ways of limiting the eddy viscosity were implemented:
 \item $\nu_t$-limitation leads to faster development of the flow field. The maximal velocities are in the range of 10-16m higher than without any limitation (laminar-turbulent transition). It is expected that the maximal velocities will decrease to the values of the turbulent simulation with limitation.
 \end{itemize}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[trim={5cm 1.5cm 4cm 1.5cm},clip,angle=90,origin=c, width=0.8\textwidth]{yu}
-    \caption{a nice plot}
-    \label{fig:devel}
-\end{figure}
-
 \clearpage
+
 
 %\begin{figure}
 %    \centering
