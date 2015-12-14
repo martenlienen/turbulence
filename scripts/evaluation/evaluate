@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+import argparse
+import csv
+import os
+
+import scaling
+
+
+def parseArguments():
+    parser = argparse.ArgumentParser(
+        description="Evaluate scaling experiments")
+    parser.add_argument("dirs",
+                        nargs="+",
+                        help="Directories containing scaling experiments")
+
+    return parser.parse_args()
+
+
+def writecsv(path, keys, ranks, data, conffilter=lambda confs, data: confs):
+    with open(path, "w") as f:
+        csvout = csv.writer(f)
+        meancols = [k + "-mean" for k in keys]
+        varcols = [k + "-var" for k in keys]
+        csvout.writerow(["samplesize", "rank", "nx", "ny", "nz", *meancols, *
+                         varcols])
+
+        for r in ranks:
+            confs = list(data[r].keys())
+            selectedconfs = conffilter(confs, data[r])
+
+            for conf in selectedconfs:
+                n, means, variances = data[r][conf]
+
+                csvout.writerow([n, r, *conf, *means, *variances])
+
+
+def main():
+    arguments = parseArguments()
+    dir = os.path.dirname(arguments.dirs[0])
+    prefix = os.path.commonprefix([os.path.basename(d) for d in arguments.dirs
+                                   ])
+    outdir = os.path.join(dir, prefix + "evaluation")
+
+    if not os.path.isdir(outdir):
+        os.mkdir(outdir)
+
+    evaluation = scaling.parseExperiments(arguments.dirs)
+    keys = evaluation[0]
+    data = evaluation[1]
+    ranks = sorted(list(data.keys()))
+
+    def selectFastestConf(confs, data):
+        def total(conf):
+            return data[conf][1][keys.index("total")]
+
+        return [confs[confs.index(min(confs, key=total))]]
+
+    def selectSlowestConf(confs, data):
+        def total(conf):
+            return data[conf][1][keys.index("total")]
+
+        return [confs[confs.index(max(confs, key=total))]]
+
+    writecsv(os.path.join(outdir, "all.csv"), keys, ranks, data)
+    writecsv(
+        os.path.join(outdir, "min.csv"), keys, ranks, data, selectFastestConf)
+    writecsv(
+        os.path.join(outdir, "max.csv"), keys, ranks, data, selectSlowestConf)
+
+
+if __name__ == "__main__":
+    main()
