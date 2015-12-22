@@ -19,8 +19,8 @@
 
 
 ### Tolerances of the petsc solver
--ksp_atol 1e-8
--ksp_rtol 1e-11
+-ksp_atol 1e-6
+-ksp_rtol 1e-6
 
 ### maximum number of iterations
 -ksp_max_it 100000
