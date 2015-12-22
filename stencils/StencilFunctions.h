@@ -981,9 +981,9 @@ inline FLOAT biLinearInterpolation(const FLOAT l1, const FLOAT l2,
                                    const FLOAT l3, const FLOAT l4,
                                    const FLOAT x1, const FLOAT x2,
                                    const FLOAT x3, const FLOAT x4) {
-  // determin relativ position
-  const FLOAT xi1 = l1 / (l1 + l2);
-  const FLOAT xi2 = l3 / (l3 + l4);
+  // determine relative position
+  const FLOAT xi1 = (l1 / (l1 + l2) - 0.5) * 2;
+  const FLOAT xi2 = (l3 / (l3 + l4) - 0.5) * 2;
   // calculate value with help of shape functions
   // N1(xi_1,xi_2) = 0.25*(1-xi_1)(1-xi_2)
   // N2(xi_1,xi_2) = 0.25*(1+xi_1)(1-xi_2)
@@ -1026,8 +1026,8 @@ inline FLOAT interpolateNuYZ(const FLOAT* const lm, const FLOAT* const ln,
  *
  *
  */
-inline FLOAT Fdnududxdx(const Parameters& parameters, const FLOAT* const lv,
-                        const FLOAT* const lm, const FLOAT* const ln) {
+inline FLOAT Fdnududxdx(const FLOAT* const lv, const FLOAT* const lm,
+                        const FLOAT* const ln) {
   const FLOAT nu1 = ln[mapd(+1, +0, +0, 0)];
   const FLOAT nu2 = ln[mapd(+0, +0, +0, 0)];
   return 2.0 / (lm[mapd(+0, +0, +0, X)] + lm[mapd(+1, +0, +0, X)]) *
@@ -1037,8 +1037,8 @@ inline FLOAT Fdnududxdx(const Parameters& parameters, const FLOAT* const lv,
               (lm[mapd(0, 0, 0, X)]));
 }
 
-inline FLOAT Fdnududydy(const Parameters& parameters, const FLOAT* const lv,
-                        const FLOAT* const lm, const FLOAT* const ln) {
+inline FLOAT Fdnududydy(const FLOAT* const lv, const FLOAT* const lm,
+                        const FLOAT* const ln) {
   const FLOAT nu1 = interpolateNuXY(lm, ln, +1, +1);
   const FLOAT nu2 = interpolateNuXY(lm, ln, +1, -1);
   return 1 / (lm[mapd(+0, +0, +0, Y)]) *
@@ -1236,10 +1236,8 @@ inline FLOAT computeF2DT(const FLOAT* const localVelocity,
                   (
                       // + d2udx2(localVelocity, localMeshsize)
                       // + d2udy2(localVelocity, localMeshsize)
-                      +Fdnududxdx(parameters, localVelocity, localMeshsize,
-                                  localNu) +
-                      Fdnududydy(parameters, localVelocity, localMeshsize,
-                                 localNu) +
+                      +Fdnududxdx(localVelocity, localMeshsize, localNu) +
+                      Fdnududydy(localVelocity, localMeshsize, localNu) +
                       Fdnudvdydx(parameters, localVelocity, localMeshsize,
                                  localNu)) -
                   du2dx(localVelocity, parameters, localMeshsize) -
@@ -1313,10 +1311,8 @@ inline FLOAT computeF3DT(const FLOAT* const localVelocity,
                       // d2udx2(localVelocity, localMeshsize) +
                       // d2udy2(localVelocity, localMeshsize) +
                       // d2udz2(localVelocity, localMeshsize)
-                      +Fdnududxdx(parameters, localVelocity, localMeshsize,
-                                  localNu) +
-                      Fdnududydy(parameters, localVelocity, localMeshsize,
-                                 localNu) +
+                      +Fdnududxdx(localVelocity, localMeshsize, localNu) +
+                      Fdnududydy(localVelocity, localMeshsize, localNu) +
                       Fdnududzdz(parameters, localVelocity, localMeshsize,
                                  localNu) +
                       Fdnudvdydx(parameters, localVelocity, localMeshsize,

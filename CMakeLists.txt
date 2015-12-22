@@ -68,7 +68,7 @@ target_link_libraries(ns tinyxml2 vtk ${PETSC_LIBRARIES})
 find_package(GTest)
 
 if (tests AND GTEST_FOUND)
-  set(TEST_SRCS)
+  set(TEST_SRCS test/stencils/StencilFunctionsTest.cpp)
 
   enable_testing()
   include_directories(${GTEST_INCLUDE_DIRS})
