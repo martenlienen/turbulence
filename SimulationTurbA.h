@@ -87,8 +87,6 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
         _hit(_flowField, _parameters, _hst, 0, 0),
         _tst(parameters),
         _tit(_flowField, _parameters, _tst, 1, 0) {
-    _hit.iterate();
-
     this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
         this->_parameters, "h",
         [](FlowFieldTurbA &f, int i, int j) { return f.getH(i, j); },
@@ -166,6 +164,8 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
       iterator.iterate();
     }
     _solver.reInitMatrix();
+
+    _hit.iterate();
   }
 
   virtual void solveTimestep() {
