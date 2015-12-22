@@ -18,7 +18,7 @@
 #include "stencils/InitTaylorGreenFlowFieldStencil.h"
 #include "stencils/NutStencil.h"
 #include "stencils/HStencil.h"
-#include "stencils/TimestepStencil.h"
+#include "stencils/MinimumNutStencil.h"
 #include "GlobalBoundaryFactory.h"
 #include "Iterators.h"
 #include "Definitions.h"
@@ -57,8 +57,8 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
   HStencil _hst;
   FieldIterator<FlowFieldTurbA> _hit;
 
-  TimestepStencil _tst;
-  FieldIterator<FlowFieldTurbA> _tit;
+  MinimumNutStencil _minnutst;
+  FieldIterator<FlowFieldTurbA> _minnutit;
 
  public:
   SimulationTurbA(Parameters &parameters, FlowFieldTurbA &flowField)
@@ -85,8 +85,8 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
         _nutit(_flowField, _parameters, _nutst, 1, 0),
         _hst(parameters),
         _hit(_flowField, _parameters, _hst, 0, 0),
-        _tst(parameters),
-        _tit(_flowField, _parameters, _tst, 1, 0) {
+        _minnutst(parameters),
+        _minnutit(_flowField, _parameters, _minnutst, 1, 0) {
     this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
         this->_parameters, "h",
         [](FlowFieldTurbA &f, int i, int j) { return f.getH(i, j); },
@@ -228,8 +228,8 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
   /** sets the time step*/
   virtual void setTimeStep() {
     // pm-20151108
-    _tit.iterate();
-    //    double minimumt = _tst.getMinimum();
+    _minnutst.reset();
+    _minnutit.iterate();
 
     FLOAT localMin, globalMin;
     assertion(_parameters.geometry.dim == 2 || _parameters.geometry.dim == 3);
@@ -251,34 +251,17 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
     }
 
     localMin = std::min(_parameters.timestep.dt,
-                        std::min(std::min(_parameters.flow.Re / (2 * factor),
+                        std::min(std::min(1 / (1 / _parameters.flow.Re +
+                                               _minnutst.getMinimum()) /
+                                              (2 * factor),
                                           1.0 / _maxUStencil.getMaxValues()[0]),
                                  1.0 / _maxUStencil.getMaxValues()[1]));
-
-    //    localMin /=10;
-
-    // pm-20151108
-    //    cout << _maxUStencil.getMaxValues()[0] << " "
-    //         << _maxUStencil.getMaxValues()[1] << endl;
-    //    cout << minimumt << endl;
-    //    cout << localMin << endl;
-    //    localMin = std::min(minimumt, localMin);
-    //    cout << localMin << endl;
-    //    cout << "-----------------------------------------------------------"
-    //         << endl;
-
-    // Here, we select the type of operation before compiling. This allows to
-    // use the correct
-    // data type for MPI. Not a concern for small simulations, but useful if
-    // using heterogeneous
-    // machines.
 
     globalMin = MY_FLOAT_MAX;
     MPI_Allreduce(&localMin, &globalMin, 1, MY_MPI_FLOAT, MPI_MIN,
                   PETSC_COMM_WORLD);
 
     _parameters.timestep.dt = globalMin;
-    //    _parameters.timestep.dt = 1e-3;
     _parameters.timestep.dt *= _parameters.timestep.tau;
   }
 };

@@ -1,29 +1,19 @@
-#ifndef _TIMESTEP_STENCIL_P_H_
-#define _TIMESTEP_STENCIL_P_H_
+#ifndef _MINIMUM_NUT_STENCIL_P_H_
+#define _MINIMUM_NUT_STENCIL_P_H_
 
 #include "../Definitions.h"
 #include "../Parameters.h"
 #include "../Stencil.h"
 #include "../FlowFieldTurbA.h"
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-using namespace std;
 
-/** TODO WS1: Stencil for writting VTK files
- *
- * When iterated with, creates a VTK file.
+/**
+ * When iterated with, finds and stores the minimum nu_t value
  */
-class TimestepStencil : public FieldStencil<FlowFieldTurbA> {
+class MinimumNutStencil : public FieldStencil<FlowFieldTurbA> {
  public:
-  /** Constructor
-   *
-   * @param prefix String with the prefix of the name of the VTK files
-   */
-  TimestepStencil(const Parameters& parameters);
+  MinimumNutStencil(const Parameters& parameters);
 
-  ~TimestepStencil();
+  ~MinimumNutStencil();
 
   /** 2D operation for one position
    *
@@ -44,8 +34,10 @@ class TimestepStencil : public FieldStencil<FlowFieldTurbA> {
 
   double getMinimum() { return minimum; }
 
+  void reset();
+
  private:
   double minimum;
 };
 
-#endif
+#endif  // _MINIMUM_NUT_STENCIL_P_H_
