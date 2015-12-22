@@ -47,16 +47,18 @@ include_directories(".")
 add_subdirectory("3rdparty/tinyxml2")
 add_subdirectory("vtk")
 
-set(root_src Configuration.cpp DataStructures.cpp FlowField.cpp
-  GlobalBoundaryFactory.cpp LinearSolver.cpp Meshsize.cpp MemoizedMesh.cpp
-  SimpleTimer.cpp MultiTimer.cpp)
+set(root_src Configuration.cpp DataStructures.cpp FlowFieldLaminar.cpp
+  FlowFieldTurbA.cpp GlobalBoundaryFactory.cpp LinearSolver.cpp Meshsize.cpp
+  MemoizedMesh.cpp SimpleTimer.cpp MultiTimer.cpp)
 set(parallel_src parallelManagers/PetscParallelConfiguration.cpp)
 set(solvers_src solvers/PetscSolver.cpp solvers/SORSolver.cpp)
 set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp
   stencils/FGHStencil.cpp stencils/MaxUStencil.cpp
   stencils/MovingWallStencils.cpp stencils/NeumannBoundaryStencils.cpp
   stencils/ObstacleStencil.cpp stencils/PeriodicBoundaryStencils.cpp
-  stencils/RHSStencil.cpp stencils/VelocityStencil.cpp)
+  stencils/FGHStencilTurb.cpp stencils/NutStencil.cpp stencils/HStencil.cpp
+  stencils/TimestepStencil.cpp stencils/RHSStencil.cpp
+  stencils/VelocityStencil.cpp)
 
 set(NS_EOF_SRCS ${root_src} ${parallel_src} ${solvers_src} ${stencils_src})
 

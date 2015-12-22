@@ -4,6 +4,32 @@
 #include <math.h>
 #include "../Definitions.h"
 #include "../Parameters.h"
+#include "../FlowFieldTurbA.h"
+#include <iostream>
+#include <iostream>
+using namespace std;
+
+inline void loadLocalNu2D(FlowFieldTurbA& flowField, FLOAT* const localNu,
+                          int i, int j) {
+  for (int row = -1; row <= 1; row++) {
+    for (int column = -1; column <= 1; column++) {
+      FLOAT point = flowField.getNu(i + column, j + row);
+      localNu[39 + 9 * row + 3 * column] = point;  // x-component
+    }
+  }
+}
+
+inline void loadLocalNu3D(FlowFieldTurbA& flowField, FLOAT* const localNu,
+                          int i, int j, int k) {
+  for (int layer = -1; layer <= 1; layer++) {
+    for (int row = -1; row <= 1; row++) {
+      for (int column = -1; column <= 1; column++) {
+        FLOAT point = flowField.getNu(i + column, j + row, k + layer);
+        localNu[39 + 27 * layer + 9 * row + 3 * column] = point;
+      }
+    }
+  }
+}
 
 // Load the local velocity cube with relevant velocities of the 2D plane
 inline void loadLocalVelocity2D(FlowField& flowField,
@@ -91,6 +117,21 @@ inline FLOAT dudx(const FLOAT* const lv, const FLOAT* const lm) {
   return tmp2;*/
 }
 
+/*
+ * 2015.11.07-pm:
+ * calculate dudy and dudz in the centre of the cell
+ *
+ *
+ *
+ *
+ */
+inline FLOAT dudy(const FLOAT* const lv, const FLOAT* const lm) {
+  return ((lv[mapd(+0, +1, +0, +0)] + lv[mapd(-1, +1, +0, +0)]) / 2 -
+          (lv[mapd(+0, -1, +0, +0)] + lv[mapd(-1, -1, +0, +0)]) / 2) /
+         (lm[mapd(+0, -1, +0, +1)] * 0.5 + lm[mapd(+0, +0, +0, +1)] +
+          lm[mapd(+0, +1, +0, +1)] * 0.5);
+}
+
 inline FLOAT dvdy(const FLOAT* const lv, const FLOAT* const lm) {
   // double tmp1= ( lv [mapd(0,0,0,1)] - lv [mapd(0,-1,0,1)] ) /
   // GeometricParameters::dy;
@@ -101,6 +142,21 @@ inline FLOAT dvdy(const FLOAT* const lv, const FLOAT* const lm) {
   /*if (fabs(tmp1-tmp2) > 1.0e-12){handleError(1, "dvdy");}
 
   return tmp2;*/
+}
+
+/*
+ * 2015.11.07-pm:
+ * calculate dvdx and dvdz in the centre of the cell
+ *
+ *
+ *
+ *
+ */
+inline FLOAT dvdx(const FLOAT* const lv, const FLOAT* const lm) {
+  return ((lv[mapd(+1, +0, +0, +1)] + lv[mapd(+1, -1, +0, +1)]) / 2 -
+          (lv[mapd(-1, +0, +0, +1)] + lv[mapd(-1, -1, +0, +1)]) / 2) /
+         (lm[mapd(-1, +0, +0, +0)] * 0.5 + lm[mapd(+0, +0, +0, +0)] +
+          lm[mapd(+1, +0, +0, +0)] * 0.5);
 }
 
 inline FLOAT dwdz(const FLOAT* const lv, const FLOAT* const lm) {
@@ -884,6 +940,505 @@ inline FLOAT computeH3D(const FLOAT* const localVelocity,
                duwdx(localVelocity, parameters, localMeshsize) -
                dvwdy(localVelocity, parameters, localMeshsize) +
                parameters.environment.gz);
+}
+
+/*
+ * 2015.11.07-pm:
+ * calculate nut
+ *
+ *
+ *
+ *
+ */
+inline FLOAT computeNUT2D(const FLOAT* const localVelocity,
+                          const FLOAT* const localMeshsize,
+                          const Parameters& parameters, const FLOAT& h) {
+  const FLOAT S11 = 2 * dudx(localVelocity, localMeshsize);
+  const FLOAT S22 = 2 * dvdy(localVelocity, localMeshsize);
+  const FLOAT S12 =
+      dudy(localVelocity, localMeshsize) + dvdx(localVelocity, localMeshsize);
+  const FLOAT grad = sqrt(2 * (S11 * S11 + S22 * S22 + 2 * S12 * S12));
+  const FLOAT lm = 0.41 * h;
+  return lm * lm * grad;
+  //    cout << S11 << " " << S22 << " " << S12 << " " <<grad << endl;
+  //    return 0.0;
+}
+
+static int X = 0;
+static int U = 0;
+static int Y = 1;
+static int V = 1;
+static int Z = 2;
+static int W = 2;
+static int shift = 0;
+
+/*
+ * 2015.11.07-pm:
+ * interpolate nu
+ *
+ *
+ *
+ *
+ */
+inline FLOAT interpolateXY(const FLOAT* const lm, const FLOAT* const ln,
+                           const int x, const int y) {
+  if (shift == 0) {
+    return 0.0;
+  } else {
+    return ((lm[mapd(+0, +0, +0, X)] * ln[mapd(+x, +0, +0, +0)] +
+             lm[mapd(+x, +0, +0, X)] * ln[mapd(+0, +0, +0, +0)]) /
+                (lm[mapd(+0, +0, +0, X)] + lm[mapd(+x, +0, +0, X)]) *
+                lm[mapd(+0, +y, +0, Y)] +
+            (lm[mapd(+0, +y, +0, X)] * ln[mapd(+x, +y, +0, +0)] +
+             lm[mapd(+x, +y, +0, X)] * ln[mapd(+0, +y, +0, +0)]) /
+                (lm[mapd(+0, +y, +0, X)] + lm[mapd(+x, +y, +0, X)]) *
+                lm[mapd(+0, +0, +0, Y)]) /
+           (lm[mapd(+0, +0, +0, Y)] + lm[mapd(+0, +y, +0, Y)]);
+  }
+}
+
+inline FLOAT interpolateXZ(const FLOAT* const lm, const FLOAT* const ln,
+                           const int x, const int z) {
+  if (shift == 0) {
+    return 0.0;
+  } else {
+    return ((lm[mapd(+0, +0, +0, X)] * ln[mapd(+x, +0, +0, +0)] +
+             lm[mapd(+x, +0, +0, X)] * ln[mapd(+0, +0, +0, +0)]) /
+                (lm[mapd(+0, +0, +0, X)] + lm[mapd(+x, +0, +0, X)]) *
+                lm[mapd(+0, +0, +z, Z)] +
+            (lm[mapd(+0, +0, +z, X)] * ln[mapd(+x, +0, +z, +0)] +
+             lm[mapd(+x, +0, +z, X)] * ln[mapd(+0, +0, +z, +0)]) /
+                (lm[mapd(+0, +0, +z, X)] + lm[mapd(+x, +0, +z, X)]) *
+                lm[mapd(+0, +0, +0, Z)]) /
+           (lm[mapd(+0, +0, +0, Z)] + lm[mapd(+0, +0, +z, Z)]);
+  }
+}
+
+inline FLOAT interpolateYZ(const FLOAT* const lm, const FLOAT* const ln,
+                           const int y, const int z) {
+  if (shift == 0) {
+    return 0.0;
+  } else {
+    return ((lm[mapd(+0, +0, +0, Y)] * ln[mapd(+0, +y, +0, +0)] +
+             lm[mapd(+0, +y, +0, Y)] * ln[mapd(+0, +0, +0, +0)]) /
+                (lm[mapd(+0, +0, +0, Y)] + lm[mapd(+0, +y, +0, Y)]) *
+                lm[mapd(+0, +0, +z, Z)] +
+            (lm[mapd(+0, +0, +z, Y)] * ln[mapd(+0, +y, +z, +0)] +
+             lm[mapd(+0, +y, +z, Y)] * ln[mapd(+0, +0, +z, +0)]) /
+                (lm[mapd(+0, +0, +z, Y)] + lm[mapd(+0, +y, +z, Y)]) *
+                lm[mapd(+0, +0, +0, Z)]) /
+           (lm[mapd(+0, +0, +0, Z)] + lm[mapd(+0, +0, +z, Z)]);
+  }
+}
+
+/*
+ * 2015.11.07-pm:
+ * F-stencils for algebric turbulence model
+ *
+ *
+ *
+ *
+ */
+inline FLOAT Fdnududxdx(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + ln[mapd(+1, +0, +0, 0)];
+  const FLOAT nu2 = 1 / parameters.flow.Re + ln[mapd(+0, +0, +0, 0)];
+  return 2.0 / (lm[mapd(+0, +0, +0, X)] + lm[mapd(+1, +0, +0, X)]) *
+         (nu1 * (lv[mapd(+1, +0, +0, U)] - lv[mapd(+0, +0, +0, U)]) /
+              (lm[mapd(1, 0, 0, X)]) -
+          nu2 * (lv[mapd(+0, +0, +0, U)] - lv[mapd(-1, +0, +0, U)]) /
+              (lm[mapd(0, 0, 0, X)]));
+}
+
+inline FLOAT Fdnududydy(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateXY(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateXY(lm, ln, +1, -1);
+  return 1 / (lm[mapd(+0, +0, +0, Y)]) *
+         (nu1 * 2 * (lv[mapd(+0, +1, +0, U)] - lv[mapd(+0, +0, +0, U)]) /
+              (lm[mapd(+0, +0, +0, Y)] + lm[mapd(+0, +1, +0, Y)]) -
+          nu2 * 2 * (lv[mapd(+0, +0, +0, U)] - lv[mapd(+0, -1, +0, U)]) /
+              (lm[mapd(+0, -1, +0, Y)] + lm[mapd(+0, +0, +0, Y)]));
+}
+
+inline FLOAT Fdnududzdz(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateXZ(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateXZ(lm, ln, +1, -1);
+  return 1 / (lm[mapd(+0, +0, +0, Z)]) *
+         (nu1 * 2 * (lv[mapd(+0, +0, +1, U)] - lv[mapd(+0, +0, +0, U)]) /
+              (lm[mapd(+0, +0, +0, Z)] + lm[mapd(+0, +0, +1, Z)]) -
+          nu2 * 2 * (lv[mapd(+0, +0, +0, U)] - lv[mapd(+0, +0, -1, U)]) /
+              (lm[mapd(+0, +0, -1, Z)] + lm[mapd(+0, +0, +0, Z)]));
+}
+
+inline FLOAT Fdnudvdydx(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateXY(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateXY(lm, ln, +1, -1);
+  return 1 / (lm[mapd(+0, +0, +0, Y)]) *
+         (nu1 * 2 * (lv[mapd(+1, +0, +0, V)] - lv[mapd(+0, +0, +0, V)]) /
+              (lm[mapd(+0, +0, +0, X)] + lm[mapd(+1, +0, +0, X)]) -
+          nu2 * 2 * (lv[mapd(+1, -1, +0, V)] - lv[mapd(+0, -1, +0, V)]) /
+              (lm[mapd(+0, -1, +0, X)] + lm[mapd(+1, -1, +0, X)]));
+}
+
+inline FLOAT Fdnudwdzdx(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateXZ(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateXZ(lm, ln, +1, -1);
+  return 1 / (lm[mapd(+0, +0, +0, Z)]) *
+         (nu1 * 2 * (lv[mapd(+1, +0, +0, W)] - lv[mapd(+0, +0, +0, W)]) /
+              (lm[mapd(+0, +0, +0, X)] + lm[mapd(+1, +0, +0, X)]) -
+          nu2 * 2 * (lv[mapd(+1, +0, -1, W)] - lv[mapd(+0, +0, -1, W)]) /
+              (lm[mapd(+0, +0, -1, X)] + lm[mapd(+1, +0, -1, X)]));
+}
+
+/*
+ * 2015.11.07-pm:
+ * G-stencils for algebric turbulence model
+ *
+ *
+ *
+ *
+ */
+inline FLOAT Gdnudvdxdx(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateXY(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateXY(lm, ln, +1, -1);
+  return 1 / (lm[mapd(+0, +0, +0, X)]) *
+         (nu1 * 2 * (lv[mapd(+1, +0, +0, V)] - lv[mapd(+0, +0, +0, V)]) /
+              (lm[mapd(+0, +0, +0, X)] + lm[mapd(+1, +0, +0, X)]) -
+          nu2 * 2 * (lv[mapd(+0, +0, +0, V)] - lv[mapd(-1, +0, +0, V)]) /
+              (lm[mapd(-1, +0, +0, X)] + lm[mapd(+0, +0, +0, X)]));
+}
+
+inline FLOAT Gdnudvdydy(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + ln[mapd(+0, +1, +0, +0)];
+  const FLOAT nu2 = 1 / parameters.flow.Re + ln[mapd(+0, +0, +0, +0)];
+  return 2.0 / (lm[mapd(+0, +0, +0, Y)] + lm[mapd(+0, +1, +0, Y)]) *
+         (nu1 * (lv[mapd(+0, +1, +0, V)] - lv[mapd(+0, +0, +0, V)]) /
+              (lm[mapd(+0, +1, +0, Y)]) -
+          nu2 * (lv[mapd(+0, +0, +0, V)] - lv[mapd(+0, -1, +0, V)]) /
+              (lm[mapd(+0, +0, +0, Y)]));
+}
+
+inline FLOAT Gdnudvdzdz(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateYZ(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateYZ(lm, ln, +1, -1);
+  return 1 / (lm[mapd(+0, +0, +0, Z)]) *
+         (nu1 * 2 * (lv[mapd(+0, +0, +1, V)] - lv[mapd(+0, +0, +0, V)]) /
+              (lm[mapd(+0, +0, +0, Z)] + lm[mapd(+0, +0, +1, Z)]) -
+          nu2 * 2 * (lv[mapd(+0, +0, +0, V)] - lv[mapd(+0, +0, -1, V)]) /
+              (lm[mapd(+0, +0, -1, Z)] + lm[mapd(+0, +0, +0, Z)]));
+}
+
+inline FLOAT Gdnududxdy(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateXY(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateXY(lm, ln, -1, +1);
+  return 1 / (lm[mapd(+0, +0, +0, X)]) *
+         (nu1 * 2 * (lv[mapd(+0, +1, +0, U)] - lv[mapd(+0, +0, +0, U)]) /
+              (lm[mapd(+0, +0, +0, Y)] + lm[mapd(+0, +1, +0, Y)]) -
+          nu2 * 2 * (lv[mapd(-1, +1, +0, U)] - lv[mapd(-1, +0, +0, U)]) /
+              (lm[mapd(-1, +0, +0, Y)] + lm[mapd(-1, +1, +0, Y)]));
+}
+
+inline FLOAT Gdnudwdzdy(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateYZ(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateYZ(lm, ln, +1, -1);
+  return 1 / (lm[mapd(+0, +0, +0, Z)]) *
+         (nu1 * 2 * (lv[mapd(+0, +1, +0, W)] - lv[mapd(+0, +0, +0, W)]) /
+              (lm[mapd(+0, +0, +0, Y)] + lm[mapd(+0, +1, +0, Y)]) -
+          nu2 * 2 * (lv[mapd(+0, +1, -1, W)] - lv[mapd(+0, +0, -1, W)]) /
+              (lm[mapd(+0, +0, -1, Y)] + lm[mapd(+0, +1, -1, Y)]));
+}
+
+/*
+ * 2015.11.07-pm:
+ * H-stencils for algebric turbulence model
+ *
+ *
+ *
+ *
+ */
+inline FLOAT Hdnudwdxdx(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateXZ(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateXZ(lm, ln, -1, +1);
+  return 1 / (lm[mapd(+0, +0, +0, X)]) *
+         (nu1 * 2 * (lv[mapd(+1, +0, +0, W)] - lv[mapd(+0, +0, +0, W)]) /
+              (lm[mapd(+0, +0, +0, X)] + lm[mapd(+1, +0, +0, X)]) -
+          nu2 * 2 * (lv[mapd(+0, +0, +0, W)] - lv[mapd(-1, +0, +0, W)]) /
+              (lm[mapd(-1, +0, +0, X)] + lm[mapd(+0, +0, +0, X)]));
+}
+
+inline FLOAT Hdnudwdydy(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateYZ(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateYZ(lm, ln, +1, -1);
+  return 1 / (lm[mapd(+0, +0, +0, Y)]) *
+         (nu1 * 2 * (lv[mapd(+0, +1, +0, W)] - lv[mapd(+0, +0, +0, W)]) /
+              (lm[mapd(+0, +0, +0, Y)] + lm[mapd(+0, +1, +0, Y)]) -
+          nu2 * 2 * (lv[mapd(+0, +0, +0, W)] - lv[mapd(+0, -1, +0, W)]) /
+              (lm[mapd(+0, -1, +0, Y)] + lm[mapd(+0, +0, +0, Y)]));
+}
+
+inline FLOAT Hdnudwdzdz(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + ln[mapd(+0, +0, +1, +0)];
+  const FLOAT nu2 = 1 / parameters.flow.Re + ln[mapd(+0, +0, +0, +0)];
+  return 2.0 / (lm[mapd(+0, +0, +0, Z)] + lm[mapd(+0, +0, +1, Z)]) *
+         (nu1 * (lv[mapd(+0, +0, +1, W)] - lv[mapd(+0, +0, +0, W)]) /
+              (lm[mapd(+0, +0, +1, Z)]) -
+          nu2 * (lv[mapd(+0, +0, +0, W)] - lv[mapd(+0, +0, -1, W)]) /
+              (lm[mapd(+0, +0, +0, Z)]));
+}
+
+inline FLOAT Hdnududxdz(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateXZ(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateXZ(lm, ln, -1, +1);
+  return 1 / (lm[mapd(+0, +0, +0, X)]) *
+         (nu1 * 2 * (lv[mapd(+0, +0, +1, W)] - lv[mapd(+0, +0, +0, W)]) /
+              (lm[mapd(+0, +0, +0, Z)] + lm[mapd(+0, +0, +1, Z)]) -
+          nu2 * 2 * (lv[mapd(-1, +0, +1, W)] - lv[mapd(-1, +0, +0, W)]) /
+              (lm[mapd(-1, +0, +0, Z)] + lm[mapd(-1, +0, +1, Z)]));
+}
+
+inline FLOAT Hdnudvdydz(const Parameters& parameters, const FLOAT* const lv,
+                        const FLOAT* const lm, const FLOAT* const ln) {
+  const FLOAT nu1 = 1 / parameters.flow.Re + interpolateYZ(lm, ln, +1, +1);
+  const FLOAT nu2 = 1 / parameters.flow.Re + interpolateYZ(lm, ln, -1, +1);
+  return 1 / (lm[mapd(+0, +0, +0, Y)]) *
+         (nu1 * 2 * (lv[mapd(+0, +0, +1, V)] - lv[mapd(+0, +0, +0, V)]) /
+              (lm[mapd(+0, +0, +0, Z)] + lm[mapd(+0, +0, +1, Z)]) -
+          nu2 * 2 * (lv[mapd(+0, -1, +1, V)] - lv[mapd(+0, -1, +0, V)]) /
+              (lm[mapd(+0, -1, +0, Z)] + lm[mapd(+0, -1, +1, Z)]));
+}
+
+/*
+ * 2015.11.07-pm:
+ * stencils for calculating F, G - 2D
+ *
+ *
+ *
+ *
+ */
+inline FLOAT computeF2DT(const FLOAT* const localVelocity,
+                         const FLOAT* const localMeshsize,
+                         const FLOAT* const localNu,
+                         const Parameters& parameters, FLOAT dt) {
+  cout << "d2udx2" << endl;
+  cout << 1 / parameters.flow.Re * d2udx2(localVelocity, localMeshsize) << endl;
+  cout << Fdnududxdx(parameters, localVelocity, localMeshsize, localNu) << endl;
+  cout << "d2udy2" << endl;
+  cout << 1 / parameters.flow.Re * d2udy2(localVelocity, localMeshsize) << endl;
+  cout << Fdnududydy(parameters, localVelocity, localMeshsize, localNu) << endl;
+  cout << "rest" << endl;
+  cout << Fdnudvdydx(parameters, localVelocity, localMeshsize, localNu) << endl;
+  //            cout <<
+  //            "-----------------------------------------------------------" <<
+  //            endl;
+
+  return localVelocity[mapd(0, 0, 0, 0)] +
+         dt * (
+                  //            1 / parameters.flow.Re *
+                  (
+                      // + d2udx2(localVelocity, localMeshsize)
+                      // + d2udy2(localVelocity, localMeshsize)
+                      +Fdnududxdx(parameters, localVelocity, localMeshsize,
+                                  localNu) +
+                      Fdnududydy(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Fdnudvdydx(parameters, localVelocity, localMeshsize,
+                                 localNu)) -
+                  du2dx(localVelocity, parameters, localMeshsize) -
+                  duvdy(localVelocity, parameters, localMeshsize) +
+                  parameters.environment.gx);
+}
+
+inline FLOAT computeG2DT(const FLOAT* const localVelocity,
+                         const FLOAT* const localMeshsize,
+                         const FLOAT* const localNu,
+                         const Parameters& parameters, FLOAT dt) {
+  cout << "d2vdx2" << endl;
+  cout << 1 / parameters.flow.Re * d2vdx2(localVelocity, localMeshsize) << endl;
+  cout << Gdnudvdxdx(parameters, localVelocity, localMeshsize, localNu) << endl;
+  cout << "d2vdy2" << endl;
+  cout << 1 / parameters.flow.Re * d2vdy2(localVelocity, localMeshsize) << endl;
+  cout << Gdnudvdydy(parameters, localVelocity, localMeshsize, localNu) << endl;
+  cout << "rest" << endl;
+  cout << Gdnududxdy(parameters, localVelocity, localMeshsize, localNu) << endl;
+  cout << "-----------------------------------------------------------" << endl;
+
+  return localVelocity[mapd(0, 0, 0, 1)] +
+         dt * (
+                  //            1 / parameters.flow.Re *
+                  (
+                      // + d2vdx2(localVelocity, localMeshsize)
+                      // + d2vdy2(localVelocity, localMeshsize)
+                      +Gdnudvdxdx(parameters, localVelocity, localMeshsize,
+                                  localNu) +
+                      Gdnudvdydy(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Gdnududxdy(parameters, localVelocity, localMeshsize,
+                                 localNu)) -
+                  duvdx(localVelocity, parameters, localMeshsize) -
+                  dv2dy(localVelocity, parameters, localMeshsize) +
+                  parameters.environment.gy);
+}
+
+/*
+ * 2015.11.07-pm:
+ * stencils for calculating F, G, H - 3D
+ *
+ *
+ *
+ *
+ */
+inline FLOAT computeF3DT(const FLOAT* const localVelocity,
+                         const FLOAT* const localMeshsize,
+                         const FLOAT* const localNu,
+                         const Parameters& parameters, FLOAT dt) {
+  //        cout << 1 / parameters.flow.Re *d2udx2(localVelocity, localMeshsize)
+  //        << endl;
+  //        cout << Fdnududxdx(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << 1 / parameters.flow.Re *d2udy2(localVelocity, localMeshsize)
+  //        << endl;
+  //        cout << Fdnududydy(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << 1 / parameters.flow.Re *d2udz2(localVelocity, localMeshsize)
+  //        << endl;
+  //        cout << Fdnududzdz(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << Fdnudvdydx(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << Fdnudwdzdx(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout <<
+  //        "-----------------------------------------------------------" <<
+  //        endl;
+
+  return localVelocity[mapd(0, 0, 0, 0)] +
+         dt * (
+                  // 1 / parameters.flow.Re *
+                  (
+                      // d2udx2(localVelocity, localMeshsize) +
+                      // d2udy2(localVelocity, localMeshsize) +
+                      // d2udz2(localVelocity, localMeshsize)
+                      +Fdnududxdx(parameters, localVelocity, localMeshsize,
+                                  localNu) +
+                      Fdnududydy(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Fdnududzdz(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Fdnudvdydx(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Fdnudwdzdx(parameters, localVelocity, localMeshsize,
+                                 localNu)) -
+                  du2dx(localVelocity, parameters, localMeshsize) -
+                  duvdy(localVelocity, parameters, localMeshsize) -
+                  duwdz(localVelocity, parameters, localMeshsize) +
+                  parameters.environment.gx);
+}
+
+inline FLOAT computeG3DT(const FLOAT* const localVelocity,
+                         const FLOAT* const localMeshsize,
+                         const FLOAT* const localNu,
+                         const Parameters& parameters, FLOAT dt) {
+  //        cout << 1 / parameters.flow.Re *d2vdx2(localVelocity, localMeshsize)
+  //        << endl;
+  //        cout << Gdnudvdxdx(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << 1 / parameters.flow.Re *d2vdy2(localVelocity, localMeshsize)
+  //        << endl;
+  //        cout << Gdnudvdydy(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << 1 / parameters.flow.Re *d2vdz2(localVelocity, localMeshsize)
+  //        << endl;
+  //        cout << Gdnudvdzdz(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << Gdnududxdy(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << Gdnudwdzdy(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout <<
+  //        "-----------------------------------------------------------" <<
+  //        endl;
+
+  return localVelocity[mapd(0, 0, 0, 1)] +
+         dt * (
+                  // 1 / parameters.flow.Re *
+                  (
+                      // d2vdx2(localVelocity, localMeshsize) +
+                      // d2vdy2(localVelocity, localMeshsize) +
+                      // d2vdz2(localVelocity, localMeshsize)
+                      +Gdnudvdxdx(parameters, localVelocity, localMeshsize,
+                                  localNu) +
+                      Gdnudvdydy(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Gdnudvdzdz(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Gdnududxdy(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Gdnudwdzdy(parameters, localVelocity, localMeshsize,
+                                 localNu)) -
+                  dv2dy(localVelocity, parameters, localMeshsize) -
+                  duvdx(localVelocity, parameters, localMeshsize) -
+                  dvwdz(localVelocity, parameters, localMeshsize) +
+                  parameters.environment.gy);
+}
+
+inline FLOAT computeH3DT(const FLOAT* const localVelocity,
+                         const FLOAT* const localMeshsize,
+                         const FLOAT* const localNu,
+                         const Parameters& parameters, FLOAT dt) {
+  //        cout << 1 / parameters.flow.Re *d2wdx2(localVelocity, localMeshsize)
+  //        << endl;
+  //        cout << Hdnudwdxdx(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << 1 / parameters.flow.Re *d2wdy2(localVelocity, localMeshsize)
+  //        << endl;
+  //        cout << Hdnudwdydy(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << 1 / parameters.flow.Re *d2wdz2(localVelocity, localMeshsize)
+  //        << endl;
+  //        cout << Hdnudwdzdz(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << Hdnududxdz(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout << Hdnudvdydz(parameters, localVelocity, localMeshsize,
+  //        localNu) << endl;
+  //        cout <<
+  //        "-----------------------------------------------------------" <<
+  //        endl;
+
+  return localVelocity[mapd(0, 0, 0, 2)] +
+         dt * (
+                  // 1 / parameters.flow.Re *
+                  (
+                      // d2wdx2(localVelocity, localMeshsize) +
+                      // d2wdy2(localVelocity, localMeshsize) +
+                      // d2wdz2(localVelocity, localMeshsize)
+                      +Hdnudwdxdx(parameters, localVelocity, localMeshsize,
+                                  localNu) +
+                      Hdnudwdydy(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Hdnudwdzdz(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Hdnududxdz(parameters, localVelocity, localMeshsize,
+                                 localNu) +
+                      Hdnudvdydz(parameters, localVelocity, localMeshsize,
+                                 localNu)) -
+                  dw2dz(localVelocity, parameters, localMeshsize) -
+                  duwdx(localVelocity, parameters, localMeshsize) -
+                  dvwdy(localVelocity, parameters, localMeshsize) +
+                  parameters.environment.gz);
 }
 
 #endif

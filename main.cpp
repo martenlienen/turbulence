@@ -4,15 +4,19 @@
 #include <fstream>
 #include <sstream>
 #include "Configuration.h"
-#include "FlowFieldSimulation.h"
+#include "Simulation.h"
+#include "SimulationLaminar.h"
+#include "SimulationTurbA.h"
 #include "parallelManagers/PetscParallelConfiguration.h"
 #include "MeshsizeFactory.h"
+#include "FlowFieldTurbA.h"
+#include "FlowFieldLaminar.h"
 #include <iomanip>
 
 #include "MultiTimer.h"
 
 int main(int argc, char *argv[]) {
-  MultiTimer* timer = MultiTimer::get();
+  MultiTimer *timer = MultiTimer::get();
   timer->start("total");
   timer->start("initialization");
 
@@ -58,18 +62,29 @@ int main(int argc, char *argv[]) {
 
   // initialise simulation
   if (parameters.simulation.type == "turbulence") {
-    // TODO WS2: initialise turbulent flow field and turbulent simulation object
-    handleError(1, "Turbulence currently not supported yet!");
+    if (rank == 0) {
+      std::cout << "Start turbulent simulation in " << parameters.geometry.dim
+                << "D" << std::endl;
+    }
+
+    FlowFieldTurbA *flowFieldt = new FlowFieldTurbA(parameters);
+    if (flowFieldt == NULL) {
+      handleError(1, "flowField==NULL!");
+    }
+
+    simulation = new SimulationTurbA(parameters, *flowFieldt);
+
+    flowField = flowFieldt;
   } else if (parameters.simulation.type == "dns") {
     if (rank == 0) {
       std::cout << "Start DNS simulation in " << parameters.geometry.dim << "D"
                 << std::endl;
     }
-    flowField = new FlowField(parameters);
+    flowField = new FlowFieldLaminar(parameters);
     if (flowField == NULL) {
       handleError(1, "flowField==NULL!");
     }
-    simulation = new FlowFieldSimulation<FlowField>(parameters, *flowField);
+    simulation = new SimulationLaminar(parameters, *flowField);
   } else {
     handleError(
         1, "Unknown simulation type! Currently supported: dns, turbulence");
