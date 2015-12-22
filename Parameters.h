@@ -19,6 +19,8 @@ class SimulationParameters {
   FLOAT finalTime;       //! Final time for the simulation
   std::string type;      //! type of the simulation (DNS vs. turbulence)
   std::string scenario;  //! If channel or cavity, for example
+  std::string uniform;
+  std::string nulimiter;
 };
 
 class EnvironmentalParameters {
@@ -32,6 +34,7 @@ class EnvironmentalParameters {
 class FlowParameters {
  public:
   FLOAT Re;  //! Reynolds number
+  std::string type;
 };
 
 class SolverParameters {

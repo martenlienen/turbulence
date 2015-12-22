@@ -26,6 +26,17 @@ void readFloatOptional(FLOAT &storage, tinyxml2::XMLElement *node,
   }
 }
 
+void readStringOptional(std::string &storage, tinyxml2::XMLElement *node,
+                        const char *tag, std::string defaultValue = "") {
+  const char *value = node->Attribute(tag);
+
+  if (value != NULL) {
+    storage = value;
+  } else {
+    storage = defaultValue;
+  }
+}
+
 void readIntMandatory(int &storage, tinyxml2::XMLElement *node,
                       const char *tag) {
   int value;
@@ -238,6 +249,7 @@ void Configuration::loadParameters(Parameters &parameters,
     }
 
     readFloatMandatory(parameters.flow.Re, node, "Re");
+    readStringOptional(parameters.flow.type, node, "type", "laminar");
 
     //--------------------------------------------------
     // Solver parameters
@@ -281,6 +293,8 @@ void Configuration::loadParameters(Parameters &parameters,
     subNode = node->FirstChildElement("type");
     if (subNode != NULL) {
       readStringMandatory(parameters.simulation.type, subNode);
+      readStringOptional(parameters.simulation.nulimiter, subNode, "nulimiter",
+                         "0");
     } else {
       handleError(1, "Missing type in simulation parameters");
     }
@@ -288,6 +302,8 @@ void Configuration::loadParameters(Parameters &parameters,
     subNode = node->FirstChildElement("scenario");
     if (subNode != NULL) {
       readStringMandatory(parameters.simulation.scenario, subNode);
+      readStringOptional(parameters.simulation.uniform, subNode, "uniform",
+                         "true");
     } else {
       handleError(1, "Missing scenario in simulation parameters");
     }
@@ -500,4 +516,7 @@ void Configuration::loadParameters(Parameters &parameters,
   broadcastString(parameters.timing.prefix, communicator);
 
   // TODO WS2: broadcast turbulence parameters
+  broadcastString(parameters.flow.type, communicator);
+  broadcastString(parameters.simulation.nulimiter, communicator);
+  broadcastString(parameters.simulation.uniform, communicator);
 }
