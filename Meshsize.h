@@ -23,6 +23,13 @@ class Meshsize {
   virtual FLOAT getDy(int i, int j, int k) const = 0;
   virtual FLOAT getDz(int i, int j, int k) const = 0;
 
+  virtual FLOAT getPosCellX(int i, int j, int k) const = 0;
+  virtual FLOAT getPosCellY(int i, int j, int k) const = 0;
+  virtual FLOAT getPosCellZ(int i, int j, int k) const = 0;
+
+  virtual FLOAT getPosCellX(int i, int j) const = 0;
+  virtual FLOAT getPosCellY(int i, int j) const = 0;
+
   // returns the global geometric position in x-,y-,z-direction
   // of the lower/left/front corner of the local cell at (i,j,k)
   virtual FLOAT getPosX(int i, int j, int k) const = 0;
@@ -51,6 +58,18 @@ class UniformMeshsize : public Meshsize {
   virtual FLOAT getDx(int i, int j, int k) const { return _dx; }
   virtual FLOAT getDy(int i, int j, int k) const { return _dy; }
   virtual FLOAT getDz(int i, int j, int k) const { return _dz; }
+
+  virtual FLOAT getPosCellX(int i, int j, int k) const {
+    return _dx * (-2 + i) + getDx(i, j, k) / 2;
+  }
+  virtual FLOAT getPosCellY(int i, int j, int k) const {
+    return _dy * (-2 + j) + getDy(i, j, k) / 2;
+  }
+  virtual FLOAT getPosCellZ(int i, int j, int k) const {
+    return _dz * (-2 + k) + getDz(i, j, k) / 2;
+  }
+  virtual FLOAT getPosCellX(int i, int j) const { return getPosCellX(i, j, 0); }
+  virtual FLOAT getPosCellY(int i, int j) const { return getPosCellY(i, j, 0); }
 
   virtual FLOAT getPosX(int i, int j, int k) const {
     return _dx * (_firstCornerX - 2 + i);
@@ -117,6 +136,34 @@ class TanhMeshStretching : public Meshsize {
       return _uniformMeshsize.getDz(i, j, k);
     }
   }
+
+  virtual FLOAT getPosCellX(int i, int j, int k) const {
+    FLOAT d = getDx(i, j, k) / 2;
+    if (_stretchX) {
+      return computeCoordinate(i, 2, _sizeX, _lengthX, _dxMin) + d;
+    } else {
+      return _uniformMeshsize.getPosCellX(i, j, k);
+    }
+  }
+  virtual FLOAT getPosCellY(int i, int j, int k) const {
+    FLOAT d = getDy(i, j, k) / 2;
+    if (_stretchY) {
+      return computeCoordinate(j, 2, _sizeY, _lengthY, _dyMin) + d;
+    } else {
+      return _uniformMeshsize.getPosCellY(i, j, k);
+    }
+  }
+  virtual FLOAT getPosCellZ(int i, int j, int k) const {
+    FLOAT d = getDz(i, j, k) / 2;
+    if (_stretchZ) {
+      return computeCoordinate(k, 2, _sizeZ, _lengthZ, _dzMin) + d;
+    } else {
+      return _uniformMeshsize.getPosCellZ(i, j, k);
+    }
+  }
+
+  virtual FLOAT getPosCellX(int i, int j) const { return getPosCellX(i, j, 0); }
+  virtual FLOAT getPosCellY(int i, int j) const { return getPosCellY(i, j, 0); }
 
   virtual FLOAT getPosX(int i, int j, int k) const {
     if (_stretchX) {

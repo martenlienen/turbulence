@@ -61,7 +61,7 @@ set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp
   stencils/ObstacleStencil.cpp stencils/PeriodicBoundaryStencils.cpp
   stencils/FGHStencilTurb.cpp stencils/NutStencil.cpp stencils/HStencil.cpp
   stencils/TimestepStencil.cpp stencils/RHSStencil.cpp
-  stencils/VelocityStencil.cpp)
+  stencils/VelocityStencil.cpp walldistance/WallDistanceManager.cpp)
 
 set(NS_EOF_SRCS ${root_src} ${parallel_src} ${solvers_src} ${stencils_src})
 
