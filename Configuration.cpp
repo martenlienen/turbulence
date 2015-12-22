@@ -325,6 +325,9 @@ void Configuration::loadParameters(Parameters &parameters,
       parameters.vtk.enabled = false;
     }
 
+    readIntOptional(parameters.vtk.lowoffset, node, "lowoffset", 2);
+    readIntOptional(parameters.vtk.highoffset, node, "highoffset", 1);
+
     //--------------------------------------------------
     // Parallel parameters
     //--------------------------------------------------
@@ -488,6 +491,8 @@ void Configuration::loadParameters(Parameters &parameters,
 
   MPI_Bcast(&(parameters.vtk.enabled), 1, MPI_INT, 0, communicator);
   MPI_Bcast(&(parameters.vtk.interval), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.vtk.lowoffset), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(parameters.vtk.highoffset), 1, MPI_INT, 0, communicator);
 
   broadcastString(parameters.vtk.prefix, communicator);
   broadcastString(parameters.simulation.type, communicator);

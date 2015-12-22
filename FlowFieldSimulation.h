@@ -101,14 +101,17 @@ class FlowFieldSimulation : public Simulation {
     // TODO WS1: create VTKStencil and respective iterator; iterate stencil
     //           over _flowField and write flow field information to vtk file
 
-    vtk::Dataset dataset = this->datasetFromMesh();
+    int los = _parameters.vtk.lowoffset;
+    int hos = _parameters.vtk.highoffset;
+
+    vtk::Dataset dataset = this->datasetFromMesh(los, hos);
     std::vector<std::unique_ptr<vtk::CellData>> cellData;
     cellData.reserve(this->scalarStencils.size() + this->vectorStencils.size());
 
     for (auto &stencil : this->scalarStencils) {
       stencil.reset();
       FieldIterator<FF> iterator(this->_flowField, this->_parameters, stencil,
-                                 1, 0);
+                                 los - 1, 1 - hos);
       iterator.iterate();
       cellData.push_back(stencil.get());
     }
@@ -116,7 +119,7 @@ class FlowFieldSimulation : public Simulation {
     for (auto &stencil : this->vectorStencils) {
       stencil.reset();
       FieldIterator<FF> iterator(this->_flowField, this->_parameters, stencil,
-                                 1, 0);
+                                 los - 1, 1 - hos);
       iterator.iterate();
       cellData.push_back(stencil.get());
     }
@@ -126,15 +129,15 @@ class FlowFieldSimulation : public Simulation {
   }
 
  private:
-  vtk::Dataset datasetFromMesh() {
+  vtk::Dataset datasetFromMesh(int los, int hos) {
     Parameters &p = this->_parameters;
     ParallelParameters &pp = p.parallel;
     GeometricParameters &gp = p.geometry;
     Meshsize *mesh = p.meshsize;
 
-    int cellsX = pp.localSize[0];
-    int cellsY = pp.localSize[1];
-    int cellsZ = gp.dim == 3 ? pp.localSize[2] : 1;
+    int cellsX = pp.localSize[0] - (los + hos - 3);
+    int cellsY = pp.localSize[1] - (los + hos - 3);
+    int cellsZ = gp.dim == 3 ? pp.localSize[2] - (los + hos - 3) : 1;
     int pointsX = cellsX + 1;
     int pointsY = cellsY + 1;
     int pointsZ = gp.dim == 3 ? cellsZ + 1 : 1;
@@ -142,9 +145,11 @@ class FlowFieldSimulation : public Simulation {
 
     std::vector<vtk::Point> points(numPoints);
 
-    for (int k = GHOST_OFFSET, p = 0; k < pointsZ + GHOST_OFFSET; k++) {
-      for (int j = GHOST_OFFSET; j < pointsY + GHOST_OFFSET; j++) {
-        for (int i = GHOST_OFFSET; i < pointsX + GHOST_OFFSET; i++, p++) {
+    int losz = _parameters.geometry.dim == 2 ? 0 : los;
+
+    for (int k = losz, p = 0; k < pointsZ + losz; k++) {
+      for (int j = los; j < pointsY + los; j++) {
+        for (int i = los; i < pointsX + los; i++, p++) {
           points[p].x = mesh->getPosX(i, j, k);
           points[p].y = mesh->getPosY(i, j, k);
           points[p].z = mesh->getPosZ(i, j, k);
