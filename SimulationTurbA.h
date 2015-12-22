@@ -27,6 +27,7 @@
 #include "LinearSolver.h"
 #include "solvers/SORSolver.h"
 #include "solvers/PetscSolver.h"
+#include "parallelManagers/MPICommunicator.h"
 
 class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
  protected:
@@ -59,6 +60,16 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
 
   MinimumNutStencil _minnutst;
   FieldIterator<FlowFieldTurbA> _minnutit;
+
+  MPICommunicator<FLOAT, FlowFieldTurbA> nutComm{
+      this->_flowField, this->_parameters,
+      [](FlowFieldTurbA &flowField, int i, int j, int k, FLOAT &p) {
+        p = flowField.getNu(i, j, k);
+      },
+      [](FlowFieldTurbA &flowField, int i, int j, int k, FLOAT &p) {
+        flowField.getNu(i, j, k) = p;
+      },
+      2};
 
  public:
   SimulationTurbA(Parameters &parameters, FlowFieldTurbA &flowField)
@@ -204,10 +215,6 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
 
     // compute velocity
     _velocityIterator.iterate();
-
-    // compute nut
-    _nutit.iterate();
-
     // set obstacle boundaries
     _obstacleIterator.iterate();
 
@@ -222,6 +229,11 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
 
     // Iterate for velocities on the boundary
     _wallVelocityIterator.iterate();
+
+    // compute nut
+    _nutit.iterate();
+
+    nutComm.communicate(this->_flowField);
   }
 
  protected:
