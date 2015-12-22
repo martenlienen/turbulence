@@ -17,6 +17,9 @@ tests
 *.vtk
 results
 
+# Profiling data
+gmon.out
+
 #NetBeans
 nbproject
 compile_commands.json
