@@ -5,22 +5,26 @@
 #include <cmath>
 
 HStencil::HStencil(const Parameters& parameters)
-    : FieldStencil<FlowFieldTurbA>(parameters) {}
+    : FieldStencil<FlowFieldTurbA>(parameters), wdm(_parameters) {
+  wdm.init();
+}
 
 void HStencil::apply(FlowFieldTurbA& flowField, int i, int j) {
-  FLOAT temp = _parameters.meshsize->getPosY(i, j) +
-               _parameters.meshsize->getDy(i, j) * 0.5;
-  flowField.getH(i, j) = std::min(_parameters.geometry.lengthY - temp, temp);
+  const int obstacle = flowField.getFlags().getValue(i, j);
+
+  if ((obstacle & OBSTACLE_SELF) == 0) {
+    flowField.getH(i, j) = wdm.query(i, j);
+  } else {
+    flowField.getH(i, j) = 0.0;
+  }
 }
 
 void HStencil::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
-  FLOAT tempy = _parameters.meshsize->getPosY(i, j, k) +
-                _parameters.meshsize->getDy(i, j, k) * 0.5;
-  FLOAT dy = std::min(_parameters.geometry.lengthY - tempy, tempy);
+  const int obstacle = flowField.getFlags().getValue(i, j, k);
 
-  FLOAT tempz = _parameters.meshsize->getPosZ(i, j, k) +
-                _parameters.meshsize->getDz(i, j, k) * 0.5;
-  FLOAT dz = std::min(_parameters.geometry.lengthY - tempz, tempz);
-
-  flowField.getH(i, j, k) = std::min(dy, dz);
+  if ((obstacle & OBSTACLE_SELF) == 0) {
+    flowField.getH(i, j, k) = wdm.query(i, j, k);
+  } else {
+    flowField.getH(i, j, k) = 0.0;
+  }
 }

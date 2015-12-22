@@ -4,6 +4,7 @@
 #include "../FlowFieldTurbA.h"
 #include "../Stencil.h"
 #include "../Parameters.h"
+#include "../walldistance/WallDistanceManager.h"
 
 class HStencil : public FieldStencil<FlowFieldTurbA> {
  public:
@@ -27,6 +28,9 @@ class HStencil : public FieldStencil<FlowFieldTurbA> {
    * @param k Index in the z direction
    */
   void apply(FlowFieldTurbA& flowField, int i, int j, int k);
+
+ private:
+  WallDistanceManager wdm;
 };
 
 #endif
