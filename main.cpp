@@ -82,7 +82,6 @@ int main(int argc, char *argv[]) {
   // flowField->getFlags().show();
 
   FLOAT time = 0.0;
-  FLOAT timeStdOut = parameters.stdOut.interval;
   FLOAT timeVTK = parameters.vtk.interval;
   int timeSteps = 0;
 
@@ -98,10 +97,9 @@ int main(int argc, char *argv[]) {
     time += parameters.timestep.dt;
 
     // std-out: terminal info
-    if ((rank == 0) && (timeStdOut <= time)) {
+    if (rank == 0) {
       std::cout << "Current time: " << time
                 << "\ttimestep: " << parameters.timestep.dt << std::endl;
-      timeStdOut += parameters.stdOut.interval;
     }
 
     timeSteps++;

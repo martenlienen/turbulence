@@ -310,19 +310,6 @@ void Configuration::loadParameters(Parameters &parameters,
     }
 
     //--------------------------------------------------
-    // StdOut parameters
-    //--------------------------------------------------
-
-    node = confFile.FirstChildElement()->FirstChildElement("stdOut");
-
-    if (node == NULL) {
-      handleError(1, "Error loading StdOut parameters");
-    }
-
-    // If no value given, print every step
-    readFloatOptional(parameters.stdOut.interval, node, "interval", 1);
-
-    //--------------------------------------------------
     // Parallel parameters
     //--------------------------------------------------
 
@@ -485,7 +472,6 @@ void Configuration::loadParameters(Parameters &parameters,
 
   MPI_Bcast(&(parameters.vtk.enabled), 1, MPI_INT, 0, communicator);
   MPI_Bcast(&(parameters.vtk.interval), 1, MY_MPI_FLOAT, 0, communicator);
-  MPI_Bcast(&(parameters.stdOut.interval), 1, MPI_INT, 0, communicator);
 
   broadcastString(parameters.vtk.prefix, communicator);
   broadcastString(parameters.simulation.type, communicator);

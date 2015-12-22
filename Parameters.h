@@ -97,11 +97,6 @@ class VTKParameters {
   std::string prefix;  //! Output filename
 };
 
-class StdOutParameters {
- public:
-  FLOAT interval;
-};
-
 class ParallelParameters {
  public:
   int rank;  //! Rank of the current processor
@@ -161,7 +156,6 @@ class Parameters {
   WallParameters walls;
   VTKParameters vtk;
   ParallelParameters parallel;
-  StdOutParameters stdOut;
   BFStepParameters bfStep;
   TimingParameters timing;
   // TODO WS2: include parameters for turbulence
