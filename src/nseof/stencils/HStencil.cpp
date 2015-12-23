@@ -1,8 +1,9 @@
-#include "HStencil.h"
-#include "StencilFunctions.h"
-#include "Definitions.h"
 #include <algorithm>
 #include <cmath>
+
+#include "HStencil.h"
+#include "StencilFunctions.h"
+#include "../Definitions.h"
 
 HStencil::HStencil(const Parameters& parameters)
     : FieldStencil<FlowFieldTurbA>(parameters), wdm(_parameters) {

@@ -1,6 +1,7 @@
-#include "Configuration.h"
-#include "3rdparty/tinyxml2/tinyxml2.h"
+#include <tinyxml2.h>
 #include <string>
+
+#include "Configuration.h"
 #include "Parameters.h"
 
 void readFloatMandatory(FLOAT &storage, tinyxml2::XMLElement *node,

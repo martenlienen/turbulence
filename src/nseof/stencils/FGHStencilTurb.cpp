@@ -1,6 +1,6 @@
 #include "FGHStencilTurb.h"
 #include "StencilFunctions.h"
-#include "Definitions.h"
+#include "../Definitions.h"
 #include "../FlowFieldTurbA.h"
 
 FGHStencilTurb::FGHStencilTurb(const Parameters& parameters)

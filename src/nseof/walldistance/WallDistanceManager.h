@@ -5,7 +5,7 @@
 
 #include <ANN/ANN.h>
 
-#include "Parameters.h"
+#include "../Parameters.h"
 
 class WallDistanceManager {
  public:

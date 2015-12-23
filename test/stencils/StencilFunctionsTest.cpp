@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "stencils/StencilFunctions.h"
+#include <nseof/stencils/StencilFunctions.h>
 
 TEST(X, x) { ASSERT_EQ(5, 2 + 3); }
 

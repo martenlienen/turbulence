@@ -91,7 +91,7 @@ class MPICommunicator {
 
 #include <mpi.h>
 
-#include "Iterators.h"
+#include "../Iterators.h"
 
 template <typename T, typename FF>
 void MPICommunicator<T, FF>::communicate(FF& flowField) {

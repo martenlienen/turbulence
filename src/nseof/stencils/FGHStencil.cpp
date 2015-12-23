@@ -1,6 +1,6 @@
 #include "FGHStencil.h"
 #include "StencilFunctions.h"
-#include "Definitions.h"
+#include "../Definitions.h"
 
 FGHStencil::FGHStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}

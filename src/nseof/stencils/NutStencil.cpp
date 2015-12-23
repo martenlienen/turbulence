@@ -2,7 +2,7 @@
 
 #include "NutStencil.h"
 #include "StencilFunctions.h"
-#include "Definitions.h"
+#include "../Definitions.h"
 
 NutStencil::NutStencil(const Parameters& parameters)
     : FieldStencil<FlowFieldTurbA>(parameters) {
