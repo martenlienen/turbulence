@@ -15,23 +15,9 @@
 
 #include "Simulation.h"
 #include "FlowField.h"
-
-#include "stencils/FGHStencil.h"
-#include "stencils/MovingWallStencils.h"
-#include "stencils/RHSStencil.h"
-#include "stencils/VelocityStencil.h"
-#include "stencils/ObstacleStencil.h"
-#include "stencils/MaxUStencil.h"
-#include "stencils/PeriodicBoundaryStencils.h"
-#include "stencils/BFStepInitStencil.h"
-#include "stencils/NeumannBoundaryStencils.h"
-#include "stencils/BFInputStencils.h"
-#include "stencils/InitTaylorGreenFlowFieldStencil.h"
-#include "stencils/CellDataStencil.h"
-
-#include "GlobalBoundaryFactory.h"
-#include "Iterators.h"
 #include "Definitions.h"
+
+#include "stencils/CellDataStencil.h"
 
 #include "LinearSolver.h"
 #include "solvers/SORSolver.h"
@@ -47,26 +33,6 @@ template <typename FF>
 class FlowFieldSimulation : public Simulation {
  protected:
   FF &_flowField;
-
-  MaxUStencil _maxUStencil;
-  FieldIterator<FF> _maxUFieldIterator;
-  GlobalBoundaryIterator<FF> _maxUBoundaryIterator;
-
-  // Set up the boundary conditions
-  GlobalBoundaryFactory _globalBoundaryFactory;
-  GlobalBoundaryIterator<FF> _wallVelocityIterator;
-  GlobalBoundaryIterator<FF> _wallFGHIterator;
-
-  FGHStencil _fghStencil;
-  FieldIterator<FF> _fghIterator;
-
-  RHSStencil _rhsStencil;
-  FieldIterator<FF> _rhsIterator;
-
-  VelocityStencil _velocityStencil;
-  ObstacleStencil _obstacleStencil;
-  FieldIterator<FF> _velocityIterator;
-  FieldIterator<FF> _obstacleIterator;
 
   MPICommunicator<FLOAT, FF> pressureComm{
       this->_flowField, this->_parameters,
@@ -118,124 +84,25 @@ class FlowFieldSimulation : public Simulation {
             FLOAT v[3];
             f.getPressureAndVelocity(p, v, i, j, k);
             return std::vector<double>{v[0], v[1], v[2]};
-          })};
+          }),
+      CellDataStencil<std::vector<double>, FF>(
+          this->_parameters, "velocity-raw",
+          [](FF &f, int i, int j) {
+            FLOAT *v = f.getVelocity().getVector(i, j);
 
-  PetscSolver _solver;
+            return std::vector<double>{v[0], v[1]};
+          },
+          [](FF &f, int i, int j, int k) {
+            FLOAT *v = f.getVelocity().getVector(i, j, k);
+
+            return std::vector<double>{v[0], v[1], v[2]};
+          })};
 
  public:
   FlowFieldSimulation(Parameters &parameters, FF &flowField)
-      : Simulation(parameters),
-        _flowField(flowField),
-        _maxUStencil(parameters),
-        _maxUFieldIterator(_flowField, parameters, _maxUStencil),
-        _maxUBoundaryIterator(_flowField, parameters, _maxUStencil),
-        _globalBoundaryFactory(parameters),
-        _wallVelocityIterator(
-            _globalBoundaryFactory.getGlobalBoundaryVelocityIterator(
-                _flowField)),
-        _wallFGHIterator(
-            _globalBoundaryFactory.getGlobalBoundaryFGHIterator(_flowField)),
-        _fghStencil(parameters),
-        _fghIterator(_flowField, parameters, _fghStencil),
-        _rhsStencil(parameters),
-        _rhsIterator(_flowField, parameters, _rhsStencil),
-        _velocityStencil(parameters),
-        _obstacleStencil(parameters),
-        _velocityIterator(_flowField, parameters, _velocityStencil),
-        _obstacleIterator(_flowField, parameters, _obstacleStencil),
-        _solver(_flowField, parameters) {}
+      : Simulation(parameters), _flowField(flowField) {}
 
   virtual ~FlowFieldSimulation() {}
-
-  /** initialises the flow field according to the scenario */
-  virtual void initializeFlowField() {
-    if (_parameters.simulation.scenario == "taylor-green") {
-      // currently, a particular initialization is only requrid for the
-      // taylor-green vortex
-      InitTaylorGreenFlowFieldStencil stencil(_parameters);
-      FieldIterator<FF> iterator(_flowField, _parameters, stencil);
-      iterator.iterate();
-    } else if (_parameters.simulation.scenario == "channel") {
-      BFStepInitStencil stencil(_parameters);
-      FieldIterator<FF> iterator(_flowField, _parameters, stencil, 0, 1);
-      iterator.iterate();
-      _wallVelocityIterator.iterate();
-    } else if (_parameters.simulation.scenario == "pressure-channel") {
-      // set pressure boundaries here for left wall
-      const FLOAT value = _parameters.walls.scalarLeft;
-      ScalarField &rhs = _flowField.getRHS();
-
-      if (_parameters.geometry.dim == 2) {
-        const int sizey = _flowField.getNy();
-        for (int i = 0; i < sizey + 3; i++) {
-          rhs.getScalar(0, i) = value;
-        }
-      } else {
-        const int sizey = _flowField.getNy();
-        const int sizez = _flowField.getNz();
-        for (int i = 0; i < sizey + 3; i++)
-          for (int j = 0; j < sizez + 3; j++) rhs.getScalar(0, i, j) = value;
-      }
-
-      // do same procedure for domain flagging as for regular channel
-      BFStepInitStencil stencil(_parameters);
-      FieldIterator<FF> iterator(_flowField, _parameters, stencil, 0, 1);
-      iterator.iterate();
-    }
-    _solver.reInitMatrix();
-  }
-
-  virtual void solveTimestep() {
-    MultiTimer *timer = MultiTimer::get();
-
-    // determine and set max. timestep which is allowed in this simulation
-    setTimeStep();
-
-    timer->start("fgh");
-
-    // compute fgh
-    _fghIterator.iterate();
-
-    timer->stop("fgh");
-
-    // set global boundary values
-    _wallFGHIterator.iterate();
-    // compute the right hand side
-    _rhsIterator.iterate();
-
-    timer->start("poisson");
-
-    // solve for pressure
-    _solver.solve();
-
-    timer->stop("poisson");
-
-    timer->start("communication");
-    timer->start("pressure-communication");
-
-    // TODO WS2: communicate pressure values
-    pressureComm.communicate(this->_flowField);
-
-    timer->stop("pressure-communication");
-    timer->stop("communication");
-
-    // compute velocity
-    _velocityIterator.iterate();
-    // set obstacle boundaries
-    _obstacleIterator.iterate();
-
-    timer->start("communication");
-    timer->start("velocity-communication");
-
-    // TODO WS2: communicate velocity values
-    velocityComm.communicate(this->_flowField);
-
-    timer->stop("velocity-communication");
-    timer->stop("communication");
-
-    // Iterate for velocities on the boundary
-    _wallVelocityIterator.iterate();
-  }
 
   /** TODO WS1: plots the flow field. */
   virtual void plotVTK(int rank, int timeStep) {
@@ -246,14 +113,17 @@ class FlowFieldSimulation : public Simulation {
     // TODO WS1: create VTKStencil and respective iterator; iterate stencil
     //           over _flowField and write flow field information to vtk file
 
-    vtk::Dataset dataset = this->datasetFromMesh();
+    int los = _parameters.vtk.lowoffset;
+    int hos = _parameters.vtk.highoffset;
+
+    vtk::Dataset dataset = this->datasetFromMesh(los, hos);
     std::vector<std::unique_ptr<vtk::CellData>> cellData;
     cellData.reserve(this->scalarStencils.size() + this->vectorStencils.size());
 
     for (auto &stencil : this->scalarStencils) {
       stencil.reset();
       FieldIterator<FF> iterator(this->_flowField, this->_parameters, stencil,
-                                 1, 0);
+                                 los - 1, 1 - hos);
       iterator.iterate();
       cellData.push_back(stencil.get());
     }
@@ -261,7 +131,7 @@ class FlowFieldSimulation : public Simulation {
     for (auto &stencil : this->vectorStencils) {
       stencil.reset();
       FieldIterator<FF> iterator(this->_flowField, this->_parameters, stencil,
-                                 1, 0);
+                                 los - 1, 1 - hos);
       iterator.iterate();
       cellData.push_back(stencil.get());
     }
@@ -270,57 +140,16 @@ class FlowFieldSimulation : public Simulation {
     file.write(this->_parameters.vtk.prefix, rank, timeStep);
   }
 
- protected:
-  /** sets the time step*/
-  virtual void setTimeStep() {
-    FLOAT localMin, globalMin;
-    assertion(_parameters.geometry.dim == 2 || _parameters.geometry.dim == 3);
-    FLOAT factor = 1.0 / (_parameters.meshsize->getDxMin() *
-                          _parameters.meshsize->getDxMin()) +
-                   1.0 / (_parameters.meshsize->getDyMin() *
-                          _parameters.meshsize->getDyMin());
-
-    // determine maximum velocity
-    _maxUStencil.reset();
-    _maxUFieldIterator.iterate();
-    _maxUBoundaryIterator.iterate();
-    if (_parameters.geometry.dim == 3) {
-      factor += 1.0 / (_parameters.meshsize->getDzMin() *
-                       _parameters.meshsize->getDzMin());
-      _parameters.timestep.dt = 1.0 / _maxUStencil.getMaxValues()[2];
-    } else {
-      _parameters.timestep.dt = 1.0 / _maxUStencil.getMaxValues()[0];
-    }
-
-    localMin = std::min(_parameters.timestep.dt,
-                        std::min(std::min(_parameters.flow.Re / (2 * factor),
-                                          1.0 / _maxUStencil.getMaxValues()[0]),
-                                 1.0 / _maxUStencil.getMaxValues()[1]));
-
-    // Here, we select the type of operation before compiling. This allows to
-    // use the correct
-    // data type for MPI. Not a concern for small simulations, but useful if
-    // using heterogeneous
-    // machines.
-
-    globalMin = MY_FLOAT_MAX;
-    MPI_Allreduce(&localMin, &globalMin, 1, MY_MPI_FLOAT, MPI_MIN,
-                  PETSC_COMM_WORLD);
-
-    _parameters.timestep.dt = globalMin;
-    _parameters.timestep.dt *= _parameters.timestep.tau;
-  }
-
  private:
-  vtk::Dataset datasetFromMesh() {
+  vtk::Dataset datasetFromMesh(int los, int hos) {
     Parameters &p = this->_parameters;
     ParallelParameters &pp = p.parallel;
     GeometricParameters &gp = p.geometry;
     Meshsize *mesh = p.meshsize;
 
-    int cellsX = pp.localSize[0];
-    int cellsY = pp.localSize[1];
-    int cellsZ = gp.dim == 3 ? pp.localSize[2] : 1;
+    int cellsX = pp.localSize[0] - (los + hos - 3);
+    int cellsY = pp.localSize[1] - (los + hos - 3);
+    int cellsZ = gp.dim == 3 ? pp.localSize[2] - (los + hos - 3) : 1;
     int pointsX = cellsX + 1;
     int pointsY = cellsY + 1;
     int pointsZ = gp.dim == 3 ? cellsZ + 1 : 1;
@@ -328,9 +157,11 @@ class FlowFieldSimulation : public Simulation {
 
     std::vector<vtk::Point> points(numPoints);
 
-    for (int k = GHOST_OFFSET, p = 0; k < pointsZ + GHOST_OFFSET; k++) {
-      for (int j = GHOST_OFFSET; j < pointsY + GHOST_OFFSET; j++) {
-        for (int i = GHOST_OFFSET; i < pointsX + GHOST_OFFSET; i++, p++) {
+    int losz = _parameters.geometry.dim == 2 ? 0 : los;
+
+    for (int k = losz, p = 0; k < pointsZ + losz; k++) {
+      for (int j = los; j < pointsY + los; j++) {
+        for (int i = los; i < pointsX + los; i++, p++) {
           points[p].x = mesh->getPosX(i, j, k);
           points[p].y = mesh->getPosY(i, j, k);
           points[p].z = mesh->getPosZ(i, j, k);

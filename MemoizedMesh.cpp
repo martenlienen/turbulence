@@ -155,6 +155,26 @@ FLOAT MemoizedMesh::getPosY(int i, int j) const {
   }
 }
 
+FLOAT MemoizedMesh::getPosCellX(int i, int j, int k) const {
+  return this->mesh->getPosCellX(i, j, k);
+}
+
+FLOAT MemoizedMesh::getPosCellY(int i, int j, int k) const {
+  return this->mesh->getPosCellY(i, j, k);
+}
+
+FLOAT MemoizedMesh::getPosCellZ(int i, int j, int k) const {
+  return this->mesh->getPosCellZ(i, j, k);
+}
+
+FLOAT MemoizedMesh::getPosCellX(int i, int j) const {
+  return this->mesh->getPosCellX(i, j, 0);
+}
+
+FLOAT MemoizedMesh::getPosCellY(int i, int j) const {
+  return this->mesh->getPosCellY(i, j, 0);
+}
+
 FLOAT MemoizedMesh::getDxMin() const { return this->mesh->getDxMin(); }
 
 FLOAT MemoizedMesh::getDyMin() const { return this->mesh->getDyMin(); }

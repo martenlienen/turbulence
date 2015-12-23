@@ -25,9 +25,31 @@ class BFInputVelocityStencil : public BoundaryStencil<FlowField> {
   void applyFrontWall(FlowField& flowField, int i, int j, int k);
   void applyBackWall(FlowField& flowField, int i, int j, int k);
 
+  virtual FLOAT computeVelocity3DLocal(FlowField& flowField, int i, int j,
+                                       int k, FLOAT stepSize,
+                                       const Parameters& parameters);
+
+  virtual FLOAT computeVelocity2DLocal(FlowField& flowField, int i, int j,
+                                       FLOAT stepSize,
+                                       const Parameters& parameters);
+
  private:
   FLOAT
   _stepSize;  //! fixes the size of the step. If zero, is just channel flow
+};
+
+class BFInputVelocityStencilUniform : public BFInputVelocityStencil {
+ public:
+  BFInputVelocityStencilUniform(const Parameters& parameters)
+      : BFInputVelocityStencil(parameters) {}
+
+  FLOAT computeVelocity3DLocal(FlowField& flowField, int i, int j, int k,
+                               FLOAT stepSize,
+                               const Parameters& parameters) override;
+
+  FLOAT computeVelocity2DLocal(FlowField& flowField, int i, int j,
+                               FLOAT stepSize,
+                               const Parameters& parameters) override;
 };
 
 /** FGH stencil which corresponds to one-sided Dirichlet conditions (i.e. the
@@ -50,9 +72,31 @@ class BFInputFGHStencil : public BoundaryStencil<FlowField> {
   void applyFrontWall(FlowField& flowField, int i, int j, int k);
   void applyBackWall(FlowField& flowField, int i, int j, int k);
 
+  virtual FLOAT computeVelocity3DLocal(FlowField& flowField, int i, int j,
+                                       int k, FLOAT stepSize,
+                                       const Parameters& parameters);
+
+  virtual FLOAT computeVelocity2DLocal(FlowField& flowField, int i, int j,
+                                       FLOAT stepSize,
+                                       const Parameters& parameters);
+
  private:
   FLOAT
   _stepSize;  //! fixes the size of the step. If zero, is just channel flow
+};
+
+class BFInputFGHStencilUniform : public BFInputFGHStencil {
+ public:
+  BFInputFGHStencilUniform(const Parameters& parameters)
+      : BFInputFGHStencil(parameters) {}
+
+  FLOAT computeVelocity3DLocal(FlowField& flowField, int i, int j, int k,
+                               FLOAT stepSize,
+                               const Parameters& parameters) override;
+
+  FLOAT computeVelocity2DLocal(FlowField& flowField, int i, int j,
+                               FLOAT stepSize,
+                               const Parameters& parameters) override;
 };
 
 #endif

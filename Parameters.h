@@ -19,6 +19,8 @@ class SimulationParameters {
   FLOAT finalTime;       //! Final time for the simulation
   std::string type;      //! type of the simulation (DNS vs. turbulence)
   std::string scenario;  //! If channel or cavity, for example
+  std::string uniform;
+  std::string nulimiter;
 };
 
 class EnvironmentalParameters {
@@ -32,6 +34,7 @@ class EnvironmentalParameters {
 class FlowParameters {
  public:
   FLOAT Re;  //! Reynolds number
+  std::string type;
 };
 
 class SolverParameters {
@@ -93,13 +96,10 @@ class WallParameters {
 class VTKParameters {
  public:
   bool enabled;
-  FLOAT interval;      //! Time interval for file printing
+  FLOAT interval;  //! Time interval for file printing
+  int lowoffset;
+  int highoffset;
   std::string prefix;  //! Output filename
-};
-
-class StdOutParameters {
- public:
-  FLOAT interval;
 };
 
 class ParallelParameters {
@@ -161,7 +161,6 @@ class Parameters {
   WallParameters walls;
   VTKParameters vtk;
   ParallelParameters parallel;
-  StdOutParameters stdOut;
   BFStepParameters bfStep;
   TimingParameters timing;
   // TODO WS2: include parameters for turbulence

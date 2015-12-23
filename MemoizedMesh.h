@@ -30,6 +30,13 @@ class MemoizedMesh : public Meshsize {
   FLOAT getPosX(int i, int j) const;
   FLOAT getPosY(int i, int j) const;
 
+  FLOAT getPosCellX(int i, int j, int k) const;
+  FLOAT getPosCellY(int i, int j, int k) const;
+  FLOAT getPosCellZ(int i, int j, int k) const;
+
+  FLOAT getPosCellX(int i, int j) const;
+  FLOAT getPosCellY(int i, int j) const;
+
   FLOAT getDxMin() const;
   FLOAT getDyMin() const;
   FLOAT getDzMin() const;
