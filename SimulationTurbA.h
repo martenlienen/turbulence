@@ -102,6 +102,30 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
         [](FlowFieldTurbA &f, int i, int j, int k) {
           return f.getNu(i, j, k);
         }));
+
+    this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
+        this->_parameters, "lm",
+        [](FlowFieldTurbA &f, int i, int j) { return f.getLm(i, j); },
+        [](FlowFieldTurbA &f, int i, int j, int k) {
+          return f.getLm(i, j, k);
+        }));
+
+    this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
+        this->_parameters, "u",
+        [](FlowFieldTurbA &f, int i, int j) { return f.getU(i, j); },
+        [](FlowFieldTurbA &f, int i, int j, int k) {
+          return f.getU(i, j, k);
+        }));
+
+    this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
+        this->_parameters, "pressure",
+        [](FlowFieldTurbA &f, int i, int j) {
+          return f.getPressure().getScalar(i, j) - f.getU(i, j) * f.getU(i, j);
+        },
+        [](FlowFieldTurbA &f, int i, int j, int k) {
+          return f.getPressure().getScalar(i, j, k) -
+                 f.getU(i, j, k) * f.getU(i, j, k);
+        }));
   }
 
   virtual ~SimulationTurbA() {}
@@ -150,9 +174,6 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
     // determine and set max. timestep which is allowed in this simulation
     setTimeStep();
 
-    // compute nut
-    _nutit.iterate();
-
     timer->start("fgh");
 
     // compute fgh
@@ -183,6 +204,10 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
 
     // compute velocity
     _velocityIterator.iterate();
+
+    // compute nut
+    _nutit.iterate();
+
     // set obstacle boundaries
     _obstacleIterator.iterate();
 
@@ -204,7 +229,7 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
   virtual void setTimeStep() {
     // pm-20151108
     _tit.iterate();
-    double minimumt = _tst.getMinimum();
+    //    double minimumt = _tst.getMinimum();
 
     FLOAT localMin, globalMin;
     assertion(_parameters.geometry.dim == 2 || _parameters.geometry.dim == 3);
@@ -231,14 +256,14 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
                                  1.0 / _maxUStencil.getMaxValues()[1]));
 
     // pm-20151108
-    cout << _maxUStencil.getMaxValues()[0] << " "
-         << _maxUStencil.getMaxValues()[1] << endl;
-    cout << minimumt << endl;
-    cout << localMin << endl;
-    localMin = std::min(minimumt, localMin);
-    cout << localMin << endl;
-    cout << "-----------------------------------------------------------"
-         << endl;
+    //    cout << _maxUStencil.getMaxValues()[0] << " "
+    //         << _maxUStencil.getMaxValues()[1] << endl;
+    //    cout << minimumt << endl;
+    //    cout << localMin << endl;
+    //    localMin = std::min(minimumt, localMin);
+    //    cout << localMin << endl;
+    //    cout << "-----------------------------------------------------------"
+    //         << endl;
 
     // Here, we select the type of operation before compiling. This allows to
     // use the correct
@@ -251,6 +276,7 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
                   PETSC_COMM_WORLD);
 
     _parameters.timestep.dt = globalMin;
+    _parameters.timestep.dt = 1e-3;
     _parameters.timestep.dt *= _parameters.timestep.tau;
   }
 };

@@ -22,5 +22,5 @@ void HStencil::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
                 _parameters.meshsize->getDz(i, j, k) * 0.5;
   FLOAT dz = std::min(_parameters.geometry.lengthY - tempz, tempz);
 
-  flowField.getH(i, j) = sqrt(dy * dy + dz * dz);
+  flowField.getH(i, j, k) = std::min(dy, dz);
 }

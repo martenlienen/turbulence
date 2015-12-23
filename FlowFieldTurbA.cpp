@@ -8,7 +8,13 @@ FlowFieldTurbA::FlowFieldTurbA(const Parameters& parameters)
               : ScalarField(getCellsX(), getCellsY(), getCellsZ())),
       _h(parameters.geometry.dim == 2
              ? ScalarField(getCellsX(), getCellsY())
-             : ScalarField(getCellsX(), getCellsY(), getCellsZ())) {}
+             : ScalarField(getCellsX(), getCellsY(), getCellsZ())),
+      _u(parameters.geometry.dim == 2
+             ? ScalarField(getCellsX(), getCellsY())
+             : ScalarField(getCellsX(), getCellsY(), getCellsZ())),
+      _lm(parameters.geometry.dim == 2
+              ? ScalarField(getCellsX(), getCellsY())
+              : ScalarField(getCellsX(), getCellsY(), getCellsZ())) {}
 
 int FlowFieldTurbA::getNx() const { return _flowField.getNx(); }
 
@@ -54,4 +60,15 @@ FLOAT& FlowFieldTurbA::getH(int i, int j) { return _h.getScalar(i, j); }
 
 FLOAT& FlowFieldTurbA::getH(int i, int j, int k) {
   return _h.getScalar(i, j, k);
+}
+
+FLOAT& FlowFieldTurbA::getLm(int i, int j) { return _lm.getScalar(i, j); }
+
+FLOAT& FlowFieldTurbA::getLm(int i, int j, int k) {
+  return _lm.getScalar(i, j, k);
+}
+
+FLOAT& FlowFieldTurbA::getU(int i, int j) { return _u.getScalar(i, j); }
+FLOAT& FlowFieldTurbA::getU(int i, int j, int k) {
+  return _u.getScalar(i, j, k);
 }

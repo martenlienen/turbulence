@@ -202,6 +202,7 @@ class SimulationLaminar : public FlowFieldSimulation<FlowField> {
                   PETSC_COMM_WORLD);
 
     _parameters.timestep.dt = globalMin;
+    _parameters.timestep.dt = 1e-3;
     _parameters.timestep.dt *= _parameters.timestep.tau;
   }
 };

@@ -15,6 +15,8 @@ class FlowFieldTurbA : public FlowField {
   FlowFieldLaminar _flowField;
   ScalarField _nu;
   ScalarField _h;
+  ScalarField _u;
+  ScalarField _lm;
 
  public:
   /** Constructs a field from parameters object
@@ -59,6 +61,12 @@ class FlowFieldTurbA : public FlowField {
 
   FLOAT& getH(int i, int j);
   FLOAT& getH(int i, int j, int k);
+
+  FLOAT& getU(int i, int j);
+  FLOAT& getU(int i, int j, int k);
+
+  FLOAT& getLm(int i, int j);
+  FLOAT& getLm(int i, int j, int k);
 };
 
 #endif
