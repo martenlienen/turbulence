@@ -67,11 +67,13 @@ int main(int argc, char *argv[]) {
                 << "D" << std::endl;
     }
 
+    // create algebraic turbulent flow field
     FlowFieldTurbA *flowFieldt = new FlowFieldTurbA(parameters);
     if (flowFieldt == NULL) {
       handleError(1, "flowField==NULL!");
     }
 
+    // create algebraic turbulent simulation
     simulation = new SimulationTurbA(parameters, *flowFieldt);
 
     flowField = flowFieldt;

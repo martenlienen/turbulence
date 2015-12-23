@@ -16,8 +16,8 @@ static int V = 1;
 static int Z = 2;
 static int W = 2;
 
-// static int shift = 0;
-
+// Load the local viscosity (nu+nut) cube with relevant viscosity of the 2D
+// plane
 inline void loadLocalNu2D(const Parameters& parameters,
                           FlowFieldTurbA& flowField, FLOAT* const localNu,
                           int i, int j) {
@@ -30,6 +30,7 @@ inline void loadLocalNu2D(const Parameters& parameters,
   }
 }
 
+// Load the local viscosity (nu+nut) cube with surrounding values
 inline void loadLocalNu3D(const Parameters& parameters,
                           FlowFieldTurbA& flowField, FLOAT* const localNu,
                           int i, int j, int k) {

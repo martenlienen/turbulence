@@ -6,9 +6,12 @@
 #include "FlowField.h"
 #include "FlowFieldLaminar.h"
 
-/** Flow field
+/** Flow field for algebraic turbulent model:
+ *    - it is a flow field
+ *    - has a laminar flow field
+ *    - has additional scalar fields
+ *        (vortex viscosity, wall distance, velocity fluctuation, mixing length)
  *
- * Class intended to contain the state of the domain.
  */
 class FlowFieldTurbA : public FlowField {
  private:
@@ -19,14 +22,6 @@ class FlowFieldTurbA : public FlowField {
   ScalarField _lm;
 
  public:
-  /** Constructs a field from parameters object
-   *
-   * Constructs a field from a parameters object, so that it dimensionality can
-   * be defined in
-   * the configuration file.
-   *
-   * @param parameters Parameters object with geometric information
-   */
   FlowFieldTurbA(const Parameters& parameters);
 
   int getNx() const;
@@ -56,15 +51,19 @@ class FlowFieldTurbA : public FlowField {
   void getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity, int i,
                               int j, int k);
 
+  // vortex viscosity
   FLOAT& getNu(int i, int j);
   FLOAT& getNu(int i, int j, int k);
 
+  // wall distance
   FLOAT& getH(int i, int j);
   FLOAT& getH(int i, int j, int k);
 
+  // velocity fluctuation
   FLOAT& getU(int i, int j);
   FLOAT& getU(int i, int j, int k);
 
+  // mixing length
   FLOAT& getLm(int i, int j);
   FLOAT& getLm(int i, int j, int k);
 };

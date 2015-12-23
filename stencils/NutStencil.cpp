@@ -6,6 +6,7 @@
 
 NutStencil::NutStencil(const Parameters& parameters)
     : FieldStencil<FlowFieldTurbA>(parameters) {
+  // do you want to calculate vortex viscosity?
   if (parameters.flow.type == "laminar") {
     _fs = new NutStencilL(parameters);
   } else {
@@ -27,12 +28,14 @@ NutStencilL::NutStencilL(const Parameters& parameters)
     : FieldStencil<FlowFieldTurbA>(parameters) {}
 
 void NutStencilL::apply(FlowFieldTurbA& flowField, int i, int j) {
+  // no vortex viscosity, velociy fluctuation, mixing length
   flowField.getNu(i, j) = 0;
   flowField.getU(i, j) = 0;
   flowField.getLm(i, j) = 0;
 }
 
 void NutStencilL::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
+  // no vortex viscosity, velociy fluctuation, mixing length
   flowField.getNu(i, j, k) = 0;
   flowField.getU(i, j, k) = 0;
   flowField.getLm(i, j, k) = 0;
@@ -58,17 +61,19 @@ class limiter3 : public limiter {
   virtual ~limiter3() {}
 
   void limit(const Parameters& parameters, FLOAT& lm, int i, int j) {
+    // only valid for channel!
     FLOAT x = parameters.meshsize->getDx(i, j) / 2 +
               parameters.meshsize->getPosX(i, j);
     FLOAT Rex = x * parameters.flow.Re * parameters.walls.vectorLeft[0];
-    lm = std::min(lm, 0.09 * 4.94 * x / sqrt(Rex));
+    lm = std::min(lm, 0.09 * 4.91 * x / sqrt(Rex));
   }
 
   void limit(const Parameters& parameters, FLOAT& lm, int i, int j, int k) {
+    // only valid for channel!
     FLOAT x = parameters.meshsize->getDx(i, j, k) / 2 +
               parameters.meshsize->getPosX(i, j, k);
     FLOAT Rex = x * parameters.flow.Re * parameters.walls.vectorLeft[0];
-    lm = std::min(lm, 0.09 * 4.94 * x / sqrt(Rex));
+    lm = std::min(lm, 0.09 * 4.91 * x / sqrt(Rex));
   }
 };
 
@@ -80,6 +85,7 @@ class limiter4 : public limiter {
   virtual ~limiter4() {}
 
   void limit(const Parameters& parameters, FLOAT& lm, int i, int j) {
+    // only valid for channel!
     FLOAT x = parameters.meshsize->getDx(i, j) / 2 +
               parameters.meshsize->getPosX(i, j);
     FLOAT Rex = x * parameters.flow.Re * parameters.walls.vectorLeft[0];
@@ -87,6 +93,7 @@ class limiter4 : public limiter {
   }
 
   void limit(const Parameters& parameters, FLOAT& lm, int i, int j, int k) {
+    // only valid for channel!
     FLOAT x = parameters.meshsize->getDx(i, j, k) / 2 +
               parameters.meshsize->getPosX(i, j, k);
     FLOAT Rex = x * parameters.flow.Re * parameters.walls.vectorLeft[0];
@@ -99,12 +106,22 @@ NutStencilA::NutStencilA(const Parameters& parameters)
   std::string nulimiter = parameters.simulation.nulimiter;
 
   if (nulimiter == "1") {
+    // no limitation: lm = kappa*h
+    l = new limiter1();
+  } else if (nulimiter == "2") {
+    // TODO: extract the local boundary layer thickness from the laminar
+    // reference case
     l = new limiter1();
   } else if (nulimiter == "3") {
+    // compute the local boundary layer thickness by assuming a laminar flat
+    // plate Blasius boundary layer
     l = new limiter3();
   } else if (nulimiter == "4") {
+    // compute the local boundary layer thickness by assuming a turbulent flat
+    // boundary layer
     l = new limiter4();
   } else {
+    // default: no limitionen
     l = new limiter1();
   }
 }
@@ -133,17 +150,24 @@ void NutStencilA::computeNUT2D(int i, int j, const FLOAT* const localVelocity,
                                const FLOAT* const localMeshsize,
                                const Parameters& parameters, const FLOAT& h,
                                FLOAT& nu, FLOAT& flu, FLOAT& lmm) {
-  const FLOAT S11 = 2 * dudx(localVelocity, localMeshsize);
-  const FLOAT S22 = 2 * dvdy(localVelocity, localMeshsize);
-  const FLOAT S12 =
-      dudy(localVelocity, localMeshsize) + dvdx(localVelocity, localMeshsize);
+  // calculate entries in shear stress tensor
+  const FLOAT S11 = 0.5 * 2 * dudx(localVelocity, localMeshsize);
+  const FLOAT S22 = 0.5 * 2 * dvdy(localVelocity, localMeshsize);
+  const FLOAT S12 = 0.5 * (dudy(localVelocity, localMeshsize) +
+                           dvdx(localVelocity, localMeshsize));
+
+  // (2*S_ij*S_ij)^0.5
   const FLOAT grad = sqrt(2 * (S11 * S11 + S22 * S22 + 2 * S12 * S12));
+
+  // calculate mixing length
   FLOAT lm = 0.41 * h;
-
   l->limit(parameters, lm, i, j);
-
   lmm = lm;
+
+  // calculate velocity fluctuation
   flu = lm * grad;
+
+  // calculate vortex viscosity
   nu = lm * lm * grad;
 }
 
@@ -152,23 +176,30 @@ void NutStencilA::computeNUT3D(int i, int j, int k,
                                const FLOAT* const localMeshsize,
                                const Parameters& parameters, const FLOAT& h,
                                FLOAT& nu, FLOAT& flu, FLOAT& lmm) {
-  // clang-format off
-  const FLOAT S11 = 2 * dudx(localVelocity, localMeshsize);
-  const FLOAT S22 = 2 * dvdy(localVelocity, localMeshsize);
-  const FLOAT S33 = 2 * dwdz(localVelocity, localMeshsize);
-  const FLOAT S12 = dudy(localVelocity, localMeshsize)
-                  + dvdx(localVelocity, localMeshsize);
-  const FLOAT S13 = dudz(localVelocity, localMeshsize)
-                  + dwdx(localVelocity, localMeshsize);
-  const FLOAT S23 = dwdy(localVelocity, localMeshsize)
-                  + dvdz(localVelocity, localMeshsize);
-  const FLOAT grad = sqrt(2 * (S11 * S11 + S22 * S22 + S33*S33 + 2 * (S12 * S12 + S13 * S13 + S23 * S23)));
-  FLOAT lm = 0.41 * h;
   // clang-format on
+  // calculate entries in shear stress tensor
+  const FLOAT S11 = 0.5 * 2 * dudx(localVelocity, localMeshsize);
+  const FLOAT S22 = 0.5 * 2 * dvdy(localVelocity, localMeshsize);
+  const FLOAT S33 = 0.5 * 2 * dwdz(localVelocity, localMeshsize);
+  const FLOAT S12 = 0.5 * (dudy(localVelocity, localMeshsize) +
+                           dvdx(localVelocity, localMeshsize));
+  const FLOAT S13 = 0.5 * (dudz(localVelocity, localMeshsize) +
+                           dwdx(localVelocity, localMeshsize));
+  const FLOAT S23 = 0.5 * (dwdy(localVelocity, localMeshsize) +
+                           dvdz(localVelocity, localMeshsize));
+  // (2*S_ij*S_ij)^0.5
+  const FLOAT grad = sqrt(2 * (S11 * S11 + S22 * S22 + S33 * S33 +
+                               2 * (S12 * S12 + S13 * S13 + S23 * S23)));
 
+  // calculate mixing length
+  FLOAT lm = 0.41 * h;
   l->limit(parameters, lm, i, j, k);
-
   lmm = lm;
+
+  // calculate velocity fluctuation
   flu = lm * grad;
+
+  // calculate vortex viscosity
   nu = lm * lm * grad;
+  // clang-format off
 }

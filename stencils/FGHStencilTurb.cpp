@@ -7,7 +7,8 @@ FGHStencilTurb::FGHStencilTurb(const Parameters& parameters)
     : FieldStencil<FlowFieldTurbA>(parameters) {}
 
 void FGHStencilTurb::apply(FlowFieldTurbA& flowField, int i, int j) {
-  // Load local velocities into the center layer of the local array
+  // Load local vortex viscostiy and velocities into the center layer of the
+  // local array
 
   loadLocalNu2D(_parameters, flowField, _localNu, i, j);
   loadLocalVelocity2D(flowField, _localVelocity, i, j);
@@ -16,8 +17,7 @@ void FGHStencilTurb::apply(FlowFieldTurbA& flowField, int i, int j) {
   FLOAT* const values = flowField.getFGH().getVector(i, j);
 
   // Now the localVelocity array should contain lexicographically ordered
-  // elements around the
-  // given index
+  // elements around the given index
 
   values[0] = computeF2DT(_localVelocity, _localMeshsize, _localNu, _parameters,
                           _parameters.timestep.dt);

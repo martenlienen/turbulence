@@ -98,6 +98,7 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
         _hit(_flowField, _parameters, _hst, 0, 0),
         _minnutst(parameters),
         _minnutit(_flowField, _parameters, _minnutst, 1, 0) {
+    // distance to the next wall
     this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
         this->_parameters, "h",
         [](FlowFieldTurbA &f, int i, int j) { return f.getH(i, j); },
@@ -105,6 +106,7 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
           return f.getH(i, j, k);
         }));
 
+    // vortex viscosity
     this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
         this->_parameters, "nu",
         [](FlowFieldTurbA &f, int i, int j) { return f.getNu(i, j); },
@@ -112,6 +114,7 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
           return f.getNu(i, j, k);
         }));
 
+    // mixing length
     this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
         this->_parameters, "lm",
         [](FlowFieldTurbA &f, int i, int j) { return f.getLm(i, j); },
@@ -119,6 +122,7 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
           return f.getLm(i, j, k);
         }));
 
+    // velocity fluctuation
     this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
         this->_parameters, "u",
         [](FlowFieldTurbA &f, int i, int j) { return f.getU(i, j); },
@@ -126,8 +130,9 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
           return f.getU(i, j, k);
         }));
 
+    // actual pressure (without tke)
     this->scalarStencils.push_back(CellDataStencil<double, FlowFieldTurbA>(
-        this->_parameters, "pressure",
+        this->_parameters, "pressureactual",
         [](FlowFieldTurbA &f, int i, int j) {
           return f.getPressure().getScalar(i, j) - f.getU(i, j) * f.getU(i, j);
         },
@@ -187,7 +192,7 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
 
     timer->start("fgh");
 
-    // compute fgh
+    // compute fgh (turbulent)
     _fghIterator.iterate();
 
     timer->stop("fgh");
@@ -230,16 +235,16 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
     // Iterate for velocities on the boundary
     _wallVelocityIterator.iterate();
 
-    // compute nut
+    // compute vortex viscosity
     _nutit.iterate();
 
+    // communicate vortex viscosity
     nutComm.communicate(this->_flowField);
   }
 
  protected:
   /** sets the time step*/
   virtual void setTimeStep() {
-    // pm-20151108
     _minnutst.reset();
     _minnutit.iterate();
 
@@ -262,6 +267,8 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
       _parameters.timestep.dt = 1.0 / _maxUStencil.getMaxValues()[0];
     }
 
+    // determin minimal timestep on domain with formula:
+    // dt = 1/(2 * (nu+nut))/(dx_min^-2+dy_min^-2+dz_min^-2))
     localMin = std::min(_parameters.timestep.dt,
                         std::min(std::min(1 / (1 / _parameters.flow.Re +
                                                _minnutst.getMinimum()) /
