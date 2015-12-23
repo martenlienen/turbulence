@@ -84,6 +84,18 @@ class FlowFieldSimulation : public Simulation {
             FLOAT v[3];
             f.getPressureAndVelocity(p, v, i, j, k);
             return std::vector<double>{v[0], v[1], v[2]};
+          }),
+      CellDataStencil<std::vector<double>, FF>(
+          this->_parameters, "velocity-raw",
+          [](FF &f, int i, int j) {
+            FLOAT *v = f.getVelocity().getVector(i, j);
+
+            return std::vector<double>{v[0], v[1]};
+          },
+          [](FF &f, int i, int j, int k) {
+            FLOAT *v = f.getVelocity().getVector(i, j, k);
+
+            return std::vector<double>{v[0], v[1], v[2]};
           })};
 
  public:
