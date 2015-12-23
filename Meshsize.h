@@ -138,25 +138,28 @@ class TanhMeshStretching : public Meshsize {
   }
 
   virtual FLOAT getPosCellX(int i, int j, int k) const {
-    FLOAT d = getDx(i, j, k) / 2;
     if (_stretchX) {
-      return computeCoordinate(i, 2, _sizeX, _lengthX, _dxMin) + d;
+      return (computeCoordinate(i, 0, _sizeX, _lengthX, _dxMin) +
+              computeCoordinate(i + 1, 0, _sizeX, _lengthX, _dxMin)) /
+             2;
     } else {
       return _uniformMeshsize.getPosCellX(i, j, k);
     }
   }
   virtual FLOAT getPosCellY(int i, int j, int k) const {
-    FLOAT d = getDy(i, j, k) / 2;
     if (_stretchY) {
-      return computeCoordinate(j, 2, _sizeY, _lengthY, _dyMin) + d;
+      return (computeCoordinate(j, 0, _sizeY, _lengthY, _dyMin) +
+              computeCoordinate(j + 1, 0, _sizeY, _lengthY, _dyMin)) /
+             2;
     } else {
       return _uniformMeshsize.getPosCellY(i, j, k);
     }
   }
   virtual FLOAT getPosCellZ(int i, int j, int k) const {
-    FLOAT d = getDz(i, j, k) / 2;
     if (_stretchZ) {
-      return computeCoordinate(k, 2, _sizeZ, _lengthZ, _dzMin) + d;
+      return (computeCoordinate(k, 0, _sizeZ, _lengthZ, _dzMin) +
+              computeCoordinate(k + 1, 0, _sizeZ, _lengthZ, _dzMin)) /
+             2;
     } else {
       return _uniformMeshsize.getPosCellZ(i, j, k);
     }
