@@ -189,8 +189,6 @@ class SimulationLaminar : public FlowFieldSimulation<FlowField> {
                                           1.0 / _maxUStencil.getMaxValues()[0]),
                                  1.0 / _maxUStencil.getMaxValues()[1]));
 
-    localMin = 1e-4;
-
     // Here, we select the type of operation before compiling. This allows to
     // use the correct
     // data type for MPI. Not a concern for small simulations, but useful if
@@ -202,7 +200,6 @@ class SimulationLaminar : public FlowFieldSimulation<FlowField> {
                   PETSC_COMM_WORLD);
 
     _parameters.timestep.dt = globalMin;
-    _parameters.timestep.dt = 1e-3;
     _parameters.timestep.dt *= _parameters.timestep.tau;
   }
 };

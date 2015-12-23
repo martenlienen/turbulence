@@ -18,8 +18,13 @@ GlobalBoundaryFactory::GlobalBoundaryFactory(Parameters& parameters)
   _outflow[0] = new NeumannVelocityBoundaryStencil(parameters);
   _outflow[1] = new NeumannFGHBoundaryStencil(parameters);
 
-  _channelInput[0] = new BFInputVelocityStencil(parameters);
-  _channelInput[1] = new BFInputFGHStencil(parameters);
+  if (parameters.simulation.uniform == "true") {
+    _channelInput[0] = new BFInputVelocityStencilUniform(parameters);
+    _channelInput[1] = new BFInputFGHStencilUniform(parameters);
+  } else {
+    _channelInput[0] = new BFInputVelocityStencil(parameters);
+    _channelInput[1] = new BFInputFGHStencil(parameters);
+  }
 
   // Then, assign them according to the scenario
   std::string scenario = parameters.simulation.scenario;

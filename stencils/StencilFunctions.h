@@ -971,52 +971,6 @@ inline FLOAT computeH3D(const FLOAT* const localVelocity,
 
 /*
  * 2015.11.07-pm:
- * calculate nut
- *
- *
- *
- *
- */
-inline void computeNUT2D(const FLOAT* const localVelocity,
-                         const FLOAT* const localMeshsize,
-                         const Parameters& parameters, const FLOAT& h,
-                         FLOAT& nu, FLOAT& flu, FLOAT& lmm) {
-  const FLOAT S11 = 2 * dudx(localVelocity, localMeshsize);
-  const FLOAT S22 = 2 * dvdy(localVelocity, localMeshsize);
-  const FLOAT S12 =
-      dudy(localVelocity, localMeshsize) + dvdx(localVelocity, localMeshsize);
-  const FLOAT grad = sqrt(2 * (S11 * S11 + S22 * S22 + 2 * S12 * S12));
-  const FLOAT lm = 0.41 * h;
-
-  lmm = lm;
-  flu = lm * grad;
-  nu = lm * lm * grad;
-}
-
-inline void computeNUT3D(const FLOAT* const localVelocity,
-                         const FLOAT* const localMeshsize,
-                         const Parameters& parameters, const FLOAT& h,
-                         FLOAT& nu, FLOAT& flu, FLOAT& lmm) {
-  const FLOAT S11 = 2 * dudx(localVelocity, localMeshsize);
-  const FLOAT S22 = 2 * dvdy(localVelocity, localMeshsize);
-  const FLOAT S33 = 2 * dwdz(localVelocity, localMeshsize);
-  const FLOAT S12 =
-      dudy(localVelocity, localMeshsize) + dvdx(localVelocity, localMeshsize);
-  const FLOAT S13 =
-      dudz(localVelocity, localMeshsize) + dwdx(localVelocity, localMeshsize);
-  const FLOAT S23 =
-      dwdy(localVelocity, localMeshsize) + dvdz(localVelocity, localMeshsize);
-  const FLOAT grad = sqrt(2 * (S11 * S11 + S22 * S22 + S33 * S33 +
-                               2 * (S12 * S12 + S13 * S13 + S23 * S23)));
-  const FLOAT lm = 0.41 * h;
-
-  lmm = lm;
-  flu = lm * grad;
-  nu = lm * lm * grad;
-}
-
-/*
- * 2015.11.07-pm:
  * interpolate nu
  *
  *

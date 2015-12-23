@@ -255,6 +255,8 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
                                           1.0 / _maxUStencil.getMaxValues()[0]),
                                  1.0 / _maxUStencil.getMaxValues()[1]));
 
+    //    localMin /=10;
+
     // pm-20151108
     //    cout << _maxUStencil.getMaxValues()[0] << " "
     //         << _maxUStencil.getMaxValues()[1] << endl;
@@ -276,7 +278,7 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
                   PETSC_COMM_WORLD);
 
     _parameters.timestep.dt = globalMin;
-    _parameters.timestep.dt = 1e-3;
+    //    _parameters.timestep.dt = 1e-3;
     _parameters.timestep.dt *= _parameters.timestep.tau;
   }
 };

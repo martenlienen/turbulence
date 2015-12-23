@@ -1,5 +1,31 @@
 #include "BFInputStencils.h"
 
+FLOAT computeVelocity3DUniform(FlowField& flowField, int i, int j, int k,
+                               FLOAT stepSize, const Parameters& parameters) {
+  const FLOAT posY = parameters.meshsize->getPosY(i, j, k);
+  const FLOAT dy = parameters.meshsize->getDy(i, j, k);
+
+  if (posY + 0.5 * dy >= stepSize) {
+    return parameters.walls.vectorLeft[0];
+  } else {
+    return 0.0;
+  }
+}
+
+FLOAT computeVelocity2DUniform(FlowField& flowField, int i, int j,
+                               FLOAT stepSize, const Parameters& parameters) {
+  //  std::cout << 1 << std::endl;;
+
+  const FLOAT posY = parameters.meshsize->getPosY(i, j);
+  const FLOAT dy = parameters.meshsize->getDy(i, j);
+
+  if (posY + 0.5 * dy >= stepSize) {
+    return parameters.walls.vectorLeft[0];
+  } else {
+    return 0.0;
+  }
+}
+
 FLOAT computeVelocity3D(FlowField& flowField, int i, int j, int k,
                         FLOAT stepSize, const Parameters& parameters) {
   const FLOAT posY = parameters.meshsize->getPosY(i, j, k);
@@ -26,6 +52,8 @@ FLOAT computeVelocity3D(FlowField& flowField, int i, int j, int k,
 
 FLOAT computeVelocity2D(FlowField& flowField, int i, int j, FLOAT stepSize,
                         const Parameters& parameters) {
+  //    std::cout << 2 << std::endl;
+
   const FLOAT posY = parameters.meshsize->getPosY(i, j);
   const FLOAT dy = parameters.meshsize->getDy(i, j);
 
@@ -37,12 +65,36 @@ FLOAT computeVelocity2D(FlowField& flowField, int i, int j, FLOAT stepSize,
     const FLOAT y = posY + 0.5 * dy - stepSize;
 
     // DMITRIIS VERSION: for turbulence, please use: return
-    // parameters.walls.vectorLeft[0];
+    //    return parameters.walls.vectorLeft[0];
     return 6.0 * parameters.walls.vectorLeft[0] / (inletYSize * inletYSize) *
            y * (inletYSize - y);
   } else {
     return 0.0;
   }
+}
+
+FLOAT BFInputVelocityStencil::computeVelocity3DLocal(
+    FlowField& flowField, int i, int j, int k, FLOAT stepSize,
+    const Parameters& parameters) {
+  return computeVelocity3D(flowField, i, j, k, stepSize, parameters);
+}
+
+FLOAT BFInputVelocityStencil::computeVelocity2DLocal(
+    FlowField& flowField, int i, int j, FLOAT stepSize,
+    const Parameters& parameters) {
+  return computeVelocity2D(flowField, i, j, stepSize, parameters);
+}
+
+FLOAT BFInputVelocityStencilUniform::computeVelocity3DLocal(
+    FlowField& flowField, int i, int j, int k, FLOAT stepSize,
+    const Parameters& parameters) {
+  return computeVelocity3DUniform(flowField, i, j, k, stepSize, parameters);
+}
+
+FLOAT BFInputVelocityStencilUniform::computeVelocity2DLocal(
+    FlowField& flowField, int i, int j, FLOAT stepSize,
+    const Parameters& parameters) {
+  return computeVelocity2DUniform(flowField, i, j, stepSize, parameters);
 }
 
 BFInputVelocityStencil::BFInputVelocityStencil(const Parameters& parameters)
@@ -95,7 +147,7 @@ BFInputVelocityStencil::BFInputVelocityStencil(const Parameters& parameters)
 
 void BFInputVelocityStencil::applyLeftWall(FlowField& flowField, int i, int j) {
   flowField.getVelocity().getVector(i, j)[0] =
-      computeVelocity2D(flowField, i, j, _stepSize, _parameters);
+      computeVelocity2DLocal(flowField, i, j, _stepSize, _parameters);
   flowField.getVelocity().getVector(i, j)[1] =
       -flowField.getVelocity().getVector(i + 1, j)[1];
 }
@@ -109,7 +161,7 @@ void BFInputVelocityStencil::applyTopWall(FlowField& flowField, int i, int j) {}
 void BFInputVelocityStencil::applyLeftWall(FlowField& flowField, int i, int j,
                                            int k) {
   flowField.getVelocity().getVector(i, j, k)[0] =
-      computeVelocity3D(flowField, i, j, k, _stepSize, _parameters);
+      computeVelocity3DLocal(flowField, i, j, k, _stepSize, _parameters);
   flowField.getVelocity().getVector(i, j, k)[1] =
       -flowField.getVelocity().getVector(i + 1, j, k)[1];
   flowField.getVelocity().getVector(i, j, k)[2] =
@@ -135,7 +187,7 @@ BFInputFGHStencil::BFInputFGHStencil(const Parameters& parameters)
 
 void BFInputFGHStencil::applyLeftWall(FlowField& flowField, int i, int j) {
   flowField.getFGH().getVector(i, j)[0] =
-      computeVelocity2D(flowField, i, j, _stepSize, _parameters);
+      computeVelocity2DLocal(flowField, i, j, _stepSize, _parameters);
 }
 
 void BFInputFGHStencil::applyRightWall(FlowField& flowField, int i, int j) {}
@@ -145,7 +197,7 @@ void BFInputFGHStencil::applyTopWall(FlowField& flowField, int i, int j) {}
 void BFInputFGHStencil::applyLeftWall(FlowField& flowField, int i, int j,
                                       int k) {
   flowField.getFGH().getVector(i, j, k)[0] =
-      computeVelocity3D(flowField, i, j, k, _stepSize, _parameters);
+      computeVelocity3DLocal(flowField, i, j, k, _stepSize, _parameters);
 }
 
 void BFInputFGHStencil::applyRightWall(FlowField& flowField, int i, int j,
@@ -158,3 +210,27 @@ void BFInputFGHStencil::applyFrontWall(FlowField& flowField, int i, int j,
                                        int k) {}
 void BFInputFGHStencil::applyBackWall(FlowField& flowField, int i, int j,
                                       int k) {}
+
+FLOAT BFInputFGHStencil::computeVelocity3DLocal(FlowField& flowField, int i,
+                                                int j, int k, FLOAT stepSize,
+                                                const Parameters& parameters) {
+  return computeVelocity3D(flowField, i, j, k, stepSize, parameters);
+}
+
+FLOAT BFInputFGHStencil::computeVelocity2DLocal(FlowField& flowField, int i,
+                                                int j, FLOAT stepSize,
+                                                const Parameters& parameters) {
+  return computeVelocity2D(flowField, i, j, stepSize, parameters);
+}
+
+FLOAT BFInputFGHStencilUniform::computeVelocity3DLocal(
+    FlowField& flowField, int i, int j, int k, FLOAT stepSize,
+    const Parameters& parameters) {
+  return computeVelocity3DUniform(flowField, i, j, k, stepSize, parameters);
+}
+
+FLOAT BFInputFGHStencilUniform::computeVelocity2DLocal(
+    FlowField& flowField, int i, int j, FLOAT stepSize,
+    const Parameters& parameters) {
+  return computeVelocity2DUniform(flowField, i, j, stepSize, parameters);
+}
