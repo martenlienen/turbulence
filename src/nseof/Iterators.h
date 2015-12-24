@@ -4,6 +4,8 @@
 #include "Stencil.h"
 #include "Parameters.h"
 
+namespace nseof {
+
 /** Iterator class
  *
  * Applies operations to a flow field
@@ -116,6 +118,7 @@ class GlobalBoundaryIterator : public Iterator<FlowField> {
    */
   void iterate();
 };
+}
 
 #include "Iterators.cpph"
 

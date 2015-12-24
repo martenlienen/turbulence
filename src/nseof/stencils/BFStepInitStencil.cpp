@@ -1,5 +1,7 @@
 #include "BFStepInitStencil.h"
 
+namespace nseof {
+
 BFStepInitStencil::BFStepInitStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters),
       xLimit(parameters.bfStep.xRatio * parameters.geometry.lengthX),
@@ -63,4 +65,5 @@ void BFStepInitStencil::apply(FlowField& flowField, int i, int j, int k) {
   if (posX + 0.5 * dx < xLimit && posY + dx + 0.5 * nextDy < yLimit) {
     flags.getValue(i, j, k) += OBSTACLE_TOP;
   }
+}
 }

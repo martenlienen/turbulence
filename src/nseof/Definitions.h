@@ -7,6 +7,8 @@
 #include <float.h>
 #include <petscksp.h>
 
+namespace nseof {
+
 // Datatype for the type of data stored in the structures
 #ifdef USE_SINGLE_PRECISION
 #define MY_MPI_FLOAT MPI_FLOAT
@@ -46,8 +48,6 @@ const int OBSTACLE_BACK = 1 << 6;
 #define assertion(boolean)
 #endif
 
-#endif
-
 // An error handler, at least to check memory allocation. Active also outside
 // debug
 
@@ -58,3 +58,6 @@ const int OBSTACLE_BACK = 1 << 6;
               << #message << std::endl;                                \
     exit(code);                                                        \
   }
+}
+
+#endif

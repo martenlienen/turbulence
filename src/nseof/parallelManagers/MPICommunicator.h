@@ -17,6 +17,8 @@
 #include "../iterators/LeftRightBoundaryIterator.h"
 #include "../iterators/ParallelBoundaryIterator.h"
 
+namespace nseof {
+
 template <typename T>
 struct MPIType {
   typedef char type;
@@ -171,6 +173,7 @@ void MPICommunicator<T, FF>::exchangeValues(
 
     writeIterator.second.iterate();
   }
+}
 }
 
 #endif  // _MPI_COMMUNICATOR_H_

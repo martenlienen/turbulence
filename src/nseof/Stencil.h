@@ -3,6 +3,8 @@
 
 #include "Parameters.h"
 
+namespace nseof {
+
 /** Stencil class
  *
  * Abstrat class for the definition of stencils and operations on the grids
@@ -131,5 +133,6 @@ class BoundaryStencil {
    */
   virtual void applyBackWall(FlowField& flowField, int i, int j, int k) = 0;
 };
+}
 
 #endif

@@ -7,6 +7,8 @@
 #include "../Iterators.h"
 #include "../Point.h"
 
+namespace nseof {
+
 template <typename FF, typename T>
 class RangeIterator : public Iterator<FF> {
  public:
@@ -61,6 +63,7 @@ void RangeIterator<FF, T>::iterate() {
       }
     }
   }
+}
 }
 
 #endif  // RANGE_ITERATOR_H_

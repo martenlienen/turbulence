@@ -4,6 +4,8 @@
 #include <sys/time.h>
 #include "Definitions.h"
 
+namespace nseof {
+
 /** Timer. Used for scaling measurements.
  */
 class SimpleTimer {
@@ -27,5 +29,6 @@ class SimpleTimer {
   struct timeval _startingTime;
   struct timeval _currentTime;
 };
+}
 
 #endif

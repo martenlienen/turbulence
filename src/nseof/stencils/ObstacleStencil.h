@@ -5,6 +5,8 @@
 #include "../Parameters.h"
 #include "../FlowField.h"
 
+namespace nseof {
+
 /** Compute all velocities on obstacle cells. This has been taken out of
  * Velocity stencil to circumvent any race conditions
  **/
@@ -30,5 +32,6 @@ class ObstacleStencil : public FieldStencil<FlowField> {
    */
   void apply(FlowField& flowField, int i, int j, int k);
 };
+}
 
 #endif

@@ -1,5 +1,7 @@
 #include "NeumannBoundaryStencils.h"
 
+namespace nseof {
+
 NeumannVelocityBoundaryStencil::NeumannVelocityBoundaryStencil(
     const Parameters& parameters)
     : BoundaryStencil<FlowField>(parameters) {}
@@ -126,3 +128,4 @@ void NeumannFGHBoundaryStencil::applyFrontWall(FlowField& flowField, int i,
                                                int j, int k) {}
 void NeumannFGHBoundaryStencil::applyBackWall(FlowField& flowField, int i,
                                               int j, int k) {}
+}

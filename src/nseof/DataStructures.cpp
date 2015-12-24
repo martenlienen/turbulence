@@ -1,5 +1,7 @@
 #include "DataStructures.h"
 
+namespace nseof {
+
 // Functions for scalar and vector fields -------------------------------------
 
 // Functions specific to the scalar field -------------------------------------
@@ -113,4 +115,5 @@ void IntScalarField::show(const std::string title) {
     }
     std::cout << std::endl;
   }
+}
 }

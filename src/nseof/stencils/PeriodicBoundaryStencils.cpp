@@ -1,5 +1,7 @@
 #include "PeriodicBoundaryStencils.h"
 
+namespace nseof {
+
 PeriodicBoundaryVelocityStencil::PeriodicBoundaryVelocityStencil(
     const Parameters& parameters)
     : BoundaryStencil<FlowField>(parameters) {}
@@ -126,3 +128,4 @@ void PeriodicBoundaryFGHStencil::applyFrontWall(FlowField& flowField, int i,
                                                 int j, int k) {}
 void PeriodicBoundaryFGHStencil::applyBackWall(FlowField& flowField, int i,
                                                int j, int k) {}
+}

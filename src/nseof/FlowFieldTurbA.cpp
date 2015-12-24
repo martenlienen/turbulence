@@ -1,6 +1,8 @@
 #include "FlowField.h"
 #include "FlowFieldTurbA.h"
 
+namespace nseof {
+
 FlowFieldTurbA::FlowFieldTurbA(const Parameters& parameters)
     : _flowField(parameters),
       _nu(parameters.geometry.dim == 2
@@ -71,4 +73,5 @@ FLOAT& FlowFieldTurbA::getLm(int i, int j, int k) {
 FLOAT& FlowFieldTurbA::getU(int i, int j) { return _u.getScalar(i, j); }
 FLOAT& FlowFieldTurbA::getU(int i, int j, int k) {
   return _u.getScalar(i, j, k);
+}
 }

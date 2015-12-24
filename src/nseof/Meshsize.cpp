@@ -2,6 +2,8 @@
 
 #include "Parameters.h"
 
+namespace nseof {
+
 UniformMeshsize::UniformMeshsize(const Parameters &parameters)
     : Meshsize(),
       _dx(parameters.geometry.lengthX / parameters.geometry.sizeX),
@@ -69,3 +71,4 @@ TanhMeshStretching::TanhMeshStretching(const Parameters &parameters,
               : _uniformMeshsize.getDz(0, 0, 0)) {}
 
 TanhMeshStretching::~TanhMeshStretching() {}
+}

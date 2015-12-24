@@ -3,6 +3,8 @@
 
 #include "Definitions.h"
 
+namespace nseof {
+
 /** Storage of a scalar field
  *
  * Parent of storage classes. Contains the data pointer and sizes in each
@@ -240,5 +242,6 @@ class IntScalarField : public Field<int> {
 
   void show(const std::string title = "");
 };
+}
 
 #endif

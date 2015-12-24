@@ -24,6 +24,8 @@
 #include "solvers/SORSolver.h"
 #include "solvers/PetscSolver.h"
 
+namespace nseof {
+
 class SimulationLaminar : public FlowFieldSimulation<FlowField> {
  protected:
   MaxUStencil _maxUStencil;
@@ -203,5 +205,6 @@ class SimulationLaminar : public FlowFieldSimulation<FlowField> {
     _parameters.timestep.dt *= _parameters.timestep.tau;
   }
 };
+}
 
 #endif  // _SIMULATION_LAMINAR_H_

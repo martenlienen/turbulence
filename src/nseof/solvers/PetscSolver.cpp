@@ -1,5 +1,7 @@
 #include "PetscSolver.h"
 
+namespace nseof {
+
 // This function returns the ranges to work on the pressure with the
 // non-boundary stencil.
 // Since the domain PETSc deals with has an additional layer of cells, the size
@@ -1211,4 +1213,5 @@ void PetscSolver::reInitMatrix() {
     KSPSetComputeOperators(_ksp, computeMatrix2D, &_ctx);
   else
     KSPSetComputeOperators(_ksp, computeMatrix3D, &_ctx);
+}
 }

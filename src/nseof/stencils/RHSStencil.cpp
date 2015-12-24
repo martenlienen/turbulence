@@ -1,5 +1,7 @@
 #include "RHSStencil.h"
 
+namespace nseof {
+
 RHSStencil::RHSStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}
 
@@ -26,4 +28,5 @@ void RHSStencil::apply(FlowField& flowField, int i, int j, int k) {
        (flowField.getFGH().getVector(i, j, k)[2] -
         flowField.getFGH().getVector(i, j, k - 1)[2]) /
            _parameters.meshsize->getDz(i, j, k));
+}
 }

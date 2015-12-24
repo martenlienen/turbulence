@@ -5,6 +5,8 @@
 #include "../FlowField.h"
 #include "../Definitions.h"
 
+namespace nseof {
+
 /** initialized the backward facing step scenario, i.e. sets the flag field.
  *
  */
@@ -19,5 +21,6 @@ class BFStepInitStencil : public FieldStencil<FlowField> {
   const FLOAT xLimit;  //! size of step in x-direction
   const FLOAT yLimit;  //! Same as for x
 };
+}
 
 #endif

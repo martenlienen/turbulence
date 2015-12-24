@@ -4,6 +4,8 @@
 #include "Configuration.h"
 #include "Parameters.h"
 
+namespace nseof {
+
 void readFloatMandatory(FLOAT &storage, tinyxml2::XMLElement *node,
                         const char *tag) {
   double value;  // Use to be able to select precision
@@ -525,4 +527,5 @@ void Configuration::loadParameters(Parameters &parameters,
   broadcastString(parameters.flow.type, communicator);
   broadcastString(parameters.simulation.nulimiter, communicator);
   broadcastString(parameters.simulation.uniform, communicator);
+}
 }

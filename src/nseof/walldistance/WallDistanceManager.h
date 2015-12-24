@@ -7,6 +7,8 @@
 
 #include "../Parameters.h"
 
+namespace nseof {
+
 class WallDistanceManager {
  public:
   WallDistanceManager(const Parameters& parameters);
@@ -55,5 +57,6 @@ class WallDistanceManager {
 
   void initObstacles();
 };
+}
 
 #endif  // _WALLDISTANCEMANAGER_H_

@@ -2,6 +2,8 @@
 #include <math.h>
 #include "SORSolver.h"
 
+namespace nseof {
+
 SORSolver::SORSolver(FlowField& flowField, const Parameters& parameters)
     : LinearSolver(flowField, parameters) {}
 
@@ -207,4 +209,5 @@ void SORSolver::solve() {
       it++;
     } while (resnorm > tol && iterations);
   }
+}
 }

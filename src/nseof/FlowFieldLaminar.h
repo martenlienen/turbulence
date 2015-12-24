@@ -5,6 +5,8 @@
 #include "Parameters.h"
 #include "FlowField.h"
 
+namespace nseof {
+
 /** Flow field
  *
  * Class intended to contain the state of the domain.
@@ -67,5 +69,6 @@ class FlowFieldLaminar : public FlowField {
   void getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity, int i,
                               int j, int k);
 };
+}
 
 #endif

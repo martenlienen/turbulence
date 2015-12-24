@@ -29,6 +29,8 @@
 #include "solvers/PetscSolver.h"
 #include "parallelManagers/MPICommunicator.h"
 
+namespace nseof {
+
 class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
  protected:
   MaxUStencil _maxUStencil;
@@ -284,5 +286,6 @@ class SimulationTurbA : public FlowFieldSimulation<FlowFieldTurbA> {
     _parameters.timestep.dt *= _parameters.timestep.tau;
   }
 };
+}
 
 #endif  // _SIMULATION_TURB_A_H_

@@ -1,5 +1,7 @@
 #include "MovingWallStencils.h"
 
+namespace nseof {
+
 MovingWallVelocityStencil::MovingWallVelocityStencil(
     const Parameters& parameters)
     : BoundaryStencil<FlowField>(parameters) {}
@@ -168,4 +170,5 @@ void MovingWallFGHStencil::applyBackWall(FlowField& flowField, int i, int j,
                                          int k) {
   flowField.getFGH().getVector(i, j, k - 1)[2] =
       _parameters.walls.vectorBack[2];
+}
 }

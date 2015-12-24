@@ -1,5 +1,7 @@
 #include "SimpleTimer.h"
 
+namespace nseof {
+
 FLOAT timeDifference(const struct timeval& t1, const struct timeval& t2) {
   long seconds, useconds;
   seconds = t2.tv_sec - t1.tv_sec;
@@ -21,4 +23,5 @@ FLOAT SimpleTimer::getTimeAndRestart() {
 FLOAT SimpleTimer::getTimeAndContinue() {
   gettimeofday(&_currentTime, NULL);
   return timeDifference(_startingTime, _currentTime);
+}
 }

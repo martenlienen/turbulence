@@ -1,5 +1,7 @@
 #include "PetscParallelConfiguration.h"
 
+namespace nseof {
+
 PetscParallelConfiguration::PetscParallelConfiguration(Parameters& parameters)
     : _parameters(parameters) {
   // Obtain the rank of the current processor
@@ -142,4 +144,5 @@ void PetscParallelConfiguration::freeSizes() {
   for (int i = 0; i < dim; i++) {
     delete[] _parameters.parallel.sizes[i];
   }
+}
 }

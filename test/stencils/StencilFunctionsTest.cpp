@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <nseof/stencils/StencilFunctions.h>
 
+namespace nseof {
+
 TEST(X, x) { ASSERT_EQ(5, 2 + 3); }
 
 TEST(stencil, FdnududxdxTest) {
@@ -117,4 +119,5 @@ TEST(stencil, biLinearInterpolationTest) {
 
   // CENTRE
   ASSERT_EQ(2.5, biLinearInterpolation(1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 3.0, 4.0));
+}
 }

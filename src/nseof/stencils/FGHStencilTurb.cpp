@@ -3,6 +3,8 @@
 #include "../Definitions.h"
 #include "../FlowFieldTurbA.h"
 
+namespace nseof {
+
 FGHStencilTurb::FGHStencilTurb(const Parameters& parameters)
     : FieldStencil<FlowFieldTurbA>(parameters) {}
 
@@ -51,4 +53,5 @@ void FGHStencilTurb::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
                               _parameters, _parameters.timestep.dt);
     }
   }
+}
 }

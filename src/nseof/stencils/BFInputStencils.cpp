@@ -1,5 +1,7 @@
 #include "BFInputStencils.h"
 
+namespace nseof {
+
 FLOAT computeVelocity3DUniform(FlowField& flowField, int i, int j, int k,
                                FLOAT stepSize, const Parameters& parameters) {
   const FLOAT posY = parameters.meshsize->getPosY(i, j, k);
@@ -233,4 +235,5 @@ FLOAT BFInputFGHStencilUniform::computeVelocity2DLocal(
     FlowField& flowField, int i, int j, FLOAT stepSize,
     const Parameters& parameters) {
   return computeVelocity2DUniform(flowField, i, j, stepSize, parameters);
+}
 }

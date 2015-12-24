@@ -1,4 +1,4 @@
-
+namespace nseof {
 
 template <class FlowField>
 FieldIterator<FlowField>::FieldIterator(FlowField& flowField,
@@ -210,4 +210,5 @@ void GlobalBoundaryIterator<FlowField>::iterate() {
       }
     }
   }
+}
 }

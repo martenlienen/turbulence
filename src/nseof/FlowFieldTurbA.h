@@ -6,6 +6,8 @@
 #include "FlowField.h"
 #include "FlowFieldLaminar.h"
 
+namespace nseof {
+
 /** Flow field for algebraic turbulent model:
  *    - it is a flow field
  *    - has a laminar flow field
@@ -67,5 +69,6 @@ class FlowFieldTurbA : public FlowField {
   FLOAT& getLm(int i, int j);
   FLOAT& getLm(int i, int j, int k);
 };
+}
 
 #endif

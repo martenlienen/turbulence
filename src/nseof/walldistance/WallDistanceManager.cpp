@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+namespace nseof {
+
 WallDistanceManager::WallDistanceManager(const Parameters& parameters)
     : _parameters(parameters),
       x(0),
@@ -254,4 +256,5 @@ double WallDistanceManager::query(int i, int j, int kk) {
   }
 
   return dists[0];
+}
 }

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
+
 #include "Configuration.h"
 #include "Simulation.h"
 #include "SimulationLaminar.h"
@@ -11,12 +13,10 @@
 #include "MeshsizeFactory.h"
 #include "FlowFieldTurbA.h"
 #include "FlowFieldLaminar.h"
-#include <iomanip>
-
 #include "MultiTimer.h"
 
 int main(int argc, char *argv[]) {
-  MultiTimer *timer = MultiTimer::get();
+  auto timer = nseof::MultiTimer::get();
   timer->start("total");
   timer->start("initialization");
 
@@ -30,13 +30,13 @@ int main(int argc, char *argv[]) {
   std::cout << "Rank: " << rank << ", Nproc: " << nproc << std::endl;
   //----------------------------------------------------
   // read configuration and store information in parameters object
-  Configuration configuration(argv[1]);
-  Parameters parameters;
+  nseof::Configuration configuration(argv[1]);
+  nseof::Parameters parameters;
   configuration.loadParameters(parameters);
-  PetscParallelConfiguration parallelConfiguration(parameters);
-  MeshsizeFactory::getInstance().initMeshsize(parameters);
-  FlowField *flowField = NULL;
-  Simulation *simulation = NULL;
+  nseof::PetscParallelConfiguration parallelConfiguration(parameters);
+  nseof::MeshsizeFactory::getInstance().initMeshsize(parameters);
+  nseof::FlowField *flowField = NULL;
+  nseof::Simulation *simulation = NULL;
 
   if (parameters.geometry.dim == 2) {
     parameters.geometry.sizeZ = 1;
@@ -68,25 +68,27 @@ int main(int argc, char *argv[]) {
     }
 
     // create algebraic turbulent flow field
-    FlowFieldTurbA *flowFieldt = new FlowFieldTurbA(parameters);
-    if (flowFieldt == NULL) {
-      handleError(1, "flowField==NULL!");
+    auto flowFieldT = new nseof::FlowFieldTurbA(parameters);
+    if (flowFieldT == NULL) {
+      handleError(1, "flowFieldT==NULL!");
     }
 
     // create algebraic turbulent simulation
-    simulation = new SimulationTurbA(parameters, *flowFieldt);
+    simulation = new nseof::SimulationTurbA(parameters, *flowFieldT);
 
-    flowField = flowFieldt;
+    flowField = flowFieldT;
   } else if (parameters.simulation.type == "dns") {
     if (rank == 0) {
       std::cout << "Start DNS simulation in " << parameters.geometry.dim << "D"
                 << std::endl;
     }
-    flowField = new FlowFieldLaminar(parameters);
+
+    flowField = new nseof::FlowFieldLaminar(parameters);
     if (flowField == NULL) {
       handleError(1, "flowField==NULL!");
     }
-    simulation = new SimulationLaminar(parameters, *flowField);
+
+    simulation = new nseof::SimulationLaminar(parameters, *flowField);
   } else {
     handleError(
         1, "Unknown simulation type! Currently supported: dns, turbulence");
@@ -98,8 +100,8 @@ int main(int argc, char *argv[]) {
   simulation->initializeFlowField();
   // flowField->getFlags().show();
 
-  FLOAT time = 0.0;
-  FLOAT timeVTK = parameters.vtk.interval;
+  nseof::FLOAT time = 0.0;
+  nseof::FLOAT timeVTK = parameters.vtk.interval;
   int timeSteps = 0;
 
   // TODO WS1: plot initial state

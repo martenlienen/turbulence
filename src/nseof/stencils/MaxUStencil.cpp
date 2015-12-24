@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <math.h>
 
+namespace nseof {
+
 MaxUStencil::MaxUStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters),
       BoundaryStencil<FlowField>(parameters) {
@@ -94,3 +96,4 @@ void MaxUStencil::reset() {
 }
 
 const FLOAT* MaxUStencil::getMaxValues() const { return _maxValues; }
+}

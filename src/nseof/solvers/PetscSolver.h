@@ -9,6 +9,8 @@
 #include "../Parameters.h"
 #include "../LinearSolver.h"
 
+namespace nseof {
+
 const unsigned char LEFT_WALL_BIT = 1 << 0;
 const unsigned char RIGHT_WALL_BIT = 1 << 1;
 const unsigned char BOTTOM_WALL_BIT = 1 << 2;
@@ -84,5 +86,6 @@ class PetscSolver : public LinearSolver {
   /** Reinit the matrix so that it uses the right flag field */
   void reInitMatrix();
 };
+}
 
 #endif

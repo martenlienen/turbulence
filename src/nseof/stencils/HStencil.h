@@ -6,6 +6,8 @@
 #include "../Parameters.h"
 #include "../walldistance/WallDistanceManager.h"
 
+namespace nseof {
+
 class HStencil : public FieldStencil<FlowFieldTurbA> {
  public:
   HStencil(const Parameters& parameters);
@@ -32,5 +34,6 @@ class HStencil : public FieldStencil<FlowFieldTurbA> {
  private:
   WallDistanceManager wdm;
 };
+}
 
 #endif

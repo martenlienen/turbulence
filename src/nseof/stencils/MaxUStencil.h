@@ -5,6 +5,8 @@
 #include "../Parameters.h"
 #include "../FlowField.h"
 
+namespace nseof {
+
 /** this class computes the maximum value of max(velocity)/meshsize for all grid
  * cells.
  *  Originally, one would compute the max. velocity only and adapt it with the
@@ -90,5 +92,6 @@ class MaxUStencil : public FieldStencil<FlowField>,
    */
   const FLOAT* getMaxValues() const;
 };
+}
 
 #endif

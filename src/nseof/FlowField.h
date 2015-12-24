@@ -4,6 +4,8 @@
 #include "DataStructures.h"
 #include "Parameters.h"
 
+namespace nseof {
+
 /** Flow field
  *
  * Class intended to contain the state of the domain.
@@ -103,5 +105,6 @@ class FlowField {
   virtual void getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity,
                                       int i, int j, int k) = 0;
 };
+}
 
 #endif

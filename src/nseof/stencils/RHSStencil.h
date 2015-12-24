@@ -5,6 +5,8 @@
 #include "../Parameters.h"
 #include "../FlowField.h"
 
+namespace nseof {
+
 /** Field stencil to compute the right hand side of the pressure equation.
  */
 class RHSStencil : public FieldStencil<FlowField> {
@@ -30,5 +32,6 @@ class RHSStencil : public FieldStencil<FlowField> {
    */
   void apply(FlowField& flowField, int i, int j, int k);
 };
+}
 
 #endif

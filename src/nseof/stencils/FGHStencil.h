@@ -5,6 +5,8 @@
 #include "../Stencil.h"
 #include "../Parameters.h"
 
+namespace nseof {
+
 class FGHStencil : public FieldStencil<FlowField> {
  private:
   // A local velocity variable that will be used to approximate derivatives.
@@ -36,5 +38,6 @@ class FGHStencil : public FieldStencil<FlowField> {
    */
   void apply(FlowField& flowField, int i, int j, int k);
 };
+}
 
 #endif

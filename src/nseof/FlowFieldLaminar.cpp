@@ -1,5 +1,7 @@
 #include "FlowFieldLaminar.h"
 
+namespace nseof {
+
 FlowFieldLaminar::FlowFieldLaminar(int Nx, int Ny)
     : FlowField(),
       _size_x(Nx),
@@ -113,4 +115,5 @@ void FlowFieldLaminar::getPressureAndVelocity(FLOAT& pressure,
   velocity[2] = (v_here[2] + v_back[2]) / 2;
 
   pressure = getPressure().getScalar(i, j, k);
+}
 }

@@ -11,6 +11,8 @@
 #include "../Stencil.h"
 #include "../Parameters.h"
 
+namespace nseof {
+
 /**
  * Gather vtk::CellData from a flow field
  */
@@ -68,6 +70,7 @@ std::unique_ptr<vtk::SimpleCellData<T>> CellDataStencil<T, FF>::get() {
 template <typename T, typename FF>
 void CellDataStencil<T, FF>::reset() {
   this->data.clear();
+}
 }
 
 #endif  // _STENCILS_CELL_DATA_STENCIL_H

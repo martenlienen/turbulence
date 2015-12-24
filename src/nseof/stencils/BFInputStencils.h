@@ -5,6 +5,8 @@
 #include "../Parameters.h"
 #include "../FlowField.h"
 
+namespace nseof {
+
 /**
  * A stencil to set the input velocity in channel flows. Only implements the
  * applyLeftWall(...) methods.
@@ -98,5 +100,6 @@ class BFInputFGHStencilUniform : public BFInputFGHStencil {
                                FLOAT stepSize,
                                const Parameters& parameters) override;
 };
+}
 
 #endif

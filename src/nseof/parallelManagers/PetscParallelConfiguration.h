@@ -5,6 +5,8 @@
 #include "../Definitions.h"
 #include <mpi.h>
 
+namespace nseof {
+
 /** Class used to set parameters relevant to the parallel distribution. All
  * functions modify the
  * parameters instance
@@ -51,5 +53,6 @@ class PetscParallelConfiguration {
   /** Destructor */
   ~PetscParallelConfiguration();
 };
+}
 
 #endif

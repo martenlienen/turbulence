@@ -1,5 +1,7 @@
 #include "ObstacleStencil.h"
 
+namespace nseof {
+
 ObstacleStencil::ObstacleStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}
 
@@ -120,4 +122,5 @@ void ObstacleStencil::apply(FlowField& flowField, int i, int j, int k) {
     if ((obstacle & OBSTACLE_TOP) == 0) velocity.getVector(i, j, k)[1] = 0.0;
     if ((obstacle & OBSTACLE_BACK) == 0) velocity.getVector(i, j, k)[2] = 0.0;
   }
+}
 }

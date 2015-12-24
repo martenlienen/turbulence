@@ -5,6 +5,8 @@
 #include "../Parameters.h"
 #include "../FlowField.h"
 
+namespace nseof {
+
 /** Stencil to compute the velocity once the pressure has been found.
  */
 class VelocityStencil : public FieldStencil<FlowField> {
@@ -29,5 +31,6 @@ class VelocityStencil : public FieldStencil<FlowField> {
    */
   void apply(FlowField& flowField, int i, int j, int k);
 };
+}
 
 #endif

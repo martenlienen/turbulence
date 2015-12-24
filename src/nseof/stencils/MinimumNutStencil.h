@@ -6,6 +6,8 @@
 #include "../Stencil.h"
 #include "../FlowFieldTurbA.h"
 
+namespace nseof {
+
 /**
  * When iterated with, finds and stores the minimum nu_t value
  */
@@ -39,5 +41,6 @@ class MinimumNutStencil : public FieldStencil<FlowFieldTurbA> {
  private:
   double minimum;
 };
+}
 
 #endif  // _MINIMUM_NUT_STENCIL_P_H_

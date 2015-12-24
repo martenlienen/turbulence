@@ -7,6 +7,9 @@
 #include "../FlowFieldTurbA.h"
 #include <iostream>
 #include <iostream>
+
+namespace nseof {
+
 using namespace std;
 
 static int X = 0;
@@ -1407,6 +1410,7 @@ inline FLOAT computeH3DT(const FLOAT* const localVelocity,
                   duwdx(localVelocity, parameters, localMeshsize) -
                   dvwdy(localVelocity, parameters, localMeshsize) +
                   parameters.environment.gz);
+}
 }
 
 #endif

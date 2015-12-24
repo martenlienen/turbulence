@@ -1,5 +1,7 @@
 #include "GlobalBoundaryFactory.h"
 
+namespace nseof {
+
 GlobalBoundaryFactory::GlobalBoundaryFactory(Parameters& parameters)
     : _parameters(parameters) {
   // The parameters will be modified, and therefore are not declared as
@@ -139,4 +141,5 @@ GlobalBoundaryFactory::getGlobalBoundaryFGHIterator(FlowField& flowField) {
       flowField, _parameters, *(_FGHStencils[0]), *(_FGHStencils[1]),
       *(_FGHStencils[2]), *(_FGHStencils[3]), *(_FGHStencils[4]),
       *(_FGHStencils[5]), 1, 0);
+}
 }

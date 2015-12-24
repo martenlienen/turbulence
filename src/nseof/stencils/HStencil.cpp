@@ -5,6 +5,8 @@
 #include "StencilFunctions.h"
 #include "../Definitions.h"
 
+namespace nseof {
+
 HStencil::HStencil(const Parameters& parameters)
     : FieldStencil<FlowFieldTurbA>(parameters), wdm(_parameters) {
   wdm.init();
@@ -28,4 +30,5 @@ void HStencil::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
   } else {
     flowField.getH(i, j, k) = 0.0;
   }
+}
 }

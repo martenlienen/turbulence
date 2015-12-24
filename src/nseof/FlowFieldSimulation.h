@@ -29,6 +29,8 @@
 
 #define GHOST_OFFSET 2
 
+namespace nseof {
+
 template <typename FF>
 class FlowFieldSimulation : public Simulation {
  protected:
@@ -173,5 +175,6 @@ class FlowFieldSimulation : public Simulation {
                         vtk::Point(pointsX, pointsY, pointsZ), points);
   }
 };
+}
 
 #endif  // _FLOW_FIELD_SIMULATION_H_

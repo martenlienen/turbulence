@@ -4,6 +4,8 @@
 #include "StencilFunctions.h"
 #include "../Definitions.h"
 
+namespace nseof {
+
 NutStencil::NutStencil(const Parameters& parameters)
     : FieldStencil<FlowFieldTurbA>(parameters) {
   // do you want to calculate vortex viscosity?
@@ -202,4 +204,5 @@ void NutStencilA::computeNUT3D(int i, int j, int k,
   // calculate vortex viscosity
   nu = lm * lm * grad;
   // clang-format off
+}
 }

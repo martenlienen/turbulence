@@ -3,6 +3,8 @@
 
 #include "ParallelBoundaryIterator.h"
 
+namespace nseof {
+
 template <typename FF, typename T>
 class BottomTopBoundaryIterator : public ParallelBoundaryIterator<FF, T> {
  public:
@@ -27,5 +29,6 @@ class BottomTopBoundaryIterator : public ParallelBoundaryIterator<FF, T> {
             Point(high.x, low.y + (bottomWidth - 1), high.z),
             Point(low.x, high.y - (topWidth - 1), low.z), high, apply){};
 };
+}
 
 #endif  // _BOTTOM_TOP_BOUNDARY_ITERATOR_H_

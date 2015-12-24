@@ -1,5 +1,7 @@
 #include "VelocityStencil.h"
 
+namespace nseof {
+
 VelocityStencil::VelocityStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}
 
@@ -81,4 +83,5 @@ void VelocityStencil::apply(FlowField& flowField, int i, int j, int k) {
       velocity.getVector(i, j, k)[2] = 0.0;
     }
   }
+}
 }

@@ -10,6 +10,8 @@
 #include "stencils/BFInputStencils.h"
 #include "FlowField.h"
 
+namespace nseof {
+
 /** Class that returns instances of the global boundary iterator. It also
  * contains the stencils.
  * Right now, it works only with Dirichlet and periodic boundary conditions
@@ -52,5 +54,6 @@ class GlobalBoundaryFactory {
   GlobalBoundaryIterator<FlowField> getGlobalBoundaryFGHIterator(
       FlowField& flowField);
 };
+}
 
 #endif

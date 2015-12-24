@@ -6,6 +6,8 @@
 #include "Definitions.h"
 #include "Parameters.h"
 
+namespace nseof {
+
 class Configuration {
  private:
   std::string _filename;
@@ -18,5 +20,6 @@ class Configuration {
   void loadParameters(Parameters& parameters,
                       const MPI_Comm& communicator = PETSC_COMM_WORLD);
 };
+}
 
 #endif

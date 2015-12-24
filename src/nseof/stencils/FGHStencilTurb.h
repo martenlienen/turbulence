@@ -6,6 +6,8 @@
 #include "../Parameters.h"
 #include "../FlowFieldTurbA.h"
 
+namespace nseof {
+
 class FGHStencilTurb : public FieldStencil<FlowFieldTurbA> {
  private:
   // A local velocity variable that will be used to approximate derivatives.
@@ -40,5 +42,6 @@ class FGHStencilTurb : public FieldStencil<FlowFieldTurbA> {
    */
   void apply(FlowFieldTurbA& flowField, int i, int j, int k);
 };
+}
 
 #endif

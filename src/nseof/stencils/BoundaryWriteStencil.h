@@ -4,6 +4,8 @@
 
 #include "../Stencil.h"
 
+namespace nseof {
+
 template <typename T, class FF>
 class BoundaryWriteStencil : public BoundaryStencil<FF> {
  public:
@@ -109,4 +111,5 @@ void BoundaryWriteStencil<T, FF>::applyBackWall(FF& flowField, int i, int j,
                                                 int k) {
   this->apply3d(flowField, i, j, k, this->backData.back());
   this->backData.pop_back();
+}
 }

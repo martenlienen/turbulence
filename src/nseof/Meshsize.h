@@ -4,6 +4,8 @@
 #include "Definitions.h"
 #include <cmath>
 
+namespace nseof {
+
 // forward declaration of Parameters
 class Parameters;
 
@@ -264,4 +266,6 @@ class TanhMeshStretching : public Meshsize {
   const FLOAT _dyMin;
   const FLOAT _dzMin;
 };
+}
+
 #endif  // _MESHSIZE_H_

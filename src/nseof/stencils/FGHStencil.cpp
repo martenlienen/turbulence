@@ -2,6 +2,8 @@
 #include "StencilFunctions.h"
 #include "../Definitions.h"
 
+namespace nseof {
+
 FGHStencil::FGHStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}
 
@@ -48,4 +50,5 @@ void FGHStencil::apply(FlowField& flowField, int i, int j, int k) {
                              _parameters.timestep.dt);
     }
   }
+}
 }

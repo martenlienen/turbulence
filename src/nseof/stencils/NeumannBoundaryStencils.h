@@ -6,6 +6,8 @@
 #include "../FlowField.h"
 #include "../Stencil.h"
 
+namespace nseof {
+
 class NeumannVelocityBoundaryStencil : public BoundaryStencil<FlowField> {
  public:
   /** Constructor
@@ -61,5 +63,6 @@ class NeumannFGHBoundaryStencil : public BoundaryStencil<FlowField> {
   void applyBackWall(FlowField& flowField, int i, int j, int k);
   //@}
 };
+}
 
 #endif

@@ -3,6 +3,8 @@
 
 #include "Parameters.h"
 
+namespace nseof {
+
 class Simulation {
  public:
   Simulation(Parameters &parameters) : _parameters(parameters) {}
@@ -18,5 +20,6 @@ class Simulation {
  protected:
   Parameters &_parameters;
 };
+}
 
 #endif  // _SIMULATION_H_

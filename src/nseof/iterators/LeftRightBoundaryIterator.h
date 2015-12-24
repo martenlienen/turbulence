@@ -3,6 +3,8 @@
 
 #include "ParallelBoundaryIterator.h"
 
+namespace nseof {
+
 template <typename FF, typename T>
 class LeftRightBoundaryIterator : public ParallelBoundaryIterator<FF, T> {
  public:
@@ -27,5 +29,6 @@ class LeftRightBoundaryIterator : public ParallelBoundaryIterator<FF, T> {
             Point(low.x + (leftWidth - 1), high.y, high.z),
             Point(high.x - (rightWidth - 1), low.y, low.z), high, apply){};
 };
+}
 
 #endif  // _LEFT_RIGHT_BOUNDARY_ITERATOR_H_

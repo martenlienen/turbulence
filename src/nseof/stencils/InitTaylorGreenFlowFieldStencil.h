@@ -7,6 +7,8 @@
 #include "../FlowField.h"
 #include <cmath>
 
+namespace nseof {
+
 /**
  *  Stencil for initializing the taylor-green vortex flow in a periodic domain.
  *  @author Philipp Neumann
@@ -114,5 +116,6 @@ class InitTaylorGreenFlowFieldStencil : public FieldStencil<FlowField> {
             _domainSize[2]);
   }
 };
+}
 
 #endif

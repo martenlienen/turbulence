@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+namespace nseof {
+
 MinimumNutStencil::MinimumNutStencil(const Parameters& parameters)
     : FieldStencil<FlowFieldTurbA>(parameters) {
   this->minimum = 0;
@@ -19,4 +21,5 @@ void MinimumNutStencil::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
 
 void MinimumNutStencil::reset() {
   this->minimum = 0;
+}
 }

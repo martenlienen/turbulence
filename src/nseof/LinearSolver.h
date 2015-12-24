@@ -4,6 +4,8 @@
 #include "Parameters.h"
 #include "FlowField.h"
 
+namespace nseof {
+
 // Abstract class for linear solvers for the pressure
 class LinearSolver {
  protected:
@@ -21,5 +23,6 @@ class LinearSolver {
    */
   virtual void solve() = 0;
 };
+}
 
 #endif

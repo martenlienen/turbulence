@@ -6,6 +6,8 @@
 #include <string>
 #include "Meshsize.h"
 
+namespace nseof {
+
 //! Classes for the parts of the parameters
 //@{
 class TimestepParameters {
@@ -166,5 +168,6 @@ class Parameters {
   // TODO WS2: include parameters for turbulence
   Meshsize *meshsize;
 };
+}
 
 #endif

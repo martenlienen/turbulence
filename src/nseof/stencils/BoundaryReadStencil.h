@@ -3,6 +3,8 @@
 
 #include "../Stencil.h"
 
+namespace nseof {
+
 template <typename T, class FF>
 class BoundaryReadStencil : public BoundaryStencil<FF> {
  public:
@@ -100,4 +102,5 @@ template <typename T, typename FF>
 void BoundaryReadStencil<T, FF>::applyBackWall(FF& flowField, int i, int j,
                                                int k) {
   this->backData.push_back(this->apply3d(flowField, i, j, k));
+}
 }

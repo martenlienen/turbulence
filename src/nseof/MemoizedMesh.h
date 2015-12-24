@@ -7,6 +7,8 @@
 #include "Meshsize.h"
 #include "Parameters.h"
 
+namespace nseof {
+
 /**
  * This is a wrapper that precomputes the most commonly used positions but
  * forwards requests for "unusual" positions (e.g. outside of the local grid) to
@@ -64,5 +66,6 @@ class MemoizedMesh : public Meshsize {
 
   bool between(int x, int low, int high) const;
 };
+}
 
 #endif  // _MEMOIZED_MESH_H_

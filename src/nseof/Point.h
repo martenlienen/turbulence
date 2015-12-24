@@ -4,6 +4,8 @@
 #include <initializer_list>
 #include <vector>
 
+namespace nseof {
+
 struct Point {
   int x;
   int y;
@@ -34,5 +36,6 @@ struct Point {
   // TODO comment
   int size() { return (this->x + 1) * (this->y + 1) * (this->z + 1); }
 };
+}
 
 #endif  // _POINT_H_

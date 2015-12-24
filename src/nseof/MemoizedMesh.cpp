@@ -2,6 +2,8 @@
 
 #include <utility>
 
+namespace nseof {
+
 /**
  * We add 2 everywhere because for example the BFStepInitStencil accesses cells
  * one step outside the local size.
@@ -183,4 +185,5 @@ FLOAT MemoizedMesh::getDzMin() const { return this->mesh->getDyMin(); }
 
 bool MemoizedMesh::between(int x, int low, int high) const {
   return x >= low && x <= high;
+}
 }

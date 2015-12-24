@@ -7,6 +7,8 @@
 
 #include <sys/time.h>
 
+namespace nseof {
+
 class MultiTimer {
  public:
   void start(std::string timer);
@@ -27,5 +29,6 @@ class MultiTimer {
 
   struct timeval difference(struct timeval a, struct timeval b);
 };
+}
 
 #endif // _MULTI_TIMER_H_

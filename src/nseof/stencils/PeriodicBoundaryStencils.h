@@ -5,6 +5,8 @@
 #include "../Parameters.h"
 #include "../FlowField.h"
 
+namespace nseof {
+
 /** Stencil to set periodic boundary conditions for velocity
  */
 class PeriodicBoundaryVelocityStencil : public BoundaryStencil<FlowField> {
@@ -66,4 +68,6 @@ class PeriodicBoundaryFGHStencil : public BoundaryStencil<FlowField> {
   void applyBackWall(FlowField& flowField, int i, int j, int k);
   //@}
 };
+}
+
 #endif

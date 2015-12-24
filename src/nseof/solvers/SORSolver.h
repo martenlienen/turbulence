@@ -9,10 +9,13 @@
 #include "../Parameters.h"
 #include "../LinearSolver.h"
 
+namespace nseof {
+
 class SORSolver : public LinearSolver {
  public:
   SORSolver(FlowField& flowField, const Parameters& parameters);
   void solve();
 };
+}
 
 #endif

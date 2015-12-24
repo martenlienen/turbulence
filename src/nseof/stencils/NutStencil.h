@@ -5,6 +5,8 @@
 #include "../Stencil.h"
 #include "../Parameters.h"
 
+namespace nseof {
+
 class NutStencil : public FieldStencil<FlowFieldTurbA> {
  public:
   NutStencil(const Parameters& parameters);
@@ -63,5 +65,6 @@ class NutStencilA : public FieldStencil<FlowFieldTurbA> {
 
   void apply(FlowFieldTurbA& flowField, int i, int j, int k);
 };
+}
 
 #endif

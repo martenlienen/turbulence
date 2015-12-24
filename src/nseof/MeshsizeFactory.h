@@ -7,6 +7,8 @@
 #include "Parameters.h"
 #include "MemoizedMesh.h"
 
+namespace nseof {
+
 /** initialises the meshsize in the Parameters. Must be called after configuring
  * (Configuration and PetscParallelConfiguration).
  *  We therefore make use of the singleton/factory pattern.
@@ -54,5 +56,6 @@ class MeshsizeFactory {
   MeshsizeFactory() {}
   ~MeshsizeFactory() {}
 };
+}
 
 #endif  // _MESHSIZEFACTORY_H_

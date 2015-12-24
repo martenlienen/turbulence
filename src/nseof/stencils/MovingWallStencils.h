@@ -5,6 +5,8 @@
 #include "../Parameters.h"
 #include "../FlowField.h"
 
+namespace nseof {
+
 /** Boundary stencil to set constant velocities at the faces.
  *
  * The values for the velocities are stored in the parameters.
@@ -70,4 +72,6 @@ class MovingWallFGHStencil : public BoundaryStencil<FlowField> {
   void applyBackWall(FlowField& flowField, int i, int j, int k);
   //@}
 };
+}
+
 #endif

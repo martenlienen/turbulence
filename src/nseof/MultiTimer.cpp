@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+namespace nseof {
+
 void MultiTimer::start(std::string timer) {
   gettimeofday(&this->starts[timer], NULL);
 }
@@ -45,4 +47,5 @@ struct timeval MultiTimer::difference(struct timeval a, struct timeval b) {
   diff.tv_usec = a.tv_usec - b.tv_usec;
 
   return diff;
+}
 }

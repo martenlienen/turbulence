@@ -7,6 +7,8 @@
 
 #include "RangeIterator.h"
 
+namespace nseof {
+
 template <typename FF, typename T>
 class ParallelBoundaryIterator : Iterator<FF> {
  public:
@@ -38,6 +40,7 @@ template <typename FF, typename T>
 void ParallelBoundaryIterator<FF, T>::iterate() {
   this->first.iterate();
   this->second.iterate();
+}
 }
 
 #endif  // _PARALLEL_BOUNDARY_ITERATOR_H_
