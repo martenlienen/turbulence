@@ -41,32 +41,19 @@ find_package(PETSc REQUIRED)
 include_directories(${PETSC_INCLUDES})
 add_definitions(${PETSC_DEFINITIONS})
 
+add_subdirectory("3rdparty/tinyxml2")
+include_directories("3rdparty/tinyxml2")
+
+add_subdirectory("3rdparty/ann_1.1.2")
 include_directories("3rdparty/ann_1.1.2/include")
 
-# Some files expect the root directory to be on the include path
-include_directories(".")
+add_subdirectory("src/vtk")
+include_directories("src")
 
-add_subdirectory("3rdparty/tinyxml2")
-add_subdirectory("3rdparty/ann_1.1.2")
-add_subdirectory("vtk")
+add_subdirectory("src/nseof")
 
-set(root_src Configuration.cpp DataStructures.cpp FlowFieldLaminar.cpp
-  FlowFieldTurbA.cpp GlobalBoundaryFactory.cpp LinearSolver.cpp Meshsize.cpp
-  MemoizedMesh.cpp SimpleTimer.cpp MultiTimer.cpp)
-set(parallel_src parallelManagers/PetscParallelConfiguration.cpp)
-set(solvers_src solvers/PetscSolver.cpp solvers/SORSolver.cpp)
-set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp
-  stencils/FGHStencil.cpp stencils/MaxUStencil.cpp
-  stencils/MovingWallStencils.cpp stencils/NeumannBoundaryStencils.cpp
-  stencils/ObstacleStencil.cpp stencils/PeriodicBoundaryStencils.cpp
-  stencils/FGHStencilTurb.cpp stencils/NutStencil.cpp stencils/HStencil.cpp
-  stencils/MinimumNutStencil.cpp stencils/RHSStencil.cpp
-  stencils/VelocityStencil.cpp walldistance/WallDistanceManager.cpp)
-
-set(NS_EOF_SRCS ${root_src} ${parallel_src} ${solvers_src} ${stencils_src})
-
-add_executable(ns main.cpp ${NS_EOF_SRCS})
-target_link_libraries(ns tinyxml2 vtk ${PETSC_LIBRARIES} ANN)
+add_executable(ns src/main.cpp)
+target_link_libraries(ns nseof)
 
 find_package(GTest)
 
@@ -76,10 +63,8 @@ if (tests AND GTEST_FOUND)
   enable_testing()
   include_directories(${GTEST_INCLUDE_DIRS})
 
-  add_executable(tests ${TEST_SRCS} ${NS_EOF_SRCS})
-  target_link_libraries(tests tinyxml2 vtk ${PETSC_LIBRARIES} ANN)
-
-  target_link_libraries(tests ${GTEST_BOTH_LIBRARIES} ANN)
+  add_executable(tests ${TEST_SRCS})
+  target_link_libraries(tests nseof ${GTEST_BOTH_LIBRARIES})
 
   add_test(tests tests)
 endif()
