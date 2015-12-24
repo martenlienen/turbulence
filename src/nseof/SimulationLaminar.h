@@ -4,6 +4,7 @@
 #include <petscksp.h>
 #include <float.h>
 #include "FlowField.h"
+#include "FlowFieldLaminar.h"
 #include "stencils/FGHStencil.h"
 #include "stencils/MovingWallStencils.h"
 #include "stencils/RHSStencil.h"
@@ -51,26 +52,26 @@ class SimulationLaminar : public FlowFieldSimulation<FlowField> {
   PetscSolver _solver;
 
  public:
-  SimulationLaminar(Parameters &parameters, FlowField &flowField)
-      : FlowFieldSimulation(parameters, flowField),
+  SimulationLaminar(Parameters &parameters)
+      : FlowFieldSimulation(parameters, new FlowFieldLaminar(parameters)),
         _maxUStencil(parameters),
-        _maxUFieldIterator(_flowField, parameters, _maxUStencil),
-        _maxUBoundaryIterator(_flowField, parameters, _maxUStencil),
+        _maxUFieldIterator(*_flowField, parameters, _maxUStencil),
+        _maxUBoundaryIterator(*_flowField, parameters, _maxUStencil),
         _globalBoundaryFactory(parameters),
         _wallVelocityIterator(
             _globalBoundaryFactory.getGlobalBoundaryVelocityIterator(
-                _flowField)),
+                *_flowField)),
         _wallFGHIterator(
-            _globalBoundaryFactory.getGlobalBoundaryFGHIterator(_flowField)),
+            _globalBoundaryFactory.getGlobalBoundaryFGHIterator(*_flowField)),
         _fghStencil(parameters),
-        _fghIterator(_flowField, parameters, _fghStencil),
+        _fghIterator(*_flowField, parameters, _fghStencil),
         _rhsStencil(parameters),
-        _rhsIterator(_flowField, parameters, _rhsStencil),
+        _rhsIterator(*_flowField, parameters, _rhsStencil),
         _velocityStencil(parameters),
         _obstacleStencil(parameters),
-        _velocityIterator(_flowField, parameters, _velocityStencil),
-        _obstacleIterator(_flowField, parameters, _obstacleStencil),
-        _solver(_flowField, parameters) {}
+        _velocityIterator(*_flowField, parameters, _velocityStencil),
+        _obstacleIterator(*_flowField, parameters, _obstacleStencil),
+        _solver(*_flowField, parameters) {}
 
   virtual ~SimulationLaminar() {}
 
@@ -80,33 +81,35 @@ class SimulationLaminar : public FlowFieldSimulation<FlowField> {
       // currently, a particular initialization is only requrid for the
       // taylor-green vortex
       InitTaylorGreenFlowFieldStencil stencil(_parameters);
-      FieldIterator<FlowField> iterator(_flowField, _parameters, stencil);
+      FieldIterator<FlowField> iterator(*_flowField, _parameters, stencil);
       iterator.iterate();
     } else if (_parameters.simulation.scenario == "channel") {
       BFStepInitStencil stencil(_parameters);
-      FieldIterator<FlowField> iterator(_flowField, _parameters, stencil, 0, 1);
+      FieldIterator<FlowField> iterator(*_flowField, _parameters, stencil, 0,
+                                        1);
       iterator.iterate();
       _wallVelocityIterator.iterate();
     } else if (_parameters.simulation.scenario == "pressure-channel") {
       // set pressure boundaries here for left wall
       const FLOAT value = _parameters.walls.scalarLeft;
-      ScalarField &rhs = _flowField.getRHS();
+      ScalarField &rhs = _flowField->getRHS();
 
       if (_parameters.geometry.dim == 2) {
-        const int sizey = _flowField.getNy();
+        const int sizey = _flowField->getNy();
         for (int i = 0; i < sizey + 3; i++) {
           rhs.getScalar(0, i) = value;
         }
       } else {
-        const int sizey = _flowField.getNy();
-        const int sizez = _flowField.getNz();
+        const int sizey = _flowField->getNy();
+        const int sizez = _flowField->getNz();
         for (int i = 0; i < sizey + 3; i++)
           for (int j = 0; j < sizez + 3; j++) rhs.getScalar(0, i, j) = value;
       }
 
       // do same procedure for domain flagging as for regular channel
       BFStepInitStencil stencil(_parameters);
-      FieldIterator<FlowField> iterator(_flowField, _parameters, stencil, 0, 1);
+      FieldIterator<FlowField> iterator(*_flowField, _parameters, stencil, 0,
+                                        1);
       iterator.iterate();
     }
     _solver.reInitMatrix();
@@ -141,7 +144,7 @@ class SimulationLaminar : public FlowFieldSimulation<FlowField> {
     timer->start("pressure-communication");
 
     // TODO WS2: communicate pressure values
-    pressureComm.communicate(this->_flowField);
+    pressureComm.communicate(*this->_flowField);
 
     timer->stop("pressure-communication");
     timer->stop("communication");
@@ -155,7 +158,7 @@ class SimulationLaminar : public FlowFieldSimulation<FlowField> {
     timer->start("velocity-communication");
 
     // TODO WS2: communicate velocity values
-    velocityComm.communicate(this->_flowField);
+    velocityComm.communicate(*this->_flowField);
 
     timer->stop("velocity-communication");
     timer->stop("communication");

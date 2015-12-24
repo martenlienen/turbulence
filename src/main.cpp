@@ -11,8 +11,6 @@
 #include "nseof/SimulationTurbA.h"
 #include "nseof/parallelManagers/PetscParallelConfiguration.h"
 #include "nseof/MeshsizeFactory.h"
-#include "nseof/FlowFieldTurbA.h"
-#include "nseof/FlowFieldLaminar.h"
 #include "nseof/MultiTimer.h"
 
 int main(int argc, char *argv[]) {
@@ -35,7 +33,6 @@ int main(int argc, char *argv[]) {
   configuration.loadParameters(parameters);
   nseof::PetscParallelConfiguration parallelConfiguration(parameters);
   nseof::MeshsizeFactory::getInstance().initMeshsize(parameters);
-  nseof::FlowField *flowField = NULL;
   nseof::Simulation *simulation = NULL;
 
   if (parameters.geometry.dim == 2) {
@@ -67,28 +64,15 @@ int main(int argc, char *argv[]) {
                 << "D" << std::endl;
     }
 
-    // create algebraic turbulent flow field
-    auto flowFieldT = new nseof::FlowFieldTurbA(parameters);
-    if (flowFieldT == NULL) {
-      handleError(1, "flowFieldT==NULL!");
-    }
-
     // create algebraic turbulent simulation
-    simulation = new nseof::SimulationTurbA(parameters, *flowFieldT);
-
-    flowField = flowFieldT;
+    simulation = new nseof::SimulationTurbA(parameters);
   } else if (parameters.simulation.type == "dns") {
     if (rank == 0) {
       std::cout << "Start DNS simulation in " << parameters.geometry.dim << "D"
                 << std::endl;
     }
 
-    flowField = new nseof::FlowFieldLaminar(parameters);
-    if (flowField == NULL) {
-      handleError(1, "flowField==NULL!");
-    }
-
-    simulation = new nseof::SimulationLaminar(parameters, *flowField);
+    simulation = new nseof::SimulationLaminar(parameters);
   } else {
     handleError(
         1, "Unknown simulation type! Currently supported: dns, turbulence");
@@ -98,7 +82,6 @@ int main(int argc, char *argv[]) {
     handleError(1, "simulation==NULL!");
   }
   simulation->initializeFlowField();
-  // flowField->getFlags().show();
 
   nseof::FLOAT time = 0.0;
   nseof::FLOAT timeVTK = parameters.vtk.interval;
@@ -135,8 +118,6 @@ int main(int argc, char *argv[]) {
 
   delete simulation;
   simulation = NULL;
-  delete flowField;
-  flowField = NULL;
 
   PetscFinalize();
 

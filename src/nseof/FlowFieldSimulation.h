@@ -34,10 +34,10 @@ namespace nseof {
 template <typename FF>
 class FlowFieldSimulation : public Simulation {
  protected:
-  FF &_flowField;
+  std::unique_ptr<FF> _flowField;
 
   MPICommunicator<FLOAT, FF> pressureComm{
-      this->_flowField, this->_parameters,
+      *this->_flowField, this->_parameters,
       [](FF &flowField, int i, int j, int k, FLOAT &p) {
         p = flowField.getPressure().getScalar(i, j, k);
       },
@@ -46,7 +46,7 @@ class FlowFieldSimulation : public Simulation {
       }};
 
   MPICommunicator<std::array<FLOAT, 3>, FF> velocityComm{
-      this->_flowField, this->_parameters,
+      *this->_flowField, this->_parameters,
       [this](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
         std::copy_n(flowField.getVelocity().getVector(i, j, k),
                     this->_parameters.geometry.dim, v.data());
@@ -101,7 +101,7 @@ class FlowFieldSimulation : public Simulation {
           })};
 
  public:
-  FlowFieldSimulation(Parameters &parameters, FF &flowField)
+  FlowFieldSimulation(Parameters &parameters, FF* flowField)
       : Simulation(parameters), _flowField(flowField) {}
 
   virtual ~FlowFieldSimulation() {}
@@ -124,7 +124,7 @@ class FlowFieldSimulation : public Simulation {
 
     for (auto &stencil : this->scalarStencils) {
       stencil.reset();
-      FieldIterator<FF> iterator(this->_flowField, this->_parameters, stencil,
+      FieldIterator<FF> iterator(*this->_flowField, this->_parameters, stencil,
                                  los - 1, 1 - hos);
       iterator.iterate();
       cellData.push_back(stencil.get());
@@ -132,7 +132,7 @@ class FlowFieldSimulation : public Simulation {
 
     for (auto &stencil : this->vectorStencils) {
       stencil.reset();
-      FieldIterator<FF> iterator(this->_flowField, this->_parameters, stencil,
+      FieldIterator<FF> iterator(*this->_flowField, this->_parameters, stencil,
                                  los - 1, 1 - hos);
       iterator.iterate();
       cellData.push_back(stencil.get());
