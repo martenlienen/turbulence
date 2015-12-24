@@ -52,7 +52,7 @@ include_directories("src")
 
 add_subdirectory("src/nseof")
 
-add_executable(ns src/nseof/main.cpp)
+add_executable(ns src/main.cpp)
 target_link_libraries(ns nseof)
 
 find_package(GTest)

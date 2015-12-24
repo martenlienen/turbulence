@@ -5,15 +5,15 @@
 #include <sstream>
 #include <iomanip>
 
-#include "Configuration.h"
-#include "Simulation.h"
-#include "SimulationLaminar.h"
-#include "SimulationTurbA.h"
-#include "parallelManagers/PetscParallelConfiguration.h"
-#include "MeshsizeFactory.h"
-#include "FlowFieldTurbA.h"
-#include "FlowFieldLaminar.h"
-#include "MultiTimer.h"
+#include "nseof/Configuration.h"
+#include "nseof/Simulation.h"
+#include "nseof/SimulationLaminar.h"
+#include "nseof/SimulationTurbA.h"
+#include "nseof/parallelManagers/PetscParallelConfiguration.h"
+#include "nseof/MeshsizeFactory.h"
+#include "nseof/FlowFieldTurbA.h"
+#include "nseof/FlowFieldLaminar.h"
+#include "nseof/MultiTimer.h"
 
 int main(int argc, char *argv[]) {
   auto timer = nseof::MultiTimer::get();
