@@ -2,52 +2,8 @@
 
 namespace nseof {
 
-namespace flowmodels {
-
-namespace laminar {
-
-FlowField::FlowField(int Nx, int Ny)
-    : nseof::FlowField(),
-      _size_x(Nx),
-      _size_y(Ny),
-      _size_z(1),
-      _cellsX(Nx + 3),
-      _cellsY(Ny + 3),
-      _cellsZ(1),
-
-      // Pressure field doesn't need to have an extra layer, but this allows to
-      // address the same
-      // positions with the same iterator for both pressures and velocities.
-      _pressure(ScalarField(Nx + 3, Ny + 3)),
-      _velocity(VectorField(Nx + 3, Ny + 3)),
-      _flags(IntScalarField(Nx + 3, Ny + 3)),
-      _FGH(VectorField(Nx + 3, Ny + 3)),
-      _RHS(ScalarField(Nx + 3, Ny + 3)) {
-  assertion(Nx > 0);
-  assertion(Ny > 0);
-}
-
-FlowField::FlowField(int Nx, int Ny, int Nz)
-    : nseof::FlowField(),
-      _size_x(Nx),
-      _size_y(Ny),
-      _size_z(Nz),
-      _cellsX(Nx + 3),
-      _cellsY(Ny + 3),
-      _cellsZ(Nz + 3),
-      _pressure(ScalarField(Nx + 3, Ny + 3, Nz + 3)),
-      _velocity(VectorField(Nx + 3, Ny + 3, Nz + 3)),
-      _flags(IntScalarField(Nx + 3, Ny + 3, Nz + 3)),
-      _FGH(VectorField(Nx + 3, Ny + 3, Nz + 3)),
-      _RHS(ScalarField(Nx + 3, Ny + 3, Nz + 3)) {
-  // Check that the provided data makes sense
-  assertion(Nx > 0);
-  assertion(Ny > 0);
-  assertion(Nz > 0);
-}
-
 FlowField::FlowField(const Parameters& parameters)
-    : nseof::FlowField(),
+    : _parameters(parameters),
       _size_x(parameters.parallel.localSize[0]),
       _size_y(parameters.parallel.localSize[1]),
       _size_z(parameters.parallel.localSize[2]),
@@ -118,6 +74,8 @@ void FlowField::getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity,
 
   pressure = getPressure().getScalar(i, j, k);
 }
-}
+
+const Parameters& FlowField::getParameters() {
+  return this->_parameters;
 }
 }

@@ -5,8 +5,6 @@
 #include "../../Parameters.h"
 #include "../../FlowField.h"
 
-#include "../laminar/FlowField.h"
-
 namespace nseof {
 
 namespace flowmodels {
@@ -15,48 +13,12 @@ namespace algebraic {
 
 /** Flow field for algebraic turbulent model:
  *    - it is a flow field
- *    - has a laminar flow field
  *    - has additional scalar fields
  *        (vortex viscosity, wall distance, velocity fluctuation, mixing length)
- *
  */
 class FlowField : public nseof::FlowField {
- private:
-  nseof::flowmodels::laminar::FlowField _flowField;
-  ScalarField _nu;
-  ScalarField _h;
-  ScalarField _u;
-  ScalarField _lm;
-
  public:
   FlowField(const Parameters& parameters);
-
-  int getNx() const;
-
-  int getNy() const;
-
-  int getNz() const;
-
-  int getCellsX() const;
-
-  int getCellsY() const;
-
-  int getCellsZ() const;
-
-  ScalarField& getPressure();
-
-  VectorField& getVelocity();
-
-  IntScalarField& getFlags();
-
-  VectorField& getFGH();
-
-  ScalarField& getRHS();
-
-  void getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity, int i,
-                              int j);
-  void getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity, int i,
-                              int j, int k);
 
   // vortex viscosity
   FLOAT& getNu(int i, int j);
@@ -73,6 +35,12 @@ class FlowField : public nseof::FlowField {
   // mixing length
   FLOAT& getLm(int i, int j);
   FLOAT& getLm(int i, int j, int k);
+
+ private:
+  ScalarField _nu;
+  ScalarField _h;
+  ScalarField _u;
+  ScalarField _lm;
 };
 
 // Load the local viscosity (nu+nut) cube with relevant viscosity of the 2D

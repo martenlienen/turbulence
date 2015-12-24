@@ -1,9 +1,9 @@
 set(root_src Configuration.cpp DataStructures.cpp GlobalBoundaryFactory.cpp
-  LinearSolver.cpp Meshsize.cpp MemoizedMesh.cpp SimpleTimer.cpp MultiTimer.cpp)
-set(NSEOF_FLOWMODELS_SRCS flowmodels/laminar/FlowField.cpp
-  flowmodels/algebraic/FlowField.cpp flowmodels/algebraic/FGHStencil.cpp
-  flowmodels/algebraic/NutStencil.cpp flowmodels/algebraic/HStencil.cpp
-  flowmodels/algebraic/MinimumNutStencil.cpp)
+  FlowField.cpp LinearSolver.cpp Meshsize.cpp MemoizedMesh.cpp SimpleTimer.cpp
+  MultiTimer.cpp)
+set(NSEOF_FLOWMODELS_SRCS flowmodels/algebraic/FlowField.cpp
+  flowmodels/algebraic/FGHStencil.cpp flowmodels/algebraic/NutStencil.cpp
+  flowmodels/algebraic/HStencil.cpp flowmodels/algebraic/MinimumNutStencil.cpp)
 set(parallel_src parallelManagers/PetscParallelConfiguration.cpp)
 set(solvers_src solvers/PetscSolver.cpp solvers/SORSolver.cpp)
 set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp

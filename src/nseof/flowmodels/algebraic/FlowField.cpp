@@ -7,7 +7,7 @@ namespace flowmodels {
 namespace algebraic {
 
 FlowField::FlowField(const Parameters& parameters)
-    : _flowField(parameters),
+    : nseof::FlowField(parameters),
       _nu(parameters.geometry.dim == 2
               ? ScalarField(getCellsX(), getCellsY())
               : ScalarField(getCellsX(), getCellsY(), getCellsZ())),
@@ -21,48 +21,13 @@ FlowField::FlowField(const Parameters& parameters)
               ? ScalarField(getCellsX(), getCellsY())
               : ScalarField(getCellsX(), getCellsY(), getCellsZ())) {}
 
-int FlowField::getNx() const { return _flowField.getNx(); }
-
-int FlowField::getNy() const { return _flowField.getNy(); }
-
-int FlowField::getNz() const { return _flowField.getNz(); }
-
-int FlowField::getCellsX() const { return _flowField.getCellsX(); }
-
-int FlowField::getCellsY() const { return _flowField.getCellsY(); }
-
-int FlowField::getCellsZ() const { return _flowField.getCellsZ(); }
-
-ScalarField& FlowField::getPressure() { return _flowField.getPressure(); }
-
-VectorField& FlowField::getVelocity() { return _flowField.getVelocity(); }
-
-IntScalarField& FlowField::getFlags() { return _flowField.getFlags(); }
-
-VectorField& FlowField::getFGH() { return _flowField.getFGH(); }
-
-ScalarField& FlowField::getRHS() { return _flowField.getRHS(); }
-
-void FlowField::getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity,
-                                       int i, int j) {
-  _flowField.getPressureAndVelocity(pressure, velocity, i, j);
-}
-
-void FlowField::getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity,
-                                       int i, int j, int k) {
-  _flowField.getPressureAndVelocity(pressure, velocity, i, j, k);
-}
-
 FLOAT& FlowField::getNu(int i, int j) { return _nu.getScalar(i, j); }
-
 FLOAT& FlowField::getNu(int i, int j, int k) { return _nu.getScalar(i, j, k); }
 
 FLOAT& FlowField::getH(int i, int j) { return _h.getScalar(i, j); }
-
 FLOAT& FlowField::getH(int i, int j, int k) { return _h.getScalar(i, j, k); }
 
 FLOAT& FlowField::getLm(int i, int j) { return _lm.getScalar(i, j); }
-
 FLOAT& FlowField::getLm(int i, int j, int k) { return _lm.getScalar(i, j, k); }
 
 FLOAT& FlowField::getU(int i, int j) { return _u.getScalar(i, j); }
