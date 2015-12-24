@@ -92,7 +92,7 @@ class FlowFieldSimulation : public Simulation {
           [](FF &f, int i, int j) {
             FLOAT *v = f.getVelocity().getVector(i, j);
 
-            return std::vector<double>{v[0], v[1]};
+            return std::vector<double>{v[0], v[1], 0};
           },
           [](FF &f, int i, int j, int k) {
             FLOAT *v = f.getVelocity().getVector(i, j, k);
