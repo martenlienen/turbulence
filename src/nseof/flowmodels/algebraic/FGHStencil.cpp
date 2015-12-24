@@ -17,7 +17,7 @@ void FGHStencil::apply(FlowField& flowField, int i, int j) {
   // Load local vortex viscostiy and velocities into the center layer of the
   // local array
 
-  loadLocalNu2D(_parameters, flowField, _localNu, i, j);
+  flowField.loadLocalNu2D(_localNu, i, j);
   loadLocalVelocity2D(flowField, _localVelocity, i, j);
   loadLocalMeshsize2D(_parameters, _localMeshsize, i, j);
 
@@ -40,8 +40,7 @@ void FGHStencil::apply(FlowField& flowField, int i, int j, int k) {
   FLOAT* const values = flowField.getFGH().getVector(i, j, k);
 
   if ((obstacle & OBSTACLE_SELF) == 0) {  // If the cell is fluid
-
-    loadLocalNu3D(_parameters, flowField, _localNu, i, j, k);
+    flowField.loadLocalNu3D(_localNu, i, j, k);
     loadLocalVelocity3D(flowField, _localVelocity, i, j, k);
     loadLocalMeshsize3D(_parameters, _localMeshsize, i, j, k);
 

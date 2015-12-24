@@ -36,21 +36,19 @@ class FlowField : public nseof::FlowField {
   FLOAT& getLm(int i, int j);
   FLOAT& getLm(int i, int j, int k);
 
+  // Load the local viscosity (nu+nut) cube with relevant viscosity of the 2D
+  // plane
+  void loadLocalNu2D(FLOAT* const localNu, int i, int j);
+
+  // Load the local viscosity (nu+nut) cube with surrounding values
+  void loadLocalNu3D(FLOAT* const localNu, int i, int j, int k);
+
  private:
   ScalarField _nu;
   ScalarField _h;
   ScalarField _u;
   ScalarField _lm;
 };
-
-// Load the local viscosity (nu+nut) cube with relevant viscosity of the 2D
-// plane
-void loadLocalNu2D(const Parameters& parameters, FlowField& flowField,
-                   FLOAT* const localNu, int i, int j);
-
-// Load the local viscosity (nu+nut) cube with surrounding values
-void loadLocalNu3D(const Parameters& parameters, FlowField& flowField,
-                   FLOAT* const localNu, int i, int j, int k);
 }
 }
 }
