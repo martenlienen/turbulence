@@ -1,14 +1,19 @@
-#include "FGHStencilTurb.h"
-#include "StencilFunctions.h"
-#include "../Definitions.h"
-#include "../FlowFieldTurbA.h"
+#include "../../Definitions.h"
+#include "../../stencils/StencilFunctions.h"
+
+#include "FGHStencil.h"
+#include "FlowField.h"
 
 namespace nseof {
 
-FGHStencilTurb::FGHStencilTurb(const Parameters& parameters)
-    : FieldStencil<FlowFieldTurbA>(parameters) {}
+namespace flowmodels {
 
-void FGHStencilTurb::apply(FlowFieldTurbA& flowField, int i, int j) {
+namespace algebraic {
+
+FGHStencil::FGHStencil(const Parameters& parameters)
+    : FieldStencil<FlowField>(parameters) {}
+
+void FGHStencil::apply(FlowField& flowField, int i, int j) {
   // Load local vortex viscostiy and velocities into the center layer of the
   // local array
 
@@ -27,7 +32,7 @@ void FGHStencilTurb::apply(FlowFieldTurbA& flowField, int i, int j) {
                           _parameters.timestep.dt);
 }
 
-void FGHStencilTurb::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
+void FGHStencil::apply(FlowField& flowField, int i, int j, int k) {
   // The same as in 2D, with slight modifications
 
   const int obstacle = flowField.getFlags().getValue(i, j, k);
@@ -53,5 +58,7 @@ void FGHStencilTurb::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
                               _parameters, _parameters.timestep.dt);
     }
   }
+}
+}
 }
 }

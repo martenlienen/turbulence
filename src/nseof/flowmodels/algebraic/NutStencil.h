@@ -1,33 +1,38 @@
-#ifndef _STENCIL_NUT_H_
-#define _STENCIL_NUT_H_
+#ifndef _NSEOF_FLOWMODELS_ALGEBRAIC_NUTSTENCIL_H_
+#define _NSEOF_FLOWMODELS_ALGEBRAIC_NUTSTENCIL_H_
 
-#include "../FlowFieldTurbA.h"
-#include "../Stencil.h"
-#include "../Parameters.h"
+#include "../../Stencil.h"
+#include "../../Parameters.h"
+
+#include "FlowField.h"
 
 namespace nseof {
 
-class NutStencil : public FieldStencil<FlowFieldTurbA> {
+namespace flowmodels {
+
+namespace algebraic {
+
+class NutStencil : public FieldStencil<FlowField> {
  public:
   NutStencil(const Parameters& parameters);
 
   ~NutStencil();
 
-  void apply(FlowFieldTurbA& flowField, int i, int j);
+  void apply(FlowField& flowField, int i, int j);
 
-  void apply(FlowFieldTurbA& flowField, int i, int j, int k);
+  void apply(FlowField& flowField, int i, int j, int k);
 
  protected:
-  FieldStencil<FlowFieldTurbA>* _fs;
+  FieldStencil<FlowField>* _fs;
 };
 
-class NutStencilL : public FieldStencil<FlowFieldTurbA> {
+class NutStencilL : public FieldStencil<FlowField> {
  public:
   NutStencilL(const Parameters& parameters);
 
-  void apply(FlowFieldTurbA& flowField, int i, int j);
+  void apply(FlowField& flowField, int i, int j);
 
-  void apply(FlowFieldTurbA& flowField, int i, int j, int k);
+  void apply(FlowField& flowField, int i, int j, int k);
 };
 
 class limiter {
@@ -40,7 +45,7 @@ class limiter {
                      int k) = 0;
 };
 
-class NutStencilA : public FieldStencil<FlowFieldTurbA> {
+class NutStencilA : public FieldStencil<FlowField> {
  private:
   FLOAT _localVelocity[27 * 3];
   FLOAT _localMeshsize[27 * 3];
@@ -61,10 +66,12 @@ class NutStencilA : public FieldStencil<FlowFieldTurbA> {
  public:
   NutStencilA(const Parameters& parameters);
 
-  void apply(FlowFieldTurbA& flowField, int i, int j);
+  void apply(FlowField& flowField, int i, int j);
 
-  void apply(FlowFieldTurbA& flowField, int i, int j, int k);
+  void apply(FlowField& flowField, int i, int j, int k);
 };
+}
+}
 }
 
 #endif

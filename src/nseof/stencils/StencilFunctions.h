@@ -1,12 +1,12 @@
 #ifndef _DERIVATIVES_H_
 #define _DERIVATIVES_H_
 
+#include <iostream>
 #include <math.h>
+
 #include "../Definitions.h"
 #include "../Parameters.h"
-#include "../FlowFieldTurbA.h"
-#include <iostream>
-#include <iostream>
+#include "../FlowField.h"
 
 namespace nseof {
 
@@ -18,36 +18,6 @@ static int Y = 1;
 static int V = 1;
 static int Z = 2;
 static int W = 2;
-
-// Load the local viscosity (nu+nut) cube with relevant viscosity of the 2D
-// plane
-inline void loadLocalNu2D(const Parameters& parameters,
-                          FlowFieldTurbA& flowField, FLOAT* const localNu,
-                          int i, int j) {
-  const FLOAT nu = 1 / parameters.flow.Re;
-  for (int row = -1; row <= 1; row++) {
-    for (int column = -1; column <= 1; column++) {
-      FLOAT nut = flowField.getNu(i + column, j + row);
-      localNu[39 + 9 * row + 3 * column] = nut + nu;
-    }
-  }
-}
-
-// Load the local viscosity (nu+nut) cube with surrounding values
-inline void loadLocalNu3D(const Parameters& parameters,
-                          FlowFieldTurbA& flowField, FLOAT* const localNu,
-                          int i, int j, int k) {
-  const FLOAT nu = 1 / parameters.flow.Re;
-
-  for (int layer = -1; layer <= 1; layer++) {
-    for (int row = -1; row <= 1; row++) {
-      for (int column = -1; column <= 1; column++) {
-        FLOAT nut = flowField.getNu(i + column, j + row, k + layer);
-        localNu[39 + 27 * layer + 9 * row + 3 * column] = nut + nu;
-      }
-    }
-  }
-}
 
 // Load the local velocity cube with relevant velocities of the 2D plane
 inline void loadLocalVelocity2D(FlowField& flowField,

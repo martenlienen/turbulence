@@ -1,18 +1,17 @@
-#include <algorithm>
-#include <cmath>
-
 #include "HStencil.h"
-#include "StencilFunctions.h"
-#include "../Definitions.h"
 
 namespace nseof {
 
+namespace flowmodels {
+
+namespace algebraic {
+
 HStencil::HStencil(const Parameters& parameters)
-    : FieldStencil<FlowFieldTurbA>(parameters), wdm(_parameters) {
+    : FieldStencil<FlowField>(parameters), wdm(_parameters) {
   wdm.init();
 }
 
-void HStencil::apply(FlowFieldTurbA& flowField, int i, int j) {
+void HStencil::apply(FlowField& flowField, int i, int j) {
   const int obstacle = flowField.getFlags().getValue(i, j);
 
   if ((obstacle & OBSTACLE_SELF) == 0) {
@@ -22,7 +21,7 @@ void HStencil::apply(FlowFieldTurbA& flowField, int i, int j) {
   }
 }
 
-void HStencil::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
+void HStencil::apply(FlowField& flowField, int i, int j, int k) {
   const int obstacle = flowField.getFlags().getValue(i, j, k);
 
   if ((obstacle & OBSTACLE_SELF) == 0) {
@@ -30,5 +29,7 @@ void HStencil::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
   } else {
     flowField.getH(i, j, k) = 0.0;
   }
+}
+}
 }
 }

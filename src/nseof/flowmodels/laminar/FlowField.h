@@ -1,17 +1,21 @@
-#ifndef _FLOW_FIELD_LAMINAR_H_
-#define _FLOW_FIELD_LAMINAR_H_
+#ifndef _NSEOF_FLOWMODELS_LAMINAR_FLOW_FIELD_H_
+#define _NSEOF_FLOWMODELS_LAMINAR_FLOW_FIELD_H_
 
-#include "DataStructures.h"
-#include "Parameters.h"
-#include "FlowField.h"
+#include "../../DataStructures.h"
+#include "../../Parameters.h"
+#include "../../FlowField.h"
 
 namespace nseof {
+
+namespace flowmodels {
+
+namespace laminar {
 
 /** Flow field
  *
  * Class intended to contain the state of the domain.
  */
-class FlowFieldLaminar : public FlowField {
+class FlowField : public nseof::FlowField {
  private:
   const int _size_x;  //! Size in the X direction
   const int _size_y;  //! Size in the Y direction
@@ -38,9 +42,9 @@ class FlowFieldLaminar : public FlowField {
    *
    * @param parameters Parameters object with geometric information
    */
-  FlowFieldLaminar(int Nx, int Ny, int Nz);
-  FlowFieldLaminar(int Nx, int Ny);
-  FlowFieldLaminar(const Parameters& parameters);
+  FlowField(int Nx, int Ny, int Nz);
+  FlowField(int Nx, int Ny);
+  FlowField(Parameters const& parameters);
 
   int getNx() const;
 
@@ -69,6 +73,8 @@ class FlowFieldLaminar : public FlowField {
   void getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity, int i,
                               int j, int k);
 };
+}
+}
 }
 
 #endif

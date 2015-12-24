@@ -1,13 +1,18 @@
 #include <algorithm>
 
+#include "../../Definitions.h"
+#include "../../stencils/StencilFunctions.h"
+
 #include "NutStencil.h"
-#include "StencilFunctions.h"
-#include "../Definitions.h"
 
 namespace nseof {
 
+namespace flowmodels {
+
+namespace algebraic {
+
 NutStencil::NutStencil(const Parameters& parameters)
-    : FieldStencil<FlowFieldTurbA>(parameters) {
+    : FieldStencil<FlowField>(parameters) {
   // do you want to calculate vortex viscosity?
   if (parameters.flow.type == "laminar") {
     _fs = new NutStencilL(parameters);
@@ -18,25 +23,25 @@ NutStencil::NutStencil(const Parameters& parameters)
 
 NutStencil::~NutStencil() { delete _fs; }
 
-void NutStencil::apply(FlowFieldTurbA& flowField, int i, int j) {
+void NutStencil::apply(FlowField& flowField, int i, int j) {
   _fs->apply(flowField, i, j);
 }
 
-void NutStencil::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
+void NutStencil::apply(FlowField& flowField, int i, int j, int k) {
   _fs->apply(flowField, i, j, k);
 }
 
 NutStencilL::NutStencilL(const Parameters& parameters)
-    : FieldStencil<FlowFieldTurbA>(parameters) {}
+    : FieldStencil<FlowField>(parameters) {}
 
-void NutStencilL::apply(FlowFieldTurbA& flowField, int i, int j) {
+void NutStencilL::apply(FlowField& flowField, int i, int j) {
   // no vortex viscosity, velociy fluctuation, mixing length
   flowField.getNu(i, j) = 0;
   flowField.getU(i, j) = 0;
   flowField.getLm(i, j) = 0;
 }
 
-void NutStencilL::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
+void NutStencilL::apply(FlowField& flowField, int i, int j, int k) {
   // no vortex viscosity, velociy fluctuation, mixing length
   flowField.getNu(i, j, k) = 0;
   flowField.getU(i, j, k) = 0;
@@ -104,7 +109,7 @@ class limiter4 : public limiter {
 };
 
 NutStencilA::NutStencilA(const Parameters& parameters)
-    : FieldStencil<FlowFieldTurbA>(parameters) {
+    : FieldStencil<FlowField>(parameters) {
   std::string nulimiter = parameters.simulation.nulimiter;
 
   if (nulimiter == "1") {
@@ -128,7 +133,7 @@ NutStencilA::NutStencilA(const Parameters& parameters)
   }
 }
 
-void NutStencilA::apply(FlowFieldTurbA& flowField, int i, int j) {
+void NutStencilA::apply(FlowField& flowField, int i, int j) {
   // Load local velocities into the center layer of the local array
   loadLocalVelocity2D(flowField, _localVelocity, i, j);
   loadLocalMeshsize2D(_parameters, _localMeshsize, i, j);
@@ -138,7 +143,7 @@ void NutStencilA::apply(FlowFieldTurbA& flowField, int i, int j) {
                flowField.getU(i, j), flowField.getLm(i, j));
 }
 
-void NutStencilA::apply(FlowFieldTurbA& flowField, int i, int j, int k) {
+void NutStencilA::apply(FlowField& flowField, int i, int j, int k) {
   // Load local velocities into the center layer of the local array
   loadLocalVelocity3D(flowField, _localVelocity, i, j, k);
   loadLocalMeshsize3D(_parameters, _localMeshsize, i, j, k);
@@ -204,5 +209,7 @@ void NutStencilA::computeNUT3D(int i, int j, int k,
   // calculate vortex viscosity
   nu = lm * lm * grad;
   // clang-format off
+}
+}
 }
 }

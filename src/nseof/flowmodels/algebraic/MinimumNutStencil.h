@@ -1,17 +1,22 @@
-#ifndef _MINIMUM_NUT_STENCIL_P_H_
-#define _MINIMUM_NUT_STENCIL_P_H_
+#ifndef _NSEOF_FLOWMODELS_ALGEBRAIC_MINIMUMNUTSTENCIL_H_
+#define _NSEOF_FLOWMODELS_ALGEBRAIC_MINIMUMNUTSTENCIL_H_
 
-#include "../Definitions.h"
-#include "../Parameters.h"
-#include "../Stencil.h"
-#include "../FlowFieldTurbA.h"
+#include "../../Definitions.h"
+#include "../../Parameters.h"
+#include "../../Stencil.h"
+
+#include "FlowField.h"
 
 namespace nseof {
+
+namespace flowmodels {
+
+namespace algebraic {
 
 /**
  * When iterated with, finds and stores the minimum nu_t value
  */
-class MinimumNutStencil : public FieldStencil<FlowFieldTurbA> {
+class MinimumNutStencil : public FieldStencil<FlowField> {
  public:
   MinimumNutStencil(const Parameters& parameters);
 
@@ -23,7 +28,7 @@ class MinimumNutStencil : public FieldStencil<FlowFieldTurbA> {
    * @param i Position in the x direction
    * @param j Position in the y direction
    */
-  void apply(FlowFieldTurbA& flowField, int i, int j);
+  void apply(FlowField& flowField, int i, int j);
 
   /** 3D operation for one position
    *
@@ -32,7 +37,7 @@ class MinimumNutStencil : public FieldStencil<FlowFieldTurbA> {
    * @param j Position in the y direction
    * @param k Position in the z direction
    */
-  void apply(FlowFieldTurbA& flowField, int i, int j, int k);
+  void apply(FlowField& flowField, int i, int j, int k);
 
   double getMinimum() { return minimum; }
 
@@ -42,5 +47,7 @@ class MinimumNutStencil : public FieldStencil<FlowFieldTurbA> {
   double minimum;
 };
 }
+}
+}
 
-#endif  // _MINIMUM_NUT_STENCIL_P_H_
+#endif  // _NSEOF_FLOWMODELS_ALGEBRAIC_MINIMUMNUTSTENCIL_H_

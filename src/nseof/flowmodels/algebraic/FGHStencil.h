@@ -1,27 +1,29 @@
-#ifndef _STENCIL_FGH_TURB_H_
-#define _STENCIL_FGH_TURB_H_
+#ifndef _NSEOF_FLOWMODELS_ALGEBRAIC_FGHSTENCIL_H_
+#define _NSEOF_FLOWMODELS_ALGEBRAIC_FGHSTENCIL_H_
 
-#include "../FlowField.h"
-#include "../Stencil.h"
-#include "../Parameters.h"
-#include "../FlowFieldTurbA.h"
+#include "../../Stencil.h"
+#include "../../Parameters.h"
+
+#include "FlowField.h"
 
 namespace nseof {
 
-class FGHStencilTurb : public FieldStencil<FlowFieldTurbA> {
+namespace flowmodels {
+
+namespace algebraic {
+
+class FGHStencil : public FieldStencil<FlowField> {
  private:
   // A local velocity variable that will be used to approximate derivatives.
-  // Size matches 3D
-  // case, but can be used for 2D as well.
+  // Size matches 3D case, but can be used for 2D as well.
   FLOAT _localVelocity[27 * 3];
   // local meshsize
   FLOAT _localMeshsize[27 * 3];
-  // pm: 2015.11.07
   // local nu
   FLOAT _localNu[27 * 3];
 
  public:
-  FGHStencilTurb(const Parameters& parameters);
+  FGHStencil(const Parameters& parameters);
 
   /** Apply the stencil in 2D
    *
@@ -31,7 +33,7 @@ class FGHStencilTurb : public FieldStencil<FlowFieldTurbA> {
    * @param i Index in the x direction
    * @param j Index in the y direction
    */
-  void apply(FlowFieldTurbA& flowField, int i, int j);
+  void apply(FlowField& flowField, int i, int j);
 
   /** Apply the stencil in 3D
    *
@@ -40,8 +42,10 @@ class FGHStencilTurb : public FieldStencil<FlowFieldTurbA> {
    * @param j Index in the y direction
    * @param k Index in the z direction
    */
-  void apply(FlowFieldTurbA& flowField, int i, int j, int k);
+  void apply(FlowField& flowField, int i, int j, int k);
 };
+}
+}
 }
 
 #endif

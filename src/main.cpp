@@ -7,8 +7,8 @@
 
 #include "nseof/Configuration.h"
 #include "nseof/Simulation.h"
-#include "nseof/SimulationLaminar.h"
-#include "nseof/SimulationTurbA.h"
+#include "nseof/flowmodels/laminar/Simulation.h"
+#include "nseof/flowmodels/algebraic/Simulation.h"
 #include "nseof/parallelManagers/PetscParallelConfiguration.h"
 #include "nseof/MeshsizeFactory.h"
 #include "nseof/MultiTimer.h"
@@ -65,14 +65,14 @@ int main(int argc, char *argv[]) {
     }
 
     // create algebraic turbulent simulation
-    simulation = new nseof::SimulationTurbA(parameters);
+    simulation = new nseof::flowmodels::algebraic::Simulation(parameters);
   } else if (parameters.simulation.type == "dns") {
     if (rank == 0) {
       std::cout << "Start DNS simulation in " << parameters.geometry.dim << "D"
                 << std::endl;
     }
 
-    simulation = new nseof::SimulationLaminar(parameters);
+    simulation = new nseof::flowmodels::laminar::Simulation(parameters);
   } else {
     handleError(
         1, "Unknown simulation type! Currently supported: dns, turbulence");

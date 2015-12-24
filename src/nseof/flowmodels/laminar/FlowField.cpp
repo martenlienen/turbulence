@@ -1,9 +1,13 @@
-#include "FlowFieldLaminar.h"
+#include "FlowField.h"
 
 namespace nseof {
 
-FlowFieldLaminar::FlowFieldLaminar(int Nx, int Ny)
-    : FlowField(),
+namespace flowmodels {
+
+namespace laminar {
+
+FlowField::FlowField(int Nx, int Ny)
+    : nseof::FlowField(),
       _size_x(Nx),
       _size_y(Ny),
       _size_z(1),
@@ -23,8 +27,8 @@ FlowFieldLaminar::FlowFieldLaminar(int Nx, int Ny)
   assertion(Ny > 0);
 }
 
-FlowFieldLaminar::FlowFieldLaminar(int Nx, int Ny, int Nz)
-    : FlowField(),
+FlowField::FlowField(int Nx, int Ny, int Nz)
+    : nseof::FlowField(),
       _size_x(Nx),
       _size_y(Ny),
       _size_z(Nz),
@@ -42,8 +46,8 @@ FlowFieldLaminar::FlowFieldLaminar(int Nx, int Ny, int Nz)
   assertion(Nz > 0);
 }
 
-FlowFieldLaminar::FlowFieldLaminar(const Parameters& parameters)
-    : FlowField(),
+FlowField::FlowField(const Parameters& parameters)
+    : nseof::FlowField(),
       _size_x(parameters.parallel.localSize[0]),
       _size_y(parameters.parallel.localSize[1]),
       _size_z(parameters.parallel.localSize[2]),
@@ -67,31 +71,30 @@ FlowFieldLaminar::FlowFieldLaminar(const Parameters& parameters)
                ? ScalarField(_size_x + 3, _size_y + 3)
                : ScalarField(_size_x + 3, _size_y + 3, _size_z + 3)) {}
 
-int FlowFieldLaminar::getNx() const { return _size_x; }
+int FlowField::getNx() const { return _size_x; }
 
-int FlowFieldLaminar::getNy() const { return _size_y; }
+int FlowField::getNy() const { return _size_y; }
 
-int FlowFieldLaminar::getNz() const { return _size_z; }
+int FlowField::getNz() const { return _size_z; }
 
-int FlowFieldLaminar::getCellsX() const { return _cellsX; }
+int FlowField::getCellsX() const { return _cellsX; }
 
-int FlowFieldLaminar::getCellsY() const { return _cellsY; }
+int FlowField::getCellsY() const { return _cellsY; }
 
-int FlowFieldLaminar::getCellsZ() const { return _cellsZ; }
+int FlowField::getCellsZ() const { return _cellsZ; }
 
-ScalarField& FlowFieldLaminar::getPressure() { return _pressure; }
+ScalarField& FlowField::getPressure() { return _pressure; }
 
-VectorField& FlowFieldLaminar::getVelocity() { return _velocity; }
+VectorField& FlowField::getVelocity() { return _velocity; }
 
-IntScalarField& FlowFieldLaminar::getFlags() { return _flags; }
+IntScalarField& FlowField::getFlags() { return _flags; }
 
-VectorField& FlowFieldLaminar::getFGH() { return _FGH; }
+VectorField& FlowField::getFGH() { return _FGH; }
 
-ScalarField& FlowFieldLaminar::getRHS() { return _RHS; }
+ScalarField& FlowField::getRHS() { return _RHS; }
 
-void FlowFieldLaminar::getPressureAndVelocity(FLOAT& pressure,
-                                              FLOAT* const velocity, int i,
-                                              int j) {
+void FlowField::getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity,
+                                       int i, int j) {
   FLOAT* v_here = getVelocity().getVector(i, j);
   FLOAT* v_left = getVelocity().getVector(i - 1, j);
   FLOAT* v_down = getVelocity().getVector(i, j - 1);
@@ -102,9 +105,8 @@ void FlowFieldLaminar::getPressureAndVelocity(FLOAT& pressure,
   pressure = getPressure().getScalar(i, j);
 }
 
-void FlowFieldLaminar::getPressureAndVelocity(FLOAT& pressure,
-                                              FLOAT* const velocity, int i,
-                                              int j, int k) {
+void FlowField::getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity,
+                                       int i, int j, int k) {
   FLOAT* v_here = getVelocity().getVector(i, j, k);
   FLOAT* v_left = getVelocity().getVector(i - 1, j, k);
   FLOAT* v_down = getVelocity().getVector(i, j - 1, k);
@@ -115,5 +117,7 @@ void FlowFieldLaminar::getPressureAndVelocity(FLOAT& pressure,
   velocity[2] = (v_here[2] + v_back[2]) / 2;
 
   pressure = getPressure().getScalar(i, j, k);
+}
+}
 }
 }
