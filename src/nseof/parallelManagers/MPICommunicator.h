@@ -87,6 +87,13 @@ class MPICommunicator {
   void exchangeValues(ParallelBoundaryIterator<FF, T>& lrReadIterator,
                       ParallelBoundaryIterator<FF, T>& lrWriteIterator, int lnb,
                       int rnb);
+
+  /**
+   * Send to and receive from two neighbors in parallel
+   */
+  void sendrecv2(int lnb, const void* lSendBuf, int lNumSend, void* lRecvBuf,
+                 int lNumRecv, int rnb, const void* rSendBuf, int rNumSend,
+                 void* rRecvBuf, int rNumRecv, MPI_Datatype type);
 };
 
 // Implementation for template type
@@ -112,7 +119,6 @@ void MPICommunicator<T, FF>::exchangeValues(
     ParallelBoundaryIterator<FF, T>& readIterator,
     ParallelBoundaryIterator<FF, T>& writeIterator, int lnb, int rnb) {
   MPI_Datatype type = MPIType<T>::mpiType;
-  MPI_Status status;
 
   // The raw data type that is transmitted by MPI (e.g. int or double)
   typedef typename MPIType<T>::type raw;
@@ -147,13 +153,9 @@ void MPICommunicator<T, FF>::exchangeValues(
   std::unique_ptr<raw> rBuf(new raw[rNumRecv]);
 
   // clang-format off
-  MPI_Sendrecv(lData.data(), lNumSend, type, lnb, 0,
-               rBuf.get(), rNumRecv, type, rnb, 0,
-               MPI_COMM_WORLD, &status);
-
-  MPI_Sendrecv(rData.data(), rNumSend, type, rnb, 0,
-               lBuf.get(), lNumRecv, type, lnb, 0,
-               MPI_COMM_WORLD, &status);
+  this->sendrecv2(lnb, lData.data(), lNumSend, lBuf.get(), lNumRecv,
+                  rnb, rData.data(), rNumSend, rBuf.get(), rNumRecv,
+                  type);
   // clang-format on
 
   if (lnb >= 0) {
@@ -173,6 +175,23 @@ void MPICommunicator<T, FF>::exchangeValues(
 
     writeIterator.second.iterate();
   }
+}
+
+template <typename T, typename FF>
+void MPICommunicator<T, FF>::sendrecv2(int lRank, const void* lSendBuf,
+                                       int lNumSend, void* lRecvBuf,
+                                       int lNumRecv, int rRank,
+                                       const void* rSendBuf, int rNumSend,
+                                       void* rRecvBuf, int rNumRecv,
+                                       MPI_Datatype type) {
+  MPI_Request requests[4];
+
+  MPI_Isend(lSendBuf, lNumSend, type, lRank, 0, MPI_COMM_WORLD, &requests[0]);
+  MPI_Isend(rSendBuf, rNumSend, type, rRank, 0, MPI_COMM_WORLD, &requests[1]);
+  MPI_Irecv(lRecvBuf, lNumRecv, type, lRank, 0, MPI_COMM_WORLD, &requests[2]);
+  MPI_Irecv(rRecvBuf, rNumRecv, type, rRank, 0, MPI_COMM_WORLD, &requests[3]);
+
+  MPI_Waitall(4, requests, MPI_STATUSES_IGNORE);
 }
 }
 
