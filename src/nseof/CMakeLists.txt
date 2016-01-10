@@ -4,7 +4,7 @@ set(root_src Configuration.cpp DataStructures.cpp GlobalBoundaryFactory.cpp
 set(NSEOF_FLOWMODELS_SRCS flowmodels/turbulent/FlowField.cpp
   flowmodels/turbulent/HStencil.cpp flowmodels/algebraic/FGHStencil.cpp
   flowmodels/algebraic/NutStencil.cpp
-  flowmodels/algebraic/MinimumNutStencil.cpp)
+  flowmodels/algebraic/MaximumNutStencil.cpp)
 set(parallel_src parallelManagers/PetscParallelConfiguration.cpp)
 set(solvers_src solvers/PetscSolver.cpp solvers/SORSolver.cpp)
 set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp

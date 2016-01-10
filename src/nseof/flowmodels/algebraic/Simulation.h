@@ -27,7 +27,7 @@
 #include "FlowField.h"
 #include "FGHStencil.h"
 #include "NutStencil.h"
-#include "MinimumNutStencil.h"
+#include "MaximumNutStencil.h"
 
 namespace nseof {
 
@@ -64,8 +64,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   nseof::flowmodels::turbulent::HStencil _hst;
   FieldIterator<nseof::flowmodels::turbulent::FlowField> _hit;
 
-  MinimumNutStencil _minnutst;
-  FieldIterator<FlowField> _minnutit;
+  MaximumNutStencil _maxmnutst;
+  FieldIterator<FlowField> _maxmnutit;
 
   MPICommunicator<FLOAT, FlowField> nutComm{
       *this->_flowField, this->_parameters,
@@ -102,8 +102,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _nutit(*_flowField, _parameters, _nutst, 1, 0),
         _hst(parameters, gm),
         _hit(*_flowField, _parameters, _hst, 0, 0),
-        _minnutst(parameters),
-        _minnutit(*_flowField, _parameters, _minnutst, 1, 0) {
+        _maxmnutst(parameters),
+        _maxmnutit(*_flowField, _parameters, _maxmnutst, 1, 0) {
     // distance to the next wall
     this->scalarStencils.push_back(CellDataStencil<double, FlowField>(
         this->_parameters, "h",
@@ -249,8 +249,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
  protected:
   /** sets the time step*/
   virtual void setTimeStep() {
-    _minnutst.reset();
-    _minnutit.iterate();
+    _maxmnutst.reset();
+    _maxmnutit.iterate();
 
     FLOAT localMin, globalMin;
     assertion(_parameters.geometry.dim == 2 || _parameters.geometry.dim == 3);
@@ -275,7 +275,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     // dt = 1/(2 * (nu+nut))/(dx_min^-2+dy_min^-2+dz_min^-2))
     localMin = std::min(_parameters.timestep.dt,
                         std::min(std::min(1 / (1 / _parameters.flow.Re +
-                                               _minnutst.getMinimum()) /
+                                               _maxmnutst.getMaximum()) /
                                               (2 * factor),
                                           1.0 / _maxUStencil.getMaxValues()[0]),
                                  1.0 / _maxUStencil.getMaxValues()[1]));
