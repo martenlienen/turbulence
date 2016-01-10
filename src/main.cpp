@@ -10,6 +10,7 @@
 #include "nseof/flowmodels/laminar/Simulation.h"
 #include "nseof/flowmodels/algebraic/Simulation.h"
 #include "nseof/parallelManagers/PetscParallelConfiguration.h"
+#include "nseof/geometry/GeometryManager.h"
 #include "nseof/MeshsizeFactory.h"
 #include "nseof/MultiTimer.h"
 
@@ -57,6 +58,8 @@ int main(int argc, char *argv[]) {
             << parameters.meshsize->getDzMin() << std::endl;
 #endif
 
+  nseof::geometry::GeometryManager gm(parameters);
+
   // initialise simulation
   if (parameters.simulation.type == "turbulence") {
     if (rank == 0) {
@@ -65,7 +68,7 @@ int main(int argc, char *argv[]) {
     }
 
     // create algebraic turbulent simulation
-    simulation = new nseof::flowmodels::algebraic::Simulation(parameters);
+    simulation = new nseof::flowmodels::algebraic::Simulation(parameters, gm);
   } else if (parameters.simulation.type == "dns") {
     if (rank == 0) {
       std::cout << "Start DNS simulation in " << parameters.geometry.dim << "D"

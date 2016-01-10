@@ -4,7 +4,7 @@ namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
 FlowField::FlowField(const Parameters& parameters)
     : nseof::FlowField(parameters),

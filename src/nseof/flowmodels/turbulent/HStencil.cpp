@@ -4,11 +4,12 @@ namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
-HStencil::HStencil(const Parameters& parameters)
+HStencil::HStencil(const Parameters& parameters,
+                   const nseof::geometry::GeometryManager& gm)
     : FieldStencil<FlowField>(parameters), wdm(_parameters) {
-  wdm.init();
+  wdm.init(gm.x, gm.y, gm.z);
 }
 
 void HStencil::apply(FlowField& flowField, int i, int j) {

@@ -8,7 +8,7 @@
 #include "../../GlobalBoundaryFactory.h"
 #include "../../Iterators.h"
 #include "../../Definitions.h"
-#include "../../Simulation.h"
+#include "../../FlowFieldSimulation.h"
 #include "../../stencils/RHSStencil.h"
 #include "../../stencils/VelocityStencil.h"
 #include "../../stencils/ObstacleStencil.h"
@@ -17,11 +17,14 @@
 #include "../../stencils/InitTaylorGreenFlowFieldStencil.h"
 #include "../../solvers/PetscSolver.h"
 #include "../../parallelManagers/MPICommunicator.h"
+#include "../../geometry/GeometryManager.h"
+
+#include "../turbulent/FlowField.h"
+#include "../turbulent/HStencil.h"
 
 #include "FlowField.h"
 #include "FGHStencil.h"
 #include "NutStencil.h"
-#include "HStencil.h"
 #include "MinimumNutStencil.h"
 
 namespace nseof {
@@ -56,8 +59,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
 
   NutStencil _nutst;
   FieldIterator<FlowField> _nutit;
-  HStencil _hst;
-  FieldIterator<FlowField> _hit;
+  nseof::flowmodels::turbulent::HStencil _hst;
+  FieldIterator<nseof::flowmodels::turbulent::FlowField> _hit;
 
   MinimumNutStencil _minnutst;
   FieldIterator<FlowField> _minnutit;
@@ -73,7 +76,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
       2};
 
  public:
-  Simulation(Parameters &parameters)
+  Simulation(Parameters &parameters, nseof::geometry::GeometryManager &gm)
       : FlowFieldSimulation(parameters, new FlowField(parameters)),
         _maxUStencil(parameters),
         _maxUFieldIterator(*_flowField, parameters, _maxUStencil),
@@ -95,7 +98,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _solver(*_flowField, parameters),
         _nutst(parameters),
         _nutit(*_flowField, _parameters, _nutst, 1, 0),
-        _hst(parameters),
+        _hst(parameters, gm),
         _hit(*_flowField, _parameters, _hst, 0, 0),
         _minnutst(parameters),
         _minnutit(*_flowField, _parameters, _minnutst, 1, 0) {
@@ -133,6 +136,9 @@ class Simulation : public FlowFieldSimulation<FlowField> {
           return f.getPressure().getScalar(i, j, k) -
                  f.getU(i, j, k) * f.getU(i, j, k);
         }));
+
+    // Load arbitrary geometry, if any present
+    gm.init(*this->_flowField);
   }
 
   virtual ~Simulation() {}

@@ -1,9 +1,10 @@
-#ifndef _NSEOF_FLOWMODELS_ALGEBRAIC_HSTENCIL_H_
-#define _NSEOF_FLOWMODELS_ALGEBRAIC_HSTENCIL_H_
+#ifndef _NSEOF_FLOWMODELS_TURBULENT_HSTENCIL_H_
+#define _NSEOF_FLOWMODELS_TURBULENT_HSTENCIL_H_
 
 #include "../../Stencil.h"
 #include "../../Parameters.h"
 #include "../../walldistance/WallDistanceManager.h"
+#include "../../geometry/GeometryManager.h"
 
 #include "FlowField.h"
 
@@ -11,11 +12,12 @@ namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
 class HStencil : public FieldStencil<FlowField> {
  public:
-  HStencil(const Parameters& parameters);
+  HStencil(const Parameters& parameters,
+           const nseof::geometry::GeometryManager& gm);
 
   /** Apply the stencil in 2D
    *
