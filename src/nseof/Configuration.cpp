@@ -223,6 +223,7 @@ void Configuration::loadParameters(Parameters &parameters,
     } else {
       handleError(1, "Unknown 'mesh'!");
     }
+    readStringOptional(parameters.geometry.obstacle, node, "obstacle", "");
 
     // Now, the size of the elements should be set
 
@@ -239,6 +240,7 @@ void Configuration::loadParameters(Parameters &parameters,
     }
 
     readFloatOptional(parameters.timestep.dt, node, "dt", 1);
+    parameters.timestep.dtu = parameters.timestep.dt;
     readFloatOptional(parameters.timestep.tau, node, "tau", 0.5);
 
     //--------------------------------------------------
@@ -252,6 +254,7 @@ void Configuration::loadParameters(Parameters &parameters,
     }
 
     readFloatMandatory(parameters.flow.Re, node, "Re");
+    parameters.flow.visc = 1 / parameters.flow.Re;
     readStringOptional(parameters.flow.type, node, "type", "laminar");
 
     //--------------------------------------------------
@@ -311,6 +314,34 @@ void Configuration::loadParameters(Parameters &parameters,
       handleError(1, "Missing scenario in simulation parameters");
     }
 
+    if (parameters.simulation.scenario == "channel-symm") {
+      parameters.geometry.lengthY /= 2;
+      parameters.geometry.sizeY /= 2;
+      parameters.geometry.lengthZ /= 2;
+      parameters.geometry.sizeZ /= 2;
+    }
+
+    //--------------------------------------------------
+    // kEpsilon parameters
+    //--------------------------------------------------
+    node = confFile.FirstChildElement()->FirstChildElement("keparameter");
+
+    if (parameters.simulation.type == "tke") {
+      if (node == NULL) {
+        handleError(1, "Missing parameters for k-epsilon turbulence model");
+      }
+
+      readFloatOptional(parameters.kEpsilon.ce1, node, "ce1", 1.4);
+      readFloatOptional(parameters.kEpsilon.ce2, node, "ce2", 1.8);
+      readFloatOptional(parameters.kEpsilon.cmu, node, "cmu", 0.09);
+      readFloatOptional(parameters.kEpsilon.sigmaK, node, "sigmaK", 1.0);
+      readFloatOptional(parameters.kEpsilon.sigmaE, node, "sigmaE", 1.3);
+      readIntOptional(parameters.kEpsilon.model, node, "model", 1);
+      readFloatOptional(parameters.kEpsilon.start, node, "start", 0.0);
+      readIntOptional(parameters.kEpsilon.adaptnrs, node, "adaptnrs", 5);
+      readFloatOptional(parameters.kEpsilon.adapterr, node, "adapterr", -0.001);
+    }
+
     //--------------------------------------------------
     // VTK parameters
     //--------------------------------------------------
@@ -321,6 +352,7 @@ void Configuration::loadParameters(Parameters &parameters,
       readBoolOptional(parameters.vtk.enabled, node, "enabled", true);
 
       if (parameters.vtk.enabled) {
+        readFloatOptional(parameters.vtk.start, node, "start", 0.0);
         readFloatOptional(parameters.vtk.interval, node, "interval");
         readStringMandatory(parameters.vtk.prefix, node);
       }
@@ -475,11 +507,14 @@ void Configuration::loadParameters(Parameters &parameters,
   MPI_Bcast(&(parameters.geometry.lengthX), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.geometry.lengthY), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.geometry.lengthZ), 1, MY_MPI_FLOAT, 0, communicator);
+  broadcastString(parameters.geometry.obstacle, communicator);
 
   MPI_Bcast(&(parameters.timestep.dt), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.timestep.dtu), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.timestep.tau), 1, MY_MPI_FLOAT, 0, communicator);
 
   MPI_Bcast(&(parameters.flow.Re), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.flow.visc), 1, MY_MPI_FLOAT, 0, communicator);
 
   MPI_Bcast(&(parameters.solver.gamma), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.solver.maxIterations), 1, MY_MPI_FLOAT, 0,
@@ -492,8 +527,19 @@ void Configuration::loadParameters(Parameters &parameters,
   MPI_Bcast(&(parameters.simulation.finalTime), 1, MY_MPI_FLOAT, 0,
             communicator);
 
+  MPI_Bcast(&(parameters.kEpsilon.ce1), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.kEpsilon.ce2), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.kEpsilon.cmu), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.kEpsilon.sigmaK), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.kEpsilon.sigmaE), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.kEpsilon.model), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(parameters.kEpsilon.start), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.kEpsilon.adaptnrs), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(parameters.kEpsilon.adapterr), 1, MY_MPI_FLOAT, 0, communicator);
+
   MPI_Bcast(&(parameters.vtk.enabled), 1, MPI_INT, 0, communicator);
   MPI_Bcast(&(parameters.vtk.interval), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(parameters.vtk.start), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.vtk.lowoffset), 1, MPI_INT, 0, communicator);
   MPI_Bcast(&(parameters.vtk.highoffset), 1, MPI_INT, 0, communicator);
 
