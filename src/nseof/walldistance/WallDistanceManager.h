@@ -15,7 +15,8 @@ class WallDistanceManager {
 
   virtual ~WallDistanceManager();
 
-  void init();
+  void init(std::vector<double> xx, std::vector<double> yy,
+            std::vector<double> zz);
 
   double query(int i, int j, int kk = 0);
 
