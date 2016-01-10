@@ -23,11 +23,11 @@
 
 #include "../turbulent/FlowField.h"
 #include "../turbulent/HStencil.h"
+#include "../turbulent/MaximumNutStencil.h"
+#include "../turbulent/FGHStencil.h"
 
 #include "FlowField.h"
-#include "FGHStencil.h"
 #include "NutStencil.h"
-#include "MaximumNutStencil.h"
 
 namespace nseof {
 
@@ -46,8 +46,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   GlobalBoundaryIterator<nseof::FlowField> _wallVelocityIterator;
   GlobalBoundaryIterator<nseof::FlowField> _wallFGHIterator;
 
-  FGHStencil _fghStencil;
-  FieldIterator<FlowField> _fghIterator;
+  nseof::flowmodels::turbulent::FGHStencil _fghStencil;
+  FieldIterator<nseof::flowmodels::turbulent::FlowField> _fghIterator;
 
   RHSStencil _rhsStencil;
   FieldIterator<nseof::FlowField> _rhsIterator;
@@ -64,8 +64,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   nseof::flowmodels::turbulent::HStencil _hst;
   FieldIterator<nseof::flowmodels::turbulent::FlowField> _hit;
 
-  MaximumNutStencil _maxmnutst;
-  FieldIterator<FlowField> _maxmnutit;
+  nseof::flowmodels::turbulent::MaximumNutStencil _maxmnutst;
+  FieldIterator<nseof::flowmodels::turbulent::FlowField> _maxmnutit;
 
   MPICommunicator<FLOAT, FlowField> nutComm{
       *this->_flowField, this->_parameters,

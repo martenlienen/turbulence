@@ -1,5 +1,5 @@
-#ifndef _NSEOF_FLOWMODELS_ALGEBRAIC_FGHSTENCIL_H_
-#define _NSEOF_FLOWMODELS_ALGEBRAIC_FGHSTENCIL_H_
+#ifndef _NSEOF_FLOWMODELS_TURBULENT_FGHSTENCIL_H_
+#define _NSEOF_FLOWMODELS_TURBULENT_FGHSTENCIL_H_
 
 #include "../../Stencil.h"
 #include "../../Parameters.h"
@@ -10,7 +10,7 @@ namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
 class FGHStencil : public FieldStencil<FlowField> {
  private:

@@ -6,7 +6,7 @@ namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
 MaximumNutStencil::MaximumNutStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {

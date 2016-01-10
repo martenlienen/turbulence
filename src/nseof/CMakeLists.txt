@@ -2,9 +2,8 @@ set(root_src Configuration.cpp DataStructures.cpp GlobalBoundaryFactory.cpp
   FlowField.cpp LinearSolver.cpp Meshsize.cpp MemoizedMesh.cpp SimpleTimer.cpp
   MultiTimer.cpp)
 set(NSEOF_FLOWMODELS_SRCS flowmodels/turbulent/FlowField.cpp
-  flowmodels/turbulent/HStencil.cpp flowmodels/algebraic/FGHStencil.cpp
-  flowmodels/algebraic/NutStencil.cpp
-  flowmodels/algebraic/MaximumNutStencil.cpp)
+  flowmodels/turbulent/HStencil.cpp flowmodels/turbulent/MaximumNutStencil.cpp
+  flowmodels/turbulent/FGHStencil.cpp flowmodels/algebraic/NutStencil.cpp)
 set(parallel_src parallelManagers/PetscParallelConfiguration.cpp)
 set(solvers_src solvers/PetscSolver.cpp solvers/SORSolver.cpp)
 set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp

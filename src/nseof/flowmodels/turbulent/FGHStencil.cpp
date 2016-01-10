@@ -8,7 +8,7 @@ namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
 FGHStencil::FGHStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}

@@ -1,5 +1,5 @@
-#ifndef _NSEOF_FLOWMODELS_ALGEBRAIC_MAXIMUMNUTSTENCIL_H_
-#define _NSEOF_FLOWMODELS_ALGEBRAIC_MAXIMUMNUTSTENCIL_H_
+#ifndef _NSEOF_FLOWMODELS_TURBULENT_MAXIMUMNUTSTENCIL_H_
+#define _NSEOF_FLOWMODELS_TURBULENT_MAXIMUMNUTSTENCIL_H_
 
 #include "../../Definitions.h"
 #include "../../Parameters.h"
@@ -11,7 +11,7 @@ namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
 /**
  * When iterated with, finds and stores the maximum nu_t value
@@ -50,4 +50,4 @@ class MaximumNutStencil : public FieldStencil<FlowField> {
 }
 }
 
-#endif  // _NSEOF_FLOWMODELS_ALGEBRAIC_MAXIMUMNUTSTENCIL_H_
+#endif  // _NSEOF_FLOWMODELS_TURBULENT_MAXIMUMNUTSTENCIL_H_
