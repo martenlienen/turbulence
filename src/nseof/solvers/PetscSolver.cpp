@@ -299,6 +299,95 @@ PetscSolver::PetscSolver(FlowField &flowField, Parameters &parameters)
   }
 }
 
+void PetscSolver::init() {
+
+  MPI_Barrier(PETSC_COMM_WORLD);
+
+  ScalarField &pressure = _flowField.getPressure();
+
+//  KSPSolve(_ksp, PETSC_NULL, _x);
+
+
+  if (_parameters.geometry.dim == 2) {
+
+
+    PetscScalar **array;
+    DMDAVecGetArray(_da, _x, &array);
+
+
+    for (int j = _firstY; j < _firstY + _lengthY; j++) {
+      for (int i = _firstX; i < _firstX + _lengthX; i++) {
+        array[j][i] = pressure.getScalar(i - _firstX + _offsetX, j - _firstY + _offsetY);
+      }
+    }
+
+    int a, b, c;
+
+    VecGetLocalSize(_x,&a); VecGetSize(_x,&b); VecGetBlockSize(_x,&c);
+
+    int counter = 0;
+    for (int j = _firstY; j < _firstY + _lengthY; j++) {
+      for (int i = _firstX; i < _firstX + _lengthX; i++) {
+        VecSetValue(_x,counter,pressure.getScalar(i - _firstX + _offsetX, j - _firstY + _offsetY),INSERT_VALUES);
+      }
+    }
+
+    DMDAVecRestoreArray(_da, _x, &array);
+//    std::cout<<"blub: "<< a_x[0]<<std::endl;
+//    VecPlaceArray(_x,*array);
+//    std::cout
+//             <<"pro:"<<_parameters.parallel.rank
+//             <<" px:"<<_parameters.parallel.numProcessors[0]
+//             <<" py:"<<_parameters.parallel.numProcessors[1]
+//             <<" gl:"<<(_parameters.geometry.sizeX + 2)*(_parameters.geometry.sizeY + 2)
+//             <<" lx:"<<_lengthX
+//             <<" ly:"<<_lengthY
+//             <<" local size:"<<a
+//             <<" global size:"<<b
+//             <<" block:"<<c
+//             <<std::endl;
+
+//    MPI_Barrier(PETSC_COMM_WORLD);
+//    VecCreateSeqWithArray()
+//    VecCreateMPIWithArray(
+//        PETSC_COMM_WORLD,
+//        c,
+//        a,
+//        b,
+//        *array,
+//        &_x);
+//
+//MPI_Barrier(PETSC_COMM_WORLD);
+//    std::cout<<"---------------------------------"<<std::endl;
+
+
+//    VecCreateMPIWithArray(
+//        PETSC_COMM_WORLD,
+//        _parameters.parallel.numProcessors[0]*_parameters.parallel.numProcessors[1],
+//        (_lengthX)*(_lengthY),
+//        (_parameters.geometry.sizeX + 2)*(_parameters.geometry.sizeY + 2),
+//        *array,
+//        &_x);
+
+    
+//    VecCreateSeqWithArray(PETSC_COMM_WORLD,1,b,*array,&_x);
+//    VecCreateSeqWithArray(PETSC_COMM_WORLD,1,(_parameters.geometry.sizeX + 2)*(_parameters.geometry.sizeY + 2),*array,&_x);
+    
+  } else if (_parameters.geometry.dim == 3) {
+
+//    for (int k = _firstZ; k < _firstZ + _lengthZ; k++) {
+//      for (int j = _firstY; j < _firstY + _lengthY; j++) {
+//        for (int i = _firstX; i < _firstX + _lengthX; i++) {
+//          pressure.getScalar(i - _firstX + _offsetX, j - _firstY + _offsetY,
+//                             k - _firstZ + _offsetZ) = array[k][j][i];
+//        }
+//      }
+//    }
+    
+  }
+}
+
+
 void PetscSolver::solve() {
   ScalarField &pressure = _flowField.getPressure();
 

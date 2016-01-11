@@ -19,6 +19,7 @@ class Simulation {
   
   virtual void serialize()=0;
   virtual void deserialize()=0;
+  virtual void init()=0;
 
  protected:
   Parameters &_parameters;

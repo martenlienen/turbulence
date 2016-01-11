@@ -197,6 +197,10 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   virtual void deserialize(){
     _mpiir.iterate();
   }
+  
+  virtual void init(){
+    _solver.init();
+  }
 
  protected:
   /** sets the time step*/

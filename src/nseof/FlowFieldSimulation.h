@@ -107,6 +107,8 @@ class FlowFieldSimulation : public Simulation {
 
             return std::vector<double>{v[0], v[1], v[2]};
           })};
+          
+          
 
  public:
   FlowFieldSimulation(Parameters &parameters, FF* flowField)

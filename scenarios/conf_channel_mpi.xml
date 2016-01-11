@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <flow Re="5600" type="turbulent"/>
-  <simulation finalTime="1.0">
+  <simulation finalTime="0.2">
     <!--<type nulimiter="3">dns</type>-->
     <type nulimiter="0">dns</type>
     <scenario uniform="true">channel</scenario>
@@ -35,6 +35,6 @@
       <vector x="0" y="0" z="0"/>
     </back>
   </walls>
-  <vtk interval="0.1">results/mpi--</vtk>
+  <vtk interval="0.1">results/mpi-</vtk>
   <parallel numProcessorsX="1" numProcessorsY="1" numProcessorsZ="1"/>
 </configuration>

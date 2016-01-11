@@ -107,6 +107,12 @@ int main(int argc, char *argv[]) {
 
   // TODO WS1: plot initial state
   simulation->deserialize();
+
+
+//  MPI_Barrier(PETSC_COMM_WORLD);
+
+  
+//  simulation->init();
   simulation->plotVTK(rank, 0);
 
   timer->stop("initialization");

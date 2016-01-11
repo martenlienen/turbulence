@@ -85,6 +85,8 @@ class PetscSolver : public LinearSolver {
 
   /** Reinit the matrix so that it uses the right flag field */
   void reInitMatrix();
+  
+  void init();
 };
 }
 
