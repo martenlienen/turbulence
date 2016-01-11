@@ -1,6 +1,7 @@
 #ifndef _DERIVATIVES_H_
 #define _DERIVATIVES_H_
 
+#include <functional>
 #include <iostream>
 #include <math.h>
 
@@ -18,6 +19,27 @@ static int Y = 1;
 static int V = 1;
 static int Z = 2;
 static int W = 2;
+
+inline void loadLocal2D(std::function<void(FLOAT*, int, int)> fun,
+                        FLOAT* const local, int i, int j) {
+  for (int row = -1; row <= 1; row++) {
+    for (int column = -1; column <= 1; column++) {
+      fun(&local[39 + 9 * row + 3 * column], i + column, j + row);
+    }
+  }
+}
+
+inline void loadLocal3D(std::function<void(FLOAT*, int, int, int)> fun,
+                        FLOAT* const local, int i, int j, int k) {
+  for (int layer = -1; layer <= 1; layer++) {
+    for (int row = -1; row <= 1; row++) {
+      for (int column = -1; column <= 1; column++) {
+        fun(&local[39 + 27 * layer + 9 * row + 3 * column], i + column, j + row,
+            k + layer);
+      }
+    }
+  }
+}
 
 // Load the local velocity cube with relevant velocities of the 2D plane
 inline void loadLocalVelocity2D(FlowField& flowField,
