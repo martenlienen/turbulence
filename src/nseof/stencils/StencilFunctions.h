@@ -1403,6 +1403,35 @@ inline FLOAT computeH3DT(const FLOAT* const localVelocity,
                   dvwdy(localVelocity, parameters, localMeshsize) +
                   parameters.environment.gz);
 }
+
+inline FLOAT computeSijSij2D(const FLOAT* const localVelocity,
+                             const FLOAT* const localMeshsize) {
+  // calculate entries in shear stress tensor
+  const FLOAT S11 = 0.5 * 2 * dudx(localVelocity, localMeshsize);
+  const FLOAT S22 = 0.5 * 2 * dvdy(localVelocity, localMeshsize);
+  const FLOAT S12 = 0.5 * (dudy(localVelocity, localMeshsize) +
+                           dvdx(localVelocity, localMeshsize));
+
+  // S_ij*S_ij
+  return S11 * S11 + S22 * S22 + 2 * S12 * S12;
+}
+
+inline FLOAT computeSijSij3D(const FLOAT* const localVelocity,
+                             const FLOAT* const localMeshsize) {
+  // calculate entries in shear stress tensor
+  const FLOAT S11 = 0.5 * 2 * dudx(localVelocity, localMeshsize);
+  const FLOAT S22 = 0.5 * 2 * dvdy(localVelocity, localMeshsize);
+  const FLOAT S33 = 0.5 * 2 * dwdz(localVelocity, localMeshsize);
+  const FLOAT S12 = 0.5 * (dudy(localVelocity, localMeshsize) +
+                           dvdx(localVelocity, localMeshsize));
+  const FLOAT S13 = 0.5 * (dudz(localVelocity, localMeshsize) +
+                           dwdx(localVelocity, localMeshsize));
+  const FLOAT S23 = 0.5 * (dwdy(localVelocity, localMeshsize) +
+                           dvdz(localVelocity, localMeshsize));
+  // S_ij*S_ij
+  return S11 * S11 + S22 * S22 + S33 * S33 +
+         2 * (S12 * S12 + S13 * S13 + S23 * S23);
+}
 }
 
 #endif
