@@ -31,7 +31,7 @@ class MPIIterator : public Iterator<FF> {
   FF& _flowField;
   int _size;
   int _sizetotal;
-  Parameters _p;
+  const Parameters& _p;
   std::function<void(FF& flowField, int, int, int, T&)> _apply;
   std::string _fname;
 
