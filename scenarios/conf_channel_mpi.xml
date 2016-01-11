@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <flow Re="5600" type="turbulent"/>
-  <simulation finalTime="0.1">
+  <simulation finalTime="1.0">
     <!--<type nulimiter="3">dns</type>-->
     <type nulimiter="0">dns</type>
     <scenario uniform="true">channel</scenario>
