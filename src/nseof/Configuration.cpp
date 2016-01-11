@@ -326,7 +326,7 @@ void Configuration::loadParameters(Parameters &parameters,
     //--------------------------------------------------
     node = confFile.FirstChildElement()->FirstChildElement("keparameter");
 
-    if (parameters.simulation.type == "tke") {
+    if (parameters.simulation.type == "ke") {
       if (node == NULL) {
         handleError(1, "Missing parameters for k-epsilon turbulence model");
       }

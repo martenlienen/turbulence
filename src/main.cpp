@@ -9,6 +9,7 @@
 #include "nseof/Simulation.h"
 #include "nseof/flowmodels/laminar/Simulation.h"
 #include "nseof/flowmodels/algebraic/Simulation.h"
+#include "nseof/flowmodels/ke/Simulation.h"
 #include "nseof/parallelManagers/PetscParallelConfiguration.h"
 #include "nseof/geometry/GeometryManager.h"
 #include "nseof/MeshsizeFactory.h"
@@ -61,7 +62,7 @@ int main(int argc, char *argv[]) {
   nseof::geometry::GeometryManager gm(parameters);
 
   // initialise simulation
-  if (parameters.simulation.type == "turbulence") {
+  if (parameters.simulation.type == "algebraic") {
     if (rank == 0) {
       std::cout << "Start turbulent simulation in " << parameters.geometry.dim
                 << "D" << std::endl;
@@ -69,6 +70,20 @@ int main(int argc, char *argv[]) {
 
     // create algebraic turbulent simulation
     simulation = new nseof::flowmodels::algebraic::Simulation(parameters, gm);
+  } else if (parameters.simulation.type == "ke") {
+    if (rank == 0) {
+      std::cout << "Start turbulent simulation (k-epsilon) in "
+                << parameters.geometry.dim << "D" << std::endl;
+      std::cout << "with model parameters:" << std::endl;
+      std::cout << "ce1     :  " << parameters.kEpsilon.ce1 << std::endl;
+      std::cout << "ce2     :  " << parameters.kEpsilon.ce2 << std::endl;
+      std::cout << "cmu     :  " << parameters.kEpsilon.cmu << std::endl;
+      std::cout << "sigmaK  :  " << parameters.kEpsilon.sigmaK << std::endl;
+      std::cout << "sigmaE  :  " << parameters.kEpsilon.sigmaE << std::endl;
+    }
+
+    // create k-epsilon turbulent simulation
+    simulation = new nseof::flowmodels::ke::Simulation(parameters, gm);
   } else if (parameters.simulation.type == "dns") {
     if (rank == 0) {
       std::cout << "Start DNS simulation in " << parameters.geometry.dim << "D"
@@ -97,6 +112,10 @@ int main(int argc, char *argv[]) {
 
   // time loop
   while (time < parameters.simulation.finalTime) {
+    // DIRTY: Communicate current time to KE simulation
+    parameters.timestep.time = time;
+    parameters.timestep.timeSteps = timeSteps;
+
     simulation->solveTimestep();
 
     time += parameters.timestep.dt;
@@ -111,7 +130,10 @@ int main(int argc, char *argv[]) {
 
     // TODO WS1: trigger VTK output
     if (time >= timeVTK) {
-      simulation->plotVTK(rank, timeSteps);
+      if (time >= parameters.vtk.start) {
+        simulation->plotVTK(rank, timeSteps);
+      }
+
       timeVTK += parameters.vtk.interval;
     }
   }
