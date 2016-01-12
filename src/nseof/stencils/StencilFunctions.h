@@ -1,6 +1,7 @@
 #ifndef _DERIVATIVES_H_
 #define _DERIVATIVES_H_
 
+#include <functional>
 #include <iostream>
 #include <math.h>
 
@@ -18,6 +19,27 @@ static int Y = 1;
 static int V = 1;
 static int Z = 2;
 static int W = 2;
+
+inline void loadLocal2D(std::function<void(FLOAT*, int, int)> fun,
+                        FLOAT* const local, int i, int j) {
+  for (int row = -1; row <= 1; row++) {
+    for (int column = -1; column <= 1; column++) {
+      fun(&local[39 + 9 * row + 3 * column], i + column, j + row);
+    }
+  }
+}
+
+inline void loadLocal3D(std::function<void(FLOAT*, int, int, int)> fun,
+                        FLOAT* const local, int i, int j, int k) {
+  for (int layer = -1; layer <= 1; layer++) {
+    for (int row = -1; row <= 1; row++) {
+      for (int column = -1; column <= 1; column++) {
+        fun(&local[39 + 27 * layer + 9 * row + 3 * column], i + column, j + row,
+            k + layer);
+      }
+    }
+  }
+}
 
 // Load the local velocity cube with relevant velocities of the 2D plane
 inline void loadLocalVelocity2D(FlowField& flowField,
@@ -1380,6 +1402,116 @@ inline FLOAT computeH3DT(const FLOAT* const localVelocity,
                   duwdx(localVelocity, parameters, localMeshsize) -
                   dvwdy(localVelocity, parameters, localMeshsize) +
                   parameters.environment.gz);
+}
+
+inline FLOAT computeSijSij2D(const FLOAT* const localVelocity,
+                             const FLOAT* const localMeshsize) {
+  // calculate entries in shear stress tensor
+  const FLOAT S11 = 0.5 * 2 * dudx(localVelocity, localMeshsize);
+  const FLOAT S22 = 0.5 * 2 * dvdy(localVelocity, localMeshsize);
+  const FLOAT S12 = 0.5 * (dudy(localVelocity, localMeshsize) +
+                           dvdx(localVelocity, localMeshsize));
+
+  // S_ij*S_ij
+  return S11 * S11 + S22 * S22 + 2 * S12 * S12;
+}
+
+inline FLOAT computeSijSij3D(const FLOAT* const localVelocity,
+                             const FLOAT* const localMeshsize) {
+  // calculate entries in shear stress tensor
+  const FLOAT S11 = 0.5 * 2 * dudx(localVelocity, localMeshsize);
+  const FLOAT S22 = 0.5 * 2 * dvdy(localVelocity, localMeshsize);
+  const FLOAT S33 = 0.5 * 2 * dwdz(localVelocity, localMeshsize);
+  const FLOAT S12 = 0.5 * (dudy(localVelocity, localMeshsize) +
+                           dvdx(localVelocity, localMeshsize));
+  const FLOAT S13 = 0.5 * (dudz(localVelocity, localMeshsize) +
+                           dwdx(localVelocity, localMeshsize));
+  const FLOAT S23 = 0.5 * (dwdy(localVelocity, localMeshsize) +
+                           dvdz(localVelocity, localMeshsize));
+  // S_ij*S_ij
+  return S11 * S11 + S22 * S22 + S33 * S33 +
+         2 * (S12 * S12 + S13 * S13 + S23 * S23);
+}
+
+inline FLOAT dAdBdMdM(const FLOAT* const lm, const FLOAT* const la,
+                      const FLOAT* const lb, const FLOAT ox, const FLOAT oy,
+                      const FLOAT oz, const FLOAT dir) {
+  // clang-format off
+  return 2/lm[mapd(0,0,0,dir)]*
+      ((lm[mapd(+ox,+oy,+oz,dir)]*la[mapd(0,0,0,0)]+lm[mapd(0,0,0,dir)]*la[mapd(+ox,+oy,+oz,0)])*
+           (lb[mapd(+ox,+oy,+oz,0)]-lb[mapd(0,0,0,0)])/pow(lm[mapd(+ox,+oy,+oz,dir)]+lm[mapd(0,0,0,dir)],2)-
+       (lm[mapd(0,0,0,dir)]*la[mapd(-ox,-oy,-oz,0)]+lm[mapd(-ox,-oy,-oz,dir)]*la[mapd(0,0,0,0)])*
+           (lb[mapd(0,0,0,0)]-lb[mapd(-ox,-oy,-oz,0)])/pow(lm[mapd(0,0,0,dir)]+lm[mapd(-ox,-oy,-oz,dir)],2));
+  // clang-format on
+}
+
+inline FLOAT dUCdM(const FLOAT* const lm, const FLOAT* const lu,
+                   const FLOAT* const lc, const FLOAT ox, const FLOAT oy,
+                   const FLOAT oz, const FLOAT dir) {
+  // clang-format off
+  return (lu[mapd(  0,  0,  0,dir)]*(lm[mapd(+ox,+oy,+oz,dir)]*lc[mapd(0,0,0,0)] + lm[mapd(0,0,0,dir)]*lc[mapd(+ox,+oy,+oz,0)]) /
+                              (lm[mapd(+ox,+oy,+oz,dir)]+lm[mapd(0,0,0,dir)]) -
+          lu[mapd(-ox,-oy,-oz,dir)]*(lm[mapd(0,0,0,dir)]*lc[mapd(-ox,-oy,-oz,0)] + lm[mapd(-ox,-oy,-oz,dir)]*lc[mapd(0,0,0,0)]) /
+                              (lm[mapd(0,0,0,dir)]+lm[mapd(-ox,-oy,-oz,dir)])) / lm[mapd(0,0,0,dir)];
+  // clang-format on
+}
+
+inline FLOAT computeRHStke(
+    const Parameters& parameters, const FLOAT* const localVelocity,
+    const FLOAT* const localMeshsize, const FLOAT* const localNut,
+    const FLOAT* const localTKE, const FLOAT* const localEpsilon,
+    const FLOAT nut, const FLOAT localSijSij, const FLOAT f3, const FLOAT D) {
+  // clang-format off
+  FLOAT res = dAdBdMdM(localMeshsize,localNut,localTKE,     1,0,0,0)
+             +dAdBdMdM(localMeshsize,localNut,localTKE,     0,1,0,1)
+             -dUCdM   (localMeshsize,localVelocity,localTKE,1,0,0,0)
+             -dUCdM   (localMeshsize,localVelocity,localTKE,0,1,0,1)
+             +0.5*nut*localSijSij*4
+             -localEpsilon[mapd(0,0,0,0)]*f3
+             -D;
+
+  if(parameters.geometry.dim==3){
+    res += dAdBdMdM(localMeshsize,localNut,localTKE,     0,0,1,2)
+          -dUCdM   (localMeshsize,localVelocity,localTKE,0,0,1,2);
+  }
+  // clang-format on
+
+  return res;
+}
+
+inline FLOAT computeRHSepsilon(const Parameters& parameters,
+                               const FLOAT* const localVelocity,
+                               const FLOAT* const localMeshsize,
+                               const FLOAT* const localNut,
+                               const FLOAT* const localTKE,
+                               const FLOAT* const localEpsilon, const FLOAT nut,
+                               const FLOAT localSijSij, const FLOAT f1,
+                               const FLOAT f2, const FLOAT E) {
+  // TODO Konstanten c1 und c2 als parameters laden
+  const FLOAT ce1 = parameters.kEpsilon.ce1;
+  const FLOAT ce2 = parameters.kEpsilon.ce2;
+
+  // clang-format off
+  FLOAT res = dAdBdMdM(localMeshsize,localNut,localEpsilon,  1,0,0,0)
+             +dAdBdMdM(localMeshsize,localNut,localEpsilon,  0,1,0,1);
+
+  if(parameters.geometry.dim==3){
+    res += dAdBdMdM(localMeshsize,localNut,localEpsilon,  0,0,1,2);
+  }
+
+  res = res
+             -dUCdM   (localMeshsize,localVelocity,localEpsilon,1,0,0,0)
+             -dUCdM   (localMeshsize,localVelocity,localEpsilon,0,1,0,1)
+             +0.5*nut*localSijSij*4*ce1*f1*localEpsilon[mapd(0,0,0,0)]/max(fabs(localTKE[mapd(0,0,0,0)]),1e-8)
+             -ce2*f2*localEpsilon[mapd(0,0,0,0)]*localEpsilon[mapd(0,0,0,0)]/max(fabs(localTKE[mapd(0,0,0,0)]),1e-8)
+	     +E;
+
+  if(parameters.geometry.dim==3){
+    res -= dUCdM   (localMeshsize,localVelocity,localEpsilon,0,0,1,2);
+  }
+  // clang-format on
+
+  return res;
 }
 }
 

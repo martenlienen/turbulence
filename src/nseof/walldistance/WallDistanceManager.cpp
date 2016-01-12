@@ -29,23 +29,25 @@ void WallDistanceManager::initObstacles() {
   // Pressure Channel - 2D
   if (_dim == 2) {
     // bottom-line
-    for (int i = 0; i < _sizex + 2; i++) {
+    for (int i = 0; i < _sizex + 3; i++) {
       x.push_back(i);
       y.push_back(1);
     }
 
     // top-line
-    for (int i = 0; i < _sizex + 2; i++) {
-      x.push_back(i);
-      y.push_back(_sizey + 2);
+    if ((_scenario != "channel-symm") && (_scenario != "boundary")) {
+      for (int i = 0; i < _sizex + 3; i++) {
+        x.push_back(i);
+        y.push_back(_sizey + 2);
+      }
     }
   }
 
   // Pressure Channel - 3D
   if (_dim == 3) {
     // bottom-surface
-    for (int i = 0; i < _sizex + 2; i++) {
-      for (int j = 0; j < _sizez + 2; j++) {
+    for (int i = 0; i < _sizex + 3; i++) {
+      for (int j = 0; j < _sizez + 23; j++) {
         x.push_back(i);
         y.push_back(1);
         z.push_back(j);
@@ -53,17 +55,19 @@ void WallDistanceManager::initObstacles() {
     }
 
     // top-surface
-    for (int i = 0; i < _sizex + 2; i++) {
-      for (int j = 0; j < _sizez + 2; j++) {
-        x.push_back(i);
-        y.push_back(_sizey + 2);
-        z.push_back(j);
+    if (_scenario != "channel-symm") {
+      for (int i = 0; i < _sizex + 3; i++) {
+        for (int j = 0; j < _sizez + 3; j++) {
+          x.push_back(i);
+          y.push_back(_sizey + 2);
+          z.push_back(j);
+        }
       }
     }
 
     // front-surface
-    for (int i = 0; i < _sizex + 2; i++) {
-      for (int j = 0; j < _sizey + 2; j++) {
+    for (int i = 0; i < _sizex + 3; i++) {
+      for (int j = 0; j < _sizey + 3; j++) {
         x.push_back(i);
         y.push_back(j);
         z.push_back(1);
@@ -71,11 +75,13 @@ void WallDistanceManager::initObstacles() {
     }
 
     // back-surface
-    for (int i = 0; i < _sizex + 2; i++) {
-      for (int j = 0; j < _sizey + 2; j++) {
-        x.push_back(i);
-        y.push_back(j);
-        z.push_back(_sizez + 2);
+    if (_scenario != "channel-symm") {
+      for (int i = 0; i < _sizex + 3; i++) {
+        for (int j = 0; j < _sizey + 3; j++) {
+          x.push_back(i);
+          y.push_back(j);
+          z.push_back(_sizez + 3);
+        }
       }
     }
   }
@@ -90,7 +96,7 @@ void WallDistanceManager::initObstacles() {
       // 2D
       if (_dim == 2) {
         // step-top
-        for (int i = 0; i < _sizex + 2; i++) {
+        for (int i = 0; i < _sizex + 3; i++) {
           if (_parameters.meshsize->getPosCellX(i, 0, 0) < lx) {
             x.push_back(i);
             y.push_back(-ly);
@@ -100,7 +106,7 @@ void WallDistanceManager::initObstacles() {
           }
         }
         // step-right
-        for (int i = 0; i < _sizey + 2; i++) {
+        for (int i = 0; i < _sizey + 3; i++) {
           if (_parameters.meshsize->getPosCellY(0, i, 0) < ly) {
             x.push_back(-lx);
             y.push_back(i);
@@ -114,9 +120,9 @@ void WallDistanceManager::initObstacles() {
       // 3D
       if (_dim == 3) {
         // step-top
-        for (int i = 0; i < _sizex + 2; i++) {
+        for (int i = 0; i < _sizex + 3; i++) {
           if (_parameters.meshsize->getPosCellX(i, 0, 0) < lx) {
-            for (int j = 0; j < _sizez + 2; j++) {
+            for (int j = 0; j < _sizez + 3; j++) {
               x.push_back(i);
               y.push_back(-ly);
               z.push_back(j);
@@ -126,9 +132,70 @@ void WallDistanceManager::initObstacles() {
           }
         }
         // step-right
-        for (int i = 0; i < _sizey + 2; i++) {
+        for (int i = 0; i < _sizey + 3; i++) {
           if (_parameters.meshsize->getPosCellY(0, i, 0) < ly) {
-            for (int j = 0; j < _sizez + 2; j++) {
+            for (int j = 0; j < _sizez + 3; j++) {
+              x.push_back(-lx);
+              y.push_back(i);
+              z.push_back(j);
+            }
+          } else {
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // Boundary - 2D
+  if (_scenario == "boundary") {
+    double lx = _parameters.bfStep.xRatio * _parameters.geometry.lengthX;
+    double ly = _parameters.bfStep.yRatio * _parameters.geometry.lengthY;
+
+    // is there any step?
+    if (lx > 0.0 && ly > 0) {
+      // 2D
+      if (_dim == 2) {
+        // step-top
+        for (int i = 0; i < _sizex + 3; i++) {
+          if (_parameters.meshsize->getPosCellX(i, 0, 0) < lx) {
+            x.push_back(i);
+            y.push_back(-ly);
+
+          } else {
+            break;
+          }
+        }
+        // step-right
+        for (int i = 0; i < _sizey + 3; i++) {
+          if (_parameters.meshsize->getPosCellY(0, i, 0) < ly) {
+            x.push_back(-lx);
+            y.push_back(i);
+
+          } else {
+            break;
+          }
+        }
+      }
+
+      // 3D
+      if (_dim == 3) {
+        // step-top
+        for (int i = 0; i < _sizex + 3; i++) {
+          if (_parameters.meshsize->getPosCellX(i, 0, 0) < lx) {
+            for (int j = 0; j < _sizez + 3; j++) {
+              x.push_back(i);
+              y.push_back(-ly);
+              z.push_back(j);
+            }
+          } else {
+            break;
+          }
+        }
+        // step-right
+        for (int i = 0; i < _sizey + 3; i++) {
+          if (_parameters.meshsize->getPosCellY(0, i, 0) < ly) {
+            for (int j = 0; j < _sizez + 3; j++) {
               x.push_back(-lx);
               y.push_back(i);
               z.push_back(j);
@@ -144,13 +211,13 @@ void WallDistanceManager::initObstacles() {
   // Cavity - 2D
   if (_scenario == "cavity" && _dim == 2) {
     // left-line
-    for (int i = 0; i < _sizex + 2; i++) {
+    for (int i = 0; i < _sizex + 3; i++) {
       x.push_back(1);
       y.push_back(i);
     }
 
     // right-line
-    for (int i = 0; i < _sizex + 2; i++) {
+    for (int i = 0; i < _sizex + 3; i++) {
       x.push_back(_sizex + 2);
       y.push_back(i);
     }
@@ -159,8 +226,8 @@ void WallDistanceManager::initObstacles() {
   // Cavity - 3D
   if (_scenario == "cavity" && _dim == 3) {
     // left-surface
-    for (int i = 0; i < _sizez + 2; i++) {
-      for (int j = 0; j < _sizey + 2; j++) {
+    for (int i = 0; i < _sizez + 3; i++) {
+      for (int j = 0; j < _sizey + 3; j++) {
         x.push_back(1);
         y.push_back(j);
         z.push_back(i);
@@ -168,8 +235,8 @@ void WallDistanceManager::initObstacles() {
     }
 
     // right-surface
-    for (int i = 0; i < _sizez + 2; i++) {
-      for (int j = 0; j < _sizey + 2; j++) {
+    for (int i = 0; i < _sizez + 3; i++) {
+      for (int j = 0; j < _sizey + 3; j++) {
         x.push_back(_sizex + 2);
         y.push_back(j);
         z.push_back(i);
@@ -178,17 +245,23 @@ void WallDistanceManager::initObstacles() {
   }
 }
 
-void WallDistanceManager::init() {
-  // 1st STEP: load all data points (obstacles)
-  if (_scenario == "pressure-channel" || _scenario == "channel" ||
-      _scenario == "cavity") {
-    initObstacles();
+void WallDistanceManager::init(std::vector<double> xx, std::vector<double> yy,
+                               std::vector<double> zz) {
+  x.insert(std::end(x), std::begin(xx), std::end(xx));
+  y.insert(std::end(y), std::begin(yy), std::end(yy));
+  z.insert(std::end(z), std::begin(zz), std::end(zz));
+
+  for (unsigned long int i = 0; i < x.size(); i++) {
+    x[i] += 2;
+    y[i] += 2;
+    z[i] += 2;
   }
 
-  if (_scenario == "free") {
-    // TODO
-    // an arbitrary geometry could be loaded at this position
-    // i.e. load obstacle cells from a file
+  // 1st STEP: load all data points (obstacles)
+  if (_scenario == "pressure-channel" || _scenario == "channel-symm" ||
+      _scenario == "boundary" || _scenario == "channel" ||
+      _scenario == "cavity") {
+    initObstacles();
   }
 
   // 2nd STEP: init ANN (size and dim of k-D-tree)

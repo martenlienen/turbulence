@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <flow Re="5600" type="turbulent"/>
+    <simulation finalTime="60">
+        <!--<type nulimiter="3">dns</type>-->
+        <type nulimiter="0">ke</type>
+        <!--<type nulimiter="0">algebraic</type>-->
+        <scenario uniform="true">channel</scenario>
+    </simulation>
+    <keparameter c1="0.126" c2="1.92" cmu="0.009" ce="0.07"/>
+    <backwardFacingStep xRatio="0.0" yRatio="0.0"/>
+    <timestep dt="0.1" tau="0.1"/>
+    <solver gamma="0.5"/>
+    <geometry dim="2" lengthX="4.0" lengthY="1.0" lengthZ="1.0" sizeX="8" sizeY="8" sizeZ="20" stretchX="false" stretchY="true" stretchZ="true">
+        <mesh>uniform</mesh>
+        <!--<mesh>stretched</mesh>-->
+    </geometry>
+    <environment gx="0" gy="0" gz="0"/>
+    <walls>
+        <left>
+            <vector x="1.0" y="0" z="0"/>
+            <scalar value="1.0"/>
+        </left>
+        <right>
+            <vector x="0" y="0" z="0"/>
+        </right>
+        <top>
+            <vector x="0.0" y="0." z="0."/>
+        </top>
+        <bottom>
+            <vector x="0" y="0" z="0"/>
+        </bottom>
+        <front>
+            <vector x="0" y="0" z="0"/>
+        </front>
+        <back>
+            <vector x="0" y="0" z="0"/>
+        </back>
+    </walls>
+    <vtk lowoffset = "2" highoffset="1" interval="0.001">results/a---</vtk>
+    <stdOut interval="0.001"/>
+    <parallel numProcessorsX="1" numProcessorsY="1" numProcessorsZ="1"/>
+</configuration>

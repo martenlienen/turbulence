@@ -1,9 +1,8 @@
-#ifndef _NSEOF_FLOWMODELS_ALGEBRAIC_HSTENCIL_H_
-#define _NSEOF_FLOWMODELS_ALGEBRAIC_HSTENCIL_H_
+#ifndef _NSEOF_FLOWMODELS_TURBULENT_FGHSTENCIL_H_
+#define _NSEOF_FLOWMODELS_TURBULENT_FGHSTENCIL_H_
 
 #include "../../Stencil.h"
 #include "../../Parameters.h"
-#include "../../walldistance/WallDistanceManager.h"
 
 #include "FlowField.h"
 
@@ -11,11 +10,20 @@ namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
-class HStencil : public FieldStencil<FlowField> {
+class FGHStencil : public FieldStencil<FlowField> {
+ private:
+  // A local velocity variable that will be used to approximate derivatives.
+  // Size matches 3D case, but can be used for 2D as well.
+  FLOAT _localVelocity[27 * 3];
+  // local meshsize
+  FLOAT _localMeshsize[27 * 3];
+  // local nu
+  FLOAT _localNu[27 * 3];
+
  public:
-  HStencil(const Parameters& parameters);
+  FGHStencil(const Parameters& parameters);
 
   /** Apply the stencil in 2D
    *
@@ -35,9 +43,6 @@ class HStencil : public FieldStencil<FlowField> {
    * @param k Index in the z direction
    */
   void apply(FlowField& flowField, int i, int j, int k);
-
- private:
-  WallDistanceManager wdm;
 };
 }
 }

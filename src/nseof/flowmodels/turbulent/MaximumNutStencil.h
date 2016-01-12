@@ -1,5 +1,5 @@
-#ifndef _NSEOF_FLOWMODELS_ALGEBRAIC_MINIMUMNUTSTENCIL_H_
-#define _NSEOF_FLOWMODELS_ALGEBRAIC_MINIMUMNUTSTENCIL_H_
+#ifndef _NSEOF_FLOWMODELS_TURBULENT_MAXIMUMNUTSTENCIL_H_
+#define _NSEOF_FLOWMODELS_TURBULENT_MAXIMUMNUTSTENCIL_H_
 
 #include "../../Definitions.h"
 #include "../../Parameters.h"
@@ -11,16 +11,16 @@ namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
 /**
- * When iterated with, finds and stores the minimum nu_t value
+ * When iterated with, finds and stores the maximum nu_t value
  */
-class MinimumNutStencil : public FieldStencil<FlowField> {
+class MaximumNutStencil : public FieldStencil<FlowField> {
  public:
-  MinimumNutStencil(const Parameters& parameters);
+  MaximumNutStencil(const Parameters& parameters);
 
-  ~MinimumNutStencil();
+  ~MaximumNutStencil();
 
   /** 2D operation for one position
    *
@@ -39,15 +39,15 @@ class MinimumNutStencil : public FieldStencil<FlowField> {
    */
   void apply(FlowField& flowField, int i, int j, int k);
 
-  double getMinimum() { return minimum; }
+  double getMaximum() { return maximum; }
 
   void reset();
 
  private:
-  double minimum;
+  double maximum;
 };
 }
 }
 }
 
-#endif  // _NSEOF_FLOWMODELS_ALGEBRAIC_MINIMUMNUTSTENCIL_H_
+#endif  // _NSEOF_FLOWMODELS_TURBULENT_MAXIMUMNUTSTENCIL_H_

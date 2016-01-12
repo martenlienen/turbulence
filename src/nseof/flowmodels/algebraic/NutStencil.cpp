@@ -157,14 +157,7 @@ void NutStencilA::computeNUT2D(int i, int j, const FLOAT* const localVelocity,
                                const FLOAT* const localMeshsize,
                                const Parameters& parameters, const FLOAT& h,
                                FLOAT& nu, FLOAT& flu, FLOAT& lmm) {
-  // calculate entries in shear stress tensor
-  const FLOAT S11 = 0.5 * 2 * dudx(localVelocity, localMeshsize);
-  const FLOAT S22 = 0.5 * 2 * dvdy(localVelocity, localMeshsize);
-  const FLOAT S12 = 0.5 * (dudy(localVelocity, localMeshsize) +
-                           dvdx(localVelocity, localMeshsize));
-
-  // (2*S_ij*S_ij)^0.5
-  const FLOAT grad = sqrt(2 * (S11 * S11 + S22 * S22 + 2 * S12 * S12));
+  const FLOAT grad = sqrt(2 * computeSijSij2D(localVelocity, localMeshsize));
 
   // calculate mixing length
   FLOAT lm = 0.41 * h;
@@ -183,20 +176,7 @@ void NutStencilA::computeNUT3D(int i, int j, int k,
                                const FLOAT* const localMeshsize,
                                const Parameters& parameters, const FLOAT& h,
                                FLOAT& nu, FLOAT& flu, FLOAT& lmm) {
-  // clang-format on
-  // calculate entries in shear stress tensor
-  const FLOAT S11 = 0.5 * 2 * dudx(localVelocity, localMeshsize);
-  const FLOAT S22 = 0.5 * 2 * dvdy(localVelocity, localMeshsize);
-  const FLOAT S33 = 0.5 * 2 * dwdz(localVelocity, localMeshsize);
-  const FLOAT S12 = 0.5 * (dudy(localVelocity, localMeshsize) +
-                           dvdx(localVelocity, localMeshsize));
-  const FLOAT S13 = 0.5 * (dudz(localVelocity, localMeshsize) +
-                           dwdx(localVelocity, localMeshsize));
-  const FLOAT S23 = 0.5 * (dwdy(localVelocity, localMeshsize) +
-                           dvdz(localVelocity, localMeshsize));
-  // (2*S_ij*S_ij)^0.5
-  const FLOAT grad = sqrt(2 * (S11 * S11 + S22 * S22 + S33 * S33 +
-                               2 * (S12 * S12 + S13 * S13 + S23 * S23)));
+  const FLOAT grad = sqrt(2 * computeSijSij3D(localVelocity, localMeshsize));
 
   // calculate mixing length
   FLOAT lm = 0.41 * h;
@@ -208,7 +188,6 @@ void NutStencilA::computeNUT3D(int i, int j, int k,
 
   // calculate vortex viscosity
   nu = lm * lm * grad;
-  // clang-format off
 }
 }
 }

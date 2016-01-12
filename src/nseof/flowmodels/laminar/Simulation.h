@@ -1,6 +1,8 @@
 #ifndef _NSEOF_FLOWMODELS_LAMINAR_SIMULATION_H_
 #define _NSEOF_FLOWMODELS_LAMINAR_SIMULATION_H_
 
+#include <algorithm>
+
 #include <petscksp.h>
 #include <float.h>
 
@@ -206,6 +208,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
 
     _parameters.timestep.dt = globalMin;
     _parameters.timestep.dt *= _parameters.timestep.tau;
+    _parameters.timestep.dt =
+        std::min(_parameters.timestep.dt, _parameters.timestep.dtu);
   }
 };
 }

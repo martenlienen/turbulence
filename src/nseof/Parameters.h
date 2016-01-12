@@ -13,7 +13,11 @@ namespace nseof {
 class TimestepParameters {
  public:
   FLOAT dt;   //! Timestep
+  FLOAT dtu;  //! Timestep (user)
   FLOAT tau;  //! Security factor
+  FLOAT time = 0.0;
+  FLOAT timeVTK = 0.0;
+  int timeSteps = 0;
 };
 
 class SimulationParameters {
@@ -35,8 +39,22 @@ class EnvironmentalParameters {
 
 class FlowParameters {
  public:
-  FLOAT Re;  //! Reynolds number
+  FLOAT Re;    //! Reynolds number
+  FLOAT visc;  //! Reynolds number
   std::string type;
+};
+
+class kEpsilonParameters {
+ public:
+  FLOAT ce1;
+  FLOAT ce2;
+  FLOAT cmu;
+  FLOAT sigmaK;
+  FLOAT sigmaE;
+  int model;
+  FLOAT start;
+  int adaptnrs;
+  FLOAT adapterr;
 };
 
 class SolverParameters {
@@ -66,6 +84,8 @@ class GeometricParameters {
   int stretchX;
   int stretchY;
   int stretchZ;
+
+  std::string obstacle;
 };
 
 class WallParameters {
@@ -102,6 +122,7 @@ class VTKParameters {
   int lowoffset;
   int highoffset;
   std::string prefix;  //! Output filename
+  FLOAT start = 0.0;
 };
 
 class ParallelParameters {
@@ -158,6 +179,7 @@ class Parameters {
   TimestepParameters timestep;
   EnvironmentalParameters environment;
   FlowParameters flow;
+  kEpsilonParameters kEpsilon;
   SolverParameters solver;
   GeometricParameters geometry;
   WallParameters walls;

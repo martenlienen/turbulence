@@ -1,6 +1,8 @@
 #ifndef _NSEOF_FLOWMODELS_ALGEBRAIC_SIMULATION_H_
 #define _NSEOF_FLOWMODELS_ALGEBRAIC_SIMULATION_H_
 
+#include <algorithm>
+
 #include <petscksp.h>
 #include <float.h>
 
@@ -8,7 +10,7 @@
 #include "../../GlobalBoundaryFactory.h"
 #include "../../Iterators.h"
 #include "../../Definitions.h"
-#include "../../Simulation.h"
+#include "../../FlowFieldSimulation.h"
 #include "../../stencils/RHSStencil.h"
 #include "../../stencils/VelocityStencil.h"
 #include "../../stencils/ObstacleStencil.h"
@@ -17,12 +19,15 @@
 #include "../../stencils/InitTaylorGreenFlowFieldStencil.h"
 #include "../../solvers/PetscSolver.h"
 #include "../../parallelManagers/MPICommunicator.h"
+#include "../../geometry/GeometryManager.h"
+
+#include "../turbulent/FlowField.h"
+#include "../turbulent/HStencil.h"
+#include "../turbulent/MaximumNutStencil.h"
+#include "../turbulent/FGHStencil.h"
 
 #include "FlowField.h"
-#include "FGHStencil.h"
 #include "NutStencil.h"
-#include "HStencil.h"
-#include "MinimumNutStencil.h"
 
 namespace nseof {
 
@@ -41,8 +46,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   GlobalBoundaryIterator<nseof::FlowField> _wallVelocityIterator;
   GlobalBoundaryIterator<nseof::FlowField> _wallFGHIterator;
 
-  FGHStencil _fghStencil;
-  FieldIterator<FlowField> _fghIterator;
+  nseof::flowmodels::turbulent::FGHStencil _fghStencil;
+  FieldIterator<nseof::flowmodels::turbulent::FlowField> _fghIterator;
 
   RHSStencil _rhsStencil;
   FieldIterator<nseof::FlowField> _rhsIterator;
@@ -56,11 +61,11 @@ class Simulation : public FlowFieldSimulation<FlowField> {
 
   NutStencil _nutst;
   FieldIterator<FlowField> _nutit;
-  HStencil _hst;
-  FieldIterator<FlowField> _hit;
+  nseof::flowmodels::turbulent::HStencil _hst;
+  FieldIterator<nseof::flowmodels::turbulent::FlowField> _hit;
 
-  MinimumNutStencil _minnutst;
-  FieldIterator<FlowField> _minnutit;
+  nseof::flowmodels::turbulent::MaximumNutStencil _maxmnutst;
+  FieldIterator<nseof::flowmodels::turbulent::FlowField> _maxmnutit;
 
   MPICommunicator<FLOAT, FlowField> nutComm{
       *this->_flowField, this->_parameters,
@@ -73,7 +78,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
       2};
 
  public:
-  Simulation(Parameters &parameters)
+  Simulation(Parameters &parameters, nseof::geometry::GeometryManager &gm)
       : FlowFieldSimulation(parameters, new FlowField(parameters)),
         _maxUStencil(parameters),
         _maxUFieldIterator(*_flowField, parameters, _maxUStencil),
@@ -95,10 +100,10 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _solver(*_flowField, parameters),
         _nutst(parameters),
         _nutit(*_flowField, _parameters, _nutst, 1, 0),
-        _hst(parameters),
+        _hst(parameters, gm),
         _hit(*_flowField, _parameters, _hst, 0, 0),
-        _minnutst(parameters),
-        _minnutit(*_flowField, _parameters, _minnutst, 1, 0) {
+        _maxmnutst(parameters),
+        _maxmnutit(*_flowField, _parameters, _maxmnutst, 1, 0) {
     // distance to the next wall
     this->scalarStencils.push_back(CellDataStencil<double, FlowField>(
         this->_parameters, "h",
@@ -133,6 +138,9 @@ class Simulation : public FlowFieldSimulation<FlowField> {
           return f.getPressure().getScalar(i, j, k) -
                  f.getU(i, j, k) * f.getU(i, j, k);
         }));
+
+    // Load arbitrary geometry, if any present
+    gm.init(*this->_flowField);
   }
 
   virtual ~Simulation() {}
@@ -241,8 +249,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
  protected:
   /** sets the time step*/
   virtual void setTimeStep() {
-    _minnutst.reset();
-    _minnutit.iterate();
+    _maxmnutst.reset();
+    _maxmnutit.iterate();
 
     FLOAT localMin, globalMin;
     assertion(_parameters.geometry.dim == 2 || _parameters.geometry.dim == 3);
@@ -267,7 +275,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     // dt = 1/(2 * (nu+nut))/(dx_min^-2+dy_min^-2+dz_min^-2))
     localMin = std::min(_parameters.timestep.dt,
                         std::min(std::min(1 / (1 / _parameters.flow.Re +
-                                               _minnutst.getMinimum()) /
+                                               _maxmnutst.getMaximum()) /
                                               (2 * factor),
                                           1.0 / _maxUStencil.getMaxValues()[0]),
                                  1.0 / _maxUStencil.getMaxValues()[1]));
@@ -278,6 +286,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
 
     _parameters.timestep.dt = globalMin;
     _parameters.timestep.dt *= _parameters.timestep.tau;
+    _parameters.timestep.dt =
+        std::min(_parameters.timestep.dt, _parameters.timestep.dtu);
   }
 };
 }

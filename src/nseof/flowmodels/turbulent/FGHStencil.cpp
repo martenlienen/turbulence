@@ -2,13 +2,12 @@
 #include "../../stencils/StencilFunctions.h"
 
 #include "FGHStencil.h"
-#include "FlowField.h"
 
 namespace nseof {
 
 namespace flowmodels {
 
-namespace algebraic {
+namespace turbulent {
 
 FGHStencil::FGHStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}
@@ -17,7 +16,12 @@ void FGHStencil::apply(FlowField& flowField, int i, int j) {
   // Load local vortex viscostiy and velocities into the center layer of the
   // local array
 
-  flowField.loadLocalNu2D(_localNu, i, j);
+  // load nu + nut
+  const FLOAT nu = 1 / _parameters.flow.Re;
+  loadLocal2D([&flowField, nu](FLOAT* local, int ii, int jj) mutable {
+    *(local + 0) = flowField.getNu(ii, jj) + nu;
+  }, _localNu, i, j);
+
   loadLocalVelocity2D(flowField, _localVelocity, i, j);
   loadLocalMeshsize2D(_parameters, _localMeshsize, i, j);
 
@@ -40,7 +44,12 @@ void FGHStencil::apply(FlowField& flowField, int i, int j, int k) {
   FLOAT* const values = flowField.getFGH().getVector(i, j, k);
 
   if ((obstacle & OBSTACLE_SELF) == 0) {  // If the cell is fluid
-    flowField.loadLocalNu3D(_localNu, i, j, k);
+    // load nu + nut
+    const FLOAT nu = 1 / _parameters.flow.Re;
+    loadLocal3D([&flowField, nu](FLOAT* local, int ii, int jj, int kk) mutable {
+      *(local + 0) = flowField.getNu(ii, jj, kk) + nu;
+    }, _localNu, i, j, k);
+
     loadLocalVelocity3D(flowField, _localVelocity, i, j, k);
     loadLocalMeshsize3D(_parameters, _localMeshsize, i, j, k);
 

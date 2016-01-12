@@ -3,7 +3,7 @@
   <flow Re="5600" type="turbulent"/>
   <simulation finalTime="1.0">
     <!--<type nulimiter="3">dns</type>-->
-    <type nulimiter="0">turbulence</type>
+    <type nulimiter="0">algebraic</type>
     <scenario uniform="true">channel</scenario>
   </simulation>
   <backwardFacingStep xRatio="0.0" yRatio="0.0"/>
