@@ -35,7 +35,8 @@ template <typename FF>
 class FlowFieldSimulation : public Simulation {
  protected:
   std::unique_ptr<FF> _flowField;
-
+  PetscSolver _solver;
+  
   MPICommunicator<FLOAT, FF> pressureComm{
       *this->_flowField, this->_parameters,
       [](FF &flowField, int i, int j, int k, FLOAT &p) {
@@ -112,7 +113,8 @@ class FlowFieldSimulation : public Simulation {
 
  public:
   FlowFieldSimulation(Parameters &parameters, FF* flowField)
-      : Simulation(parameters), _flowField(flowField) {}
+      : Simulation(parameters), _flowField(flowField),
+          _solver(*_flowField, parameters) {}
 
   virtual ~FlowFieldSimulation() {}
 
@@ -154,6 +156,10 @@ class FlowFieldSimulation : public Simulation {
   
   virtual void serialize(){}
   virtual void deserialize(){}
+  
+  virtual void init(){
+    _solver.init();
+  }
 
  private:
   vtk::Dataset datasetFromMesh(int los, int hos) {

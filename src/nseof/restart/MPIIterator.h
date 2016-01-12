@@ -14,14 +14,16 @@ class MPIIterator : public Iterator<FF> {
  public:
   MPIIterator(FF& flowField, const Parameters& parameters, 
               std::vector<std::string> vec2D, std::vector<std::string> vec3D,
-                std::function<void(FF& flowField, int, int, int, T&,std::vector<int>&)> apply)
+                std::function<void(FF& flowField, int, int, int, T&,std::vector<int>&)> apply2D,
+                std::function<void(FF& flowField, int, int, int, T&,std::vector<int>&)> apply3D)
       : Iterator<FF>(flowField, parameters),
         _flowField(flowField),
+        _infocells(1),
         _vec(parameters.geometry.dim==2?vec2D:vec3D),
         _veclocal(_vec.size(),-1),
         _size(0), _sizetotal(0), _data(0),
         _p(parameters),
-        _apply(apply),
+        _apply(parameters.geometry.dim==2?apply2D:apply3D),
         _fname(parameters.vtk.prefix) {}
 
   void iterate();
@@ -30,6 +32,14 @@ class MPIIterator : public Iterator<FF> {
 
  public:
   FF& _flowField;
+  // the first cells in the vector of rank 0 are reserved for informations of 
+  // the simulation, at the moment:
+  // [0] simulation type
+  // at a later time possible:
+  // [1] final time
+  // [2] dimension
+  // [3] ...
+  int _infocells;
   std::vector<std::string> _vec;
   std::vector<int> _veclocal;
   int _size;
@@ -115,7 +125,7 @@ void MPIIterator<FF, T>::fillTable() {
   
   if(this->_p.parallel.rank==0){
     // in the first cell of binary: save type
-    _sizetotal +=1;
+    _sizetotal +=_infocells;
   }
   
   // set size of vector

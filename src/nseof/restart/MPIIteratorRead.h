@@ -15,8 +15,9 @@ class MPIIteratorRead : public MPIIterator<FF,T> {
  public:
   MPIIteratorRead(FF& flowField, const Parameters& parameters, 
                 std::vector<std::string> vec2D, std::vector<std::string> vec3D,
-                std::function<void(FF& flowField, int, int, int, T&,std::vector<int>&)> apply)
-      : MPIIterator<FF,T>(flowField, parameters,vec2D, vec3D, apply) {}
+                std::function<void(FF& flowField, int, int, int, T&,std::vector<int>&)> apply2D,
+                std::function<void(FF& flowField, int, int, int, T&,std::vector<int>&)> apply3D)
+      : MPIIterator<FF,T>(flowField, parameters,vec2D, vec3D, apply2D, apply3D) {}
 
   void iterate();
 
@@ -74,7 +75,7 @@ void MPIIteratorRead<FF, T>::iterate() {
   // set offsets
   if(this->_p.parallel.rank != 0){
     my_offset = sizeof(T) * (this->_data.size() * 
-      this->_p.parallel.rank + 1);
+      this->_p.parallel.rank + this->_infocells);
   } else {
     this->counter++;
   } 
