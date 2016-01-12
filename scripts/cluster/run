@@ -110,8 +110,8 @@ def copyPetscArguments(jobdir):
                     os.path.join(jobdir, "petsc_commandline_arg"))
 
 
-def configureScenario(out, templatepath, nx, ny, nz, sx, sy, sz, vtkpath,
-                      enable_timing, timingpath, enable_vtk):
+def configureScenario(out, templatepath, geometrypath, nx, ny, nz, sx, sy, sz,
+                      vtkpath, enable_timing, timingpath, enable_vtk):
     """Configure a scenario template for parallel execution.
 
     The configured scenario is written into `out`."""
@@ -136,10 +136,17 @@ def configureScenario(out, templatepath, nx, ny, nz, sx, sy, sz, vtkpath,
         root.append(node)
 
     if sx != None and sy != None:
-      for child in root.findall("geometry"):
-        child.attrib["sizeX"] = str(sx)
-        child.attrib["sizeY"] = str(sy)
-        child.attrib["sizeZ"] = str(sz)
+        for child in root.findall("geometry"):
+            child.attrib["sizeX"] = str(sx)
+            child.attrib["sizeY"] = str(sy)
+            child.attrib["sizeZ"] = str(sz)
+
+    for child in root.findall("geometry"):
+        attrs = child.attrib
+
+        if "obstacle" in attrs and os.path.isfile(attrs["obstacle"]):
+            shutil.copyfile(attrs["obstacle"], geometrypath)
+            child.attrib["obstacle"] = geometrypath
 
     tree.write(out)
 
@@ -147,8 +154,8 @@ def configureScenario(out, templatepath, nx, ny, nz, sx, sy, sz, vtkpath,
 PARTITIONS = {"intel": ("snb", 16, 2), "amd": ("bdz", 64, 1)}
 
 
-def createJob(out, outfile, outdir, name, scenario, architecture, nranks, email,
-              nspath, time):
+def createJob(out, outfile, outdir, name, scenario, architecture, nranks,
+              email, nspath, time):
     (partition, ppn, cpt) = PARTITIONS[architecture]
 
     job = JOB_TEMPLATE.format(out_file=outfile,
@@ -162,7 +169,6 @@ def createJob(out, outfile, outdir, name, scenario, architecture, nranks, email,
                               processes_per_node=ppn,
                               ns_executable=nspath,
                               scenario=scenario)
-
 
     with open(out, "w") as outfile:
         outfile.write(job)
@@ -189,6 +195,7 @@ def main():
     outpath = os.path.join(options.out, "out")
     jobpath = os.path.join(options.out, "job.cmd")
     scenario = os.path.join(options.out, "scenario.xml")
+    geometry = os.path.join(options.out, "geometry.txt")
     vtkpath = os.path.join(options.out, "vtks")
     timingpath = os.path.join(options.out, "timing", "")
 
@@ -201,9 +208,10 @@ def main():
     with open(log, "w") as logfile:
         copyPetscArguments(options.out)
 
-        configureScenario(scenario, options.scenario, options.nx, options.ny,
-                          options.nz, options.sx, options.sy, options.sz,
-                          vtkpath, options.timing, timingpath, options.vtk)
+        configureScenario(scenario, options.scenario, geometry, options.nx,
+                          options.ny, options.nz, options.sx, options.sy,
+                          options.sz, vtkpath, options.timing, timingpath,
+                          options.vtk)
 
         nranks = options.nx * options.ny * options.nz
         createJob(jobpath, outpath, options.out, options.name, scenario,
