@@ -329,13 +329,17 @@ class Simulation : public FlowFieldSimulation<FlowField> {
       std::cout << _parameters.timestep.timeSteps << std::endl;
 
       // calculate rhs of epsilon- & tke-transport-equv. and check
+      bool tempGlobal;
+      
       do {
         _tsBool.reset();
         _parameters.timestep.dt /= 2.0;
         _keRHSit.iterate();
         _tiBool.iterate();
-      } while (_tsBool.getValue() &&
-               (icounter++ < _parameters.kEpsilon.adaptnrs));
+	
+	bool tempLocal = (_tsBool.getValue() && (icounter++ < _parameters.kEpsilon.adaptnrs));
+	MPI_Allreduce(&tempLocal, &tempGlobal, 1, MPI_INT, MPI_MAX, PETSC_COMM_WORLD);
+      } while (tempGlobal);
 
       keloopcounter += icounter;
 
