@@ -11,6 +11,8 @@
 #include "../../Definitions.h"
 #include "../../FlowField.h"
 #include "../../FlowFieldSimulation.h"
+#include "../../restart/MPIIteratorRead.h"
+#include "../../restart/MPIIteratorWrite.h"
 #include "../../stencils/FGHStencil.h"
 #include "../../stencils/RHSStencil.h"
 #include "../../stencils/VelocityStencil.h"
@@ -51,6 +53,10 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   FieldIterator<nseof::FlowField> _obstacleIterator;
 
   PetscSolver _solver;
+  
+  
+  MPIIteratorWrite<nseof::FlowField,double> _mpiiw;
+  MPIIteratorRead<nseof::FlowField,double> _mpiir;
 
  public:
   Simulation(Parameters &parameters)
@@ -72,7 +78,19 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _obstacleStencil(parameters),
         _velocityIterator(*_flowField, parameters, _velocityStencil),
         _obstacleIterator(*_flowField, parameters, _obstacleStencil),
-        _solver(*_flowField, parameters) {}
+        _solver(*_flowField, parameters),
+      _mpiiw(*_flowField,parameters,3,4,
+          [](nseof::FlowField &flowField, int i, int j, int k, double &p) {
+        *(&p+0) = flowField.getPressure().getScalar(i, j);
+        *(&p+1) = flowField.getVelocity().getVector(i, j)[0];
+        *(&p+2) = flowField.getVelocity().getVector(i, j)[1];
+      }),
+      _mpiir(*_flowField,parameters,3,4,
+          [](nseof::FlowField &flowField, int i, int j, int k, double &p) {
+        flowField.getPressure().getScalar(i, j)    = *(&p+0);
+        flowField.getVelocity().getVector(i, j)[0] = *(&p+1);
+        flowField.getVelocity().getVector(i, j)[1] = *(&p+2);
+      }){}
 
   virtual ~Simulation() {}
 
@@ -167,6 +185,14 @@ class Simulation : public FlowFieldSimulation<FlowField> {
 
     // Iterate for velocities on the boundary
     _wallVelocityIterator.iterate();
+  }
+  
+  virtual void serialize(){
+    _mpiiw.iterate();
+  }
+  
+  virtual void deserialize(){
+    _mpiir.iterate();
   }
 
  protected:
