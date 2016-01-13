@@ -106,6 +106,9 @@ int main(int argc, char *argv[]) {
   int timeSteps = 0;
 
   // TODO WS1: plot initial state
+  simulation->deserialize();
+  simulation->init();
+
   simulation->plotVTK(rank, 0);
 
   timer->stop("initialization");
@@ -139,6 +142,7 @@ int main(int argc, char *argv[]) {
   }
 
   // TODO WS1: plot final output
+  simulation->serialize();
   simulation->plotVTK(rank, timeSteps);
 
   delete simulation;

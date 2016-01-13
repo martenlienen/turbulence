@@ -16,6 +16,10 @@ class Simulation {
   virtual void solveTimestep() = 0;
 
   virtual void plotVTK(int rank, int timeStep) = 0;
+  
+  virtual void serialize()=0;
+  virtual void deserialize()=0;
+  virtual void init()=0;
 
  protected:
   Parameters &_parameters;

@@ -35,7 +35,8 @@ template <typename FF>
 class FlowFieldSimulation : public Simulation {
  protected:
   std::unique_ptr<FF> _flowField;
-
+  PetscSolver _solver;
+  
   MPICommunicator<FLOAT, FF> pressureComm{
       *this->_flowField, this->_parameters,
       [](FF &flowField, int i, int j, int k, FLOAT &p) {
@@ -47,12 +48,20 @@ class FlowFieldSimulation : public Simulation {
 
   MPICommunicator<std::array<FLOAT, 3>, FF> velocityComm{
       *this->_flowField, this->_parameters,
-      [this](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
+      this->_parameters.geometry.dim==2?
+        [](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
         std::copy_n(flowField.getVelocity().getVector(i, j, k),
-                    this->_parameters.geometry.dim, v.data());
+                    2, v.data());
+      }:[](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
+        std::copy_n(flowField.getVelocity().getVector(i, j, k),
+                    3, v.data());
       },
-      [this](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
-        std::copy_n(v.data(), this->_parameters.geometry.dim,
+      this->_parameters.geometry.dim==2?[](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
+        std::copy_n(v.data(), 2,
+                    flowField.getVelocity().getVector(i, j, k));
+      }:
+        [](FF &flowField, int i, int j, int k, std::array<FLOAT, 3> &v) {
+        std::copy_n(v.data(), 3,
                     flowField.getVelocity().getVector(i, j, k));
       },
       2};
@@ -99,10 +108,13 @@ class FlowFieldSimulation : public Simulation {
 
             return std::vector<double>{v[0], v[1], v[2]};
           })};
+          
+          
 
  public:
   FlowFieldSimulation(Parameters &parameters, FF* flowField)
-      : Simulation(parameters), _flowField(flowField) {}
+      : Simulation(parameters), _flowField(flowField),
+          _solver(*_flowField, parameters) {}
 
   virtual ~FlowFieldSimulation() {}
 
@@ -140,6 +152,13 @@ class FlowFieldSimulation : public Simulation {
 
     vtk::File file(dataset, std::move(cellData));
     file.write(this->_parameters.vtk.prefix, rank, timeStep);
+  }
+  
+  virtual void serialize(){}
+  virtual void deserialize(){}
+  
+  virtual void init(){
+    _solver.init();
   }
 
  private:
