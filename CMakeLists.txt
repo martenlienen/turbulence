@@ -5,6 +5,8 @@ option(tests "Build tests" ON)
 
 option(CLUSTER "Are we building on the cluster?" OFF)
 
+option(SCOREP "Do you want to use scorep profiling?" OFF)
+
 option(PROFILING "Compile in extra profiling information for gprof" OFF)
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -19,7 +21,12 @@ endif()
 #
 # The original Makefile said to use `mpiCC` on the MAC-cluster.
 if (CLUSTER)
-  set(CMAKE_CXX_COMPILER "mpiCC")
+  if(SCOREP)
+	get_filename_component(SCOREP "./scripts/cluster/scorep" REALPATH)
+	set(CMAKE_CXX_COMPILER ${SCOREP})
+   else()
+    set(CMAKE_CXX_COMPILER "mpiCC")
+   endif()
 else()
   set(CMAKE_CXX_COMPILER "mpic++")
 endif()
