@@ -31,41 +31,25 @@ GeometryManager::GeometryManager(const Parameters& parameters)
 GeometryManager::~GeometryManager() {}
 
 void GeometryManager::init(FlowField& flowField) {
-  for (unsigned long int i = 0; i < x.size(); i++) {
-    flowField.getFlags().getValue(x[i] + 2, y[i] + 2, z[i] + 2) = OBSTACLE_SELF;
-  }
+  IntScalarField& f = flowField.getFlags();
 
-  for (unsigned long int i = 0; i < x.size(); i++) {
+  for (unsigned int i = 0; i < x.size(); i++) {
     int xx = x[i] + 2;
     int yy = y[i] + 2;
     int zz = _parameters.geometry.dim == 2 ? 0 : z[i] + 2;
 
-    IntScalarField& f = flowField.getFlags();
+    f.getValue(xx, yy, zz) |= OBSTACLE_SELF;
 
-    // left cell
-    write(f, xx, yy, zz, -1, +0, +0, OBSTACLE_LEFT);
-    // right cell
-    write(f, xx, yy, zz, +1, +0, +0, OBSTACLE_RIGHT);
-    // bottom cell
-    write(f, xx, yy, zz, +0, -1, +0, OBSTACLE_BOTTOM);
-    // top cell
-    write(f, xx, yy, zz, +0, +1, +0, OBSTACLE_TOP);
+    f.getValue(xx - 1, yy + 0, zz + 0) |= OBSTACLE_RIGHT;
+    f.getValue(xx - 1, yy + 0, zz + 0) |= OBSTACLE_LEFT;
+    f.getValue(xx + 0, yy - 1, zz + 0) |= OBSTACLE_TOP;
+    f.getValue(xx + 0, yy + 1, zz + 0) |= OBSTACLE_BOTTOM;
 
     if (_parameters.geometry.dim == 3) {
-      // bottom cell
-      write(f, xx, yy, zz, +0, +0, -1, OBSTACLE_FRONT);
-      // top cell
-      write(f, xx, yy, zz, +0, +0, +1, OBSTACLE_BACK);
+      f.getValue(xx + 0, yy + 0, zz - 1) |= OBSTACLE_BACK;
+      f.getValue(xx + 0, yy + 0, zz + 1) |= OBSTACLE_FRONT;
     }
   }
-}
-
-void GeometryManager::write(IntScalarField& f, int xx, int yy, int zz, int a,
-                            int b, int c, int d) {
-  if ((f.getValue(xx + a, yy + b, zz + c) & OBSTACLE_SELF) == 1) {
-    f.getValue(xx + 0, yy + 0, zz + 0) += d;
-  }
-  f.getValue(xx - a, yy - b, zz - c) += d;
 }
 }
 }

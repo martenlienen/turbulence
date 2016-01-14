@@ -16,9 +16,6 @@ class GeometryManager {
   // general field
   const Parameters& _parameters;
 
-  void write(IntScalarField& f, int xx, int yy, int zz, int a, int b, int c,
-             int d);
-
  public:
   std::vector<double> x;
   std::vector<double> y;
