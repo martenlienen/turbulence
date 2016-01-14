@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
                 << std::endl;
     }
 
-    simulation = new nseof::flowmodels::laminar::Simulation(parameters);
+    simulation = new nseof::flowmodels::laminar::Simulation(parameters, gm);
   } else {
     handleError(
         1, "Unknown simulation type! Currently supported: dns, turbulence");

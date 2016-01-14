@@ -18,7 +18,6 @@
 #include "../../stencils/InitTaylorGreenFlowFieldStencil.h"
 #include "../../solvers/PetscSolver.h"
 #include "../../parallelManagers/MPICommunicator.h"
-#include "../../geometry/GeometryManager.h"
 
 #include "../turbulent/FlowField.h"
 #include "../turbulent/HStencil.h"
@@ -107,7 +106,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
 
  public:
   Simulation(Parameters &parameters, nseof::geometry::GeometryManager &gm)
-      : FlowFieldSimulation(parameters, new FlowField(parameters)),
+      : FlowFieldSimulation(parameters, new FlowField(parameters), gm),
         _maxUStencil(parameters),
         _maxUFieldIterator(*_flowField, parameters, _maxUStencil),
         _maxUBoundaryIterator(*_flowField, parameters, _maxUStencil),
@@ -257,9 +256,6 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         this->_parameters, "E",
         [](FlowField &f, int i, int j) { return f.getE(i, j); },
         [](FlowField &f, int i, int j, int k) { return f.getE(i, j, k); }));
-
-    // Load arbitrary geometry, if any present
-    gm.init(*this->_flowField);
   }
 
   virtual ~Simulation() {}
@@ -330,13 +326,13 @@ class Simulation : public FlowFieldSimulation<FlowField> {
 
       // calculate rhs of epsilon- & tke-transport-equv. and check
       bool tempGlobal;
-      
+
       do {
         _tsBool.reset();
         _parameters.timestep.dt /= 2.0;
         _keRHSit.iterate();
         _tiBool.iterate();
-	
+
 	bool tempLocal = (_tsBool.getValue() && (icounter++ < _parameters.kEpsilon.adaptnrs));
 	MPI_Allreduce(&tempLocal, &tempGlobal, 1, MPI_INT, MPI_MAX, PETSC_COMM_WORLD);
       } while (tempGlobal);

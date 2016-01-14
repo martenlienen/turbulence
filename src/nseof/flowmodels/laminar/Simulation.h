@@ -52,15 +52,15 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   FieldIterator<nseof::FlowField> _velocityIterator;
   FieldIterator<nseof::FlowField> _obstacleIterator;
 
-  
+
   std::vector<std::string> _mpiiwvector2D;
   std::vector<std::string> _mpiiwvector3D;
   MPIIteratorWrite<nseof::FlowField,double> _mpiiw;
   MPIIteratorRead<nseof::FlowField,double> _mpiir;
 
  public:
-  Simulation(Parameters &parameters)
-      : FlowFieldSimulation(parameters, new FlowField(parameters)),
+  Simulation(Parameters &parameters, nseof::geometry::GeometryManager &gm)
+      : FlowFieldSimulation(parameters, new FlowField(parameters), gm),
         _maxUStencil(parameters),
         _maxUFieldIterator(*_flowField, parameters, _maxUStencil),
         _maxUBoundaryIterator(*_flowField, parameters, _maxUStencil),
@@ -132,7 +132,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         for (int i = 0; i < sizey + 3; i++) {
           rhs.getScalar(0, i) = value;
         }
-      } else { 
+      } else {
         const int sizey = _flowField->getNy();
         const int sizez = _flowField->getNz();
         for (int i = 0; i < sizey + 3; i++)
@@ -199,15 +199,15 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     // Iterate for velocities on the boundary
     _wallVelocityIterator.iterate();
   }
-  
+
   virtual void serialize(){
     _mpiiw.iterate();
   }
-  
+
   virtual void deserialize(){
     _mpiir.iterate();
   }
-  
+
  protected:
   /** sets the time step*/
   virtual void setTimeStep() {

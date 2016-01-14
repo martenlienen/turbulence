@@ -19,7 +19,6 @@
 #include "../../stencils/InitTaylorGreenFlowFieldStencil.h"
 #include "../../solvers/PetscSolver.h"
 #include "../../parallelManagers/MPICommunicator.h"
-#include "../../geometry/GeometryManager.h"
 
 #include "../turbulent/FlowField.h"
 #include "../turbulent/HStencil.h"
@@ -57,11 +56,10 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   FieldIterator<nseof::FlowField> _velocityIterator;
   FieldIterator<nseof::FlowField> _obstacleIterator;
 
-  
   std::vector<std::string> _mpiiwvector2D;
   std::vector<std::string> _mpiiwvector3D;
-  MPIIteratorWrite<FlowField,double> _mpiiw;
-  MPIIteratorRead<FlowField,double> _mpiir;
+  MPIIteratorWrite<FlowField, double> _mpiiw;
+  MPIIteratorRead<FlowField, double> _mpiir;
 
   NutStencil _nutst;
   FieldIterator<FlowField> _nutit;
@@ -83,7 +81,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
 
  public:
   Simulation(Parameters &parameters, nseof::geometry::GeometryManager &gm)
-      : FlowFieldSimulation(parameters, new FlowField(parameters)),
+      : FlowFieldSimulation(parameters, new FlowField(parameters), gm),
         _maxUStencil(parameters),
         _maxUFieldIterator(*_flowField, parameters, _maxUStencil),
         _maxUBoundaryIterator(*_flowField, parameters, _maxUStencil),
@@ -171,9 +169,6 @@ class Simulation : public FlowFieldSimulation<FlowField> {
           return f.getPressure().getScalar(i, j, k) -
                  f.getU(i, j, k) * f.getU(i, j, k);
         }));
-
-    // Load arbitrary geometry, if any present
-    gm.init(*this->_flowField);
   }
 
   virtual ~Simulation() {}

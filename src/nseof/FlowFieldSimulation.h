@@ -24,6 +24,7 @@
 #include "solvers/PetscSolver.h"
 
 #include "parallelManagers/MPICommunicator.h"
+#include "geometry/GeometryManager.h"
 
 #include "MultiTimer.h"
 
@@ -36,7 +37,7 @@ class FlowFieldSimulation : public Simulation {
  protected:
   std::unique_ptr<FF> _flowField;
   PetscSolver _solver;
-  
+
   MPICommunicator<FLOAT, FF> pressureComm{
       *this->_flowField, this->_parameters,
       [](FF &flowField, int i, int j, int k, FLOAT &p) {
@@ -108,13 +109,16 @@ class FlowFieldSimulation : public Simulation {
 
             return std::vector<double>{v[0], v[1], v[2]};
           })};
-          
-          
 
  public:
-  FlowFieldSimulation(Parameters &parameters, FF* flowField)
-      : Simulation(parameters), _flowField(flowField),
-          _solver(*_flowField, parameters) {}
+  FlowFieldSimulation(Parameters &parameters, FF *flowField,
+                      nseof::geometry::GeometryManager &gm)
+      : Simulation(parameters),
+        _flowField(flowField),
+        _solver(*_flowField, parameters) {
+    // Load arbitrary geometry, if any present
+    gm.init(*this->_flowField);
+  }
 
   virtual ~FlowFieldSimulation() {}
 
@@ -153,13 +157,11 @@ class FlowFieldSimulation : public Simulation {
     vtk::File file(dataset, std::move(cellData));
     file.write(this->_parameters.vtk.prefix, rank, timeStep);
   }
-  
-  virtual void serialize(){}
-  virtual void deserialize(){}
-  
-  virtual void init(){
-    _solver.init();
-  }
+
+  virtual void serialize() {}
+  virtual void deserialize() {}
+
+  virtual void init() { _solver.init(); }
 
  private:
   vtk::Dataset datasetFromMesh(int los, int hos) {
