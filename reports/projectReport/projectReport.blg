@@ -1,0 +1,56 @@
+This is BibTeX, Version 0.99d (TeX Live 2013)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: projectReport.aux
+A level-1 auxiliary file: chapters/chapter00.aux
+A level-1 auxiliary file: chapters/chapter01.aux
+A level-1 auxiliary file: chapters/chapter02.aux
+A level-1 auxiliary file: chapters/chapter03.aux
+A level-1 auxiliary file: chapters/chapter04.aux
+A level-1 auxiliary file: chapters/chapter05.aux
+A level-1 auxiliary file: chapters/chapter06.aux
+A level-1 auxiliary file: chapters/chapter07.aux
+A level-1 auxiliary file: chapters/chapter08.aux
+A level-1 auxiliary file: chapters/appendixMain.aux
+The style file: plainnat.bst
+Database file #1: my_bachelor_thesis.bib
+You've used 5 entries,
+            2773 wiz_defined-function locations,
+            631 strings with 5946 characters,
+and the built_in function-call counts, 2051 in all, are:
+= -- 194
+> -- 92
+< -- 4
++ -- 32
+- -- 27
+* -- 157
+:= -- 329
+add.period$ -- 15
+call.type$ -- 5
+change.case$ -- 23
+chr.to.int$ -- 5
+cite$ -- 10
+duplicate$ -- 92
+empty$ -- 171
+format.name$ -- 36
+if$ -- 416
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 3
+newline$ -- 33
+num.names$ -- 20
+pop$ -- 38
+preamble$ -- 1
+purify$ -- 19
+quote$ -- 0
+skip$ -- 72
+stack$ -- 0
+substring$ -- 103
+swap$ -- 4
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 55
+warning$ -- 0
+while$ -- 21
+width$ -- 0
+write$ -- 72

@@ -1,0 +1,75 @@
+% Titelblatt
+% der \maketitel-Befehl wird neu definiert !
+%
+\newcommand{\thesistype}[1]{
+	\def\@thesistype{#1}}
+\def\@thesistype{
+	\@latex@warning@no@line{Package `TDtitle': No \noexpand\thesistype given}}	
+
+\newcommand{\tutor}[3]{
+  \def\@tutorfirst{#1}
+  \def\@tutorsecond{#2}
+  \def\@tutorthird{#3}}
+  
+\newcommand{\matno}[1]{
+	\def\@matno{#1}}	
+
+\renewcommand{\footrulewidth}{0.4pt}
+%\renewcommand{\footrulelength}{20pt}
+\renewcommand{\maketitle}{
+	\begin{titlepage}
+	\renewcommand{\headheight}{18.0pt}
+	\thispagestyle{fancy}
+	\renewcommand{\headrulewidth}{0.0pt}
+%	\begin{flushright}
+%		\vspace*{-5.5cm}{
+%		\includegraphics{logoTD}}
+%  \end{flushright}
+%\lhead{\special{color cmyk 0 0 0 0.8}
+%       \sf  Technische Universit\"at M\"unchen \\
+       %Technische Universit\"at M\"unchen \\ 
+%       \vspace*{-10pt}   \rule{0.72\textwidth}{.35pt} %\\
+%       \footnotesize Prof. Dr.-Ing. Thomas Sattelmayer \\
+%       \footnotesize Prof. Wolfgang Polifke, Ph.D. (CCNY) 
+%       \special{color cmyk 0 0 0 1.}
+%}
+%\rhead{\raisebox{-23.3pt}[0pt][0pt]
+%{\includegraphics[width = 0.25\textwidth]{lnm}}}
+%\vspace*{28pt}
+  
+  \begin{center}
+    % Change this for different kinds of reports (assignments ect.)
+	%\large \bf \sc \@thesistype \\} \vspace{36pt}
+	%\large  \bf \@thesistype \\}
+	%\vspace{150pt}
+
+	{%\Large \bf  \@title \\} \vspace{48pt}
+	 \textcolor{white}{b}
+
+	 \vspace{100pt}
+	 
+	 \Large \bf \@title \\}\vspace{16pt}
+	{\large \@thesistype \\} \vspace{48pt}
+		
+	\vspace{200pt}
+
+	{\large
+	\textbf{Author:}\\  \@author   \vspace{16pt}
+	    
+	%\textbf{Matrikel-No:}\\  \@matno  \vspace{16pt}
+			      
+	%\textbf{Supervisor:}\\
+	%\@tutorfirst \\             % first tutor
+	%\@tutorsecond \\             % first tutor
+	%\vspace{16pt}   
+    
+	December 15, 2014			\\  % Submission
+	}
+   \end{center} 
+
+
+  \cfoot{
+  	}
+\end{titlepage}}
+
+

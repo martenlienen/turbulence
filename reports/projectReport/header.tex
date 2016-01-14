@@ -1,0 +1,97 @@
+%\documentclass[pdftex,a4paper]{scrreprt}
+\documentclass[pdftex,paper=a4,pagesize,11pt,numbers=noenddot]{scrreprt}
+\usepackage[intoc]{nomencl}
+\usepackage[numbers]{natbib}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{array}
+
+\usepackage[nottoc]{tocbibind}
+
+\usepackage[T1]{fontenc}
+\setcounter{tocdepth}{3}
+
+
+\usepackage{algorithmicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\floatname{algorithm}{Procedure}
+
+%\usepackage[automark]{scrpage2}
+\usepackage{cite}
+
+\usepackage[dvips]{color}
+\usepackage{epsfig}
+\usepackage{grffile}
+\usepackage{epstopdf}
+\usepackage{ae}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{mathtools}
+
+\usepackage{float}
+\usepackage{graphics}
+\usepackage{graphicx, subfigure}
+\setcounter{lofdepth}{2}
+\graphicspath{{/Volumes/workspace/studium/bachelorarbeit/thesis/media/}}
+\newcommand{\rulesep}{\unskip\ \vrule\ }
+\newcommand{\rpm}{\sbox0{$1$}\sbox2{$\scriptstyle\pm$}
+  \raise\dimexpr(\ht0-\ht2)/2\relax\box2 }
+
+\usepackage{titlepage}
+
+\usepackage{appendix}
+
+\usepackage{pstricks}
+
+\pagestyle{headings}
+
+\usepackage{ifthen}
+\makenomenclature
+\makeindex
+\setlength{\nomlabelwidth}{.25\hsize}
+%\renewcommand{\nomlabel}[1]{#1 \dotfill}
+\setlength{\nomitemsep}{-\parsep}
+
+\renewcommand{\nomgroup}[1]{%
+\renewcommand{\makelabel}[1][]{##1}
+\item[~]
+\ifthenelse{\equal{#1}{A}}{\item[\lARGE\textbf{Abbreviations}]}{
+\ifthenelse{\equal{#1}{B}}{\item[\lARGE\textbf{Operators and Symbols}]}{
+\ifthenelse{\equal{#1}{C}}{\item[\lARGE\textbf{Superscripts and Subscripts}]}{
+\ifthenelse{\equal{#1}{D}}{\item[\lARGE\textbf{Domains and boundaries}]}{
+\ifthenelse{\equal{#1}{E}}{\item[\lARGE\textbf{Kinematics}]}{
+\ifthenelse{\equal{#1}{F}}{\item[\lARGE\textbf{Stresses and constitutive laws}]}{
+\ifthenelse{\equal{#1}{G}}{\item[\lARGE\textbf{Governing equations}]}{
+\ifthenelse{\equal{#1}{H}}{\item[\lARGE\textbf{Contact Mechanics}]}{
+\ifthenelse{\equal{#1}{I}}{\item[\lARGE\textbf{Numerical methods}]}{}}}}}}}}}
+\item[~]
+\let\makelabel\nomlabel
+}
+
+
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\Div}{Div}
+\DeclareMathOperator{\Lin}{Lin}
+\DeclareMathOperator{\divnew}{div}
+\DeclareMathOperator{\Grad}{Grad}
+\DeclareMathOperator{\tonew}{to}
+\DeclareMathOperator{\innew}{in}
+\DeclareMathOperator{\on}{on}
+\DeclareMathOperator{\subjectnew}{subject}
+
+
+\makeindex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% end of file %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

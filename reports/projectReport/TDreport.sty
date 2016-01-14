@@ -1,0 +1,193 @@
+% TD report
+% Author: W. Polifke
+% based on UDO style, Author: Gerd Sebastiani
+% URL: www.forum.fset.de
+%
+% Usage: \usepackage{TDtitle}
+%
+% Load in addition to titlepage.
+% Required Input: 
+%  Type of your thesis (Assigment, Master's, Ph.D. ... ) by \thesistype{yourtype}
+%  Title of your thesis by \title{yourtitle}
+%   CAUTION: Very long titles (4 lines) may result in a pagebreak. 
+%    Either use a shorter title or decrease the fontsize
+%  Author of the thesis by \author{yourname}
+%  Immatriculation number by \matno{yourno}
+%  Date of submission by \date{\today}
+%  Names of Supervisors by \tutor{1st Supervisor}{2nd Supervisor}
+%
+%	 See comments in the stylesheet to adjust the template to your needs
+
+\usepackage{a4wide,eurosym}
+
+% Font selection
+%\usepackage{fourier}        % Utopia with approp. math fonts, similar to mathpazo
+%\usepackage{mathpazo} % palation with approp. math fonts
+%\usepackage{mathptx}   % times with approp. math fonts, no bold math !!
+% packages {times} and {palatino} are considered obsolete !
+%
+%% - Font selection
+
+
+
+% gefälligere Kapitelüberschriften - siehe Package anonchap.sty
+%
+ \newcommand{\simplechapter}[1][\@empty]{%
+  \let\@tbiold@makechapterhead\@makechapterhead
+  \renewcommand{\@makechapterhead}[1]{%
+    \vspace*{20\p@}%
+    {\parindent \z@ \raggedright
+     \normalfont
+     \interlinepenalty\@M
+     \huge \bfseries #1\space\thechapter\simplechapterdelim\space\space\space\space
+       ##1\par\nobreak
+     \vskip 40\p@
+  }}
+}
+
+\newcommand{\restorechapter}{%
+  \let\@makechapterhead\@tbiold@makechapterhead
+}
+\newcommand{\simplechapterdelim}{}
+\simplechapter 
+%% -- Kapitelüberschriften 
+
+% no extra space at end of sentence
+\frenchspacing
+
+% damit Zitierungen sortiert werden, also [1,5-7] anstatt [5,1,7,6]
+\usepackage{cite}
+
+% Einbinden von bildern (eps / tiff / ... )
+\usepackage{graphicx,epsfig} 
+
+% erlaubt Anpassung von Header und Footer (wichtig auch für die erste Seite)
+\usepackage{fancyhdr}
+
+
+
+
+
+
+% Titelblatt
+% der \maketitel-Befehl wird neu definiert !
+%
+\newcommand{\thesistype}[1]{
+	\def\@thesistype{#1}
+	}
+\def\@thesistype{
+	\@latex@warning@no@line{Package `TDtitle': No \noexpand\thesistype given}}	
+
+%\newcommand{\institute}[1]{
+%	\def\@institute{#1}
+%	}
+%\def\@institute{
+%	\@latex@warning@no@line{Package `TDtitle': No \noexpand\institute given}}
+		
+\newcommand{\tutor}[3]{
+  \def\@tutorfirst{#1}
+  \def\@tutorsecond{#2}
+  \def\@tutorthird{#3}
+  }
+\def\@tutorfirst{
+  \@latex@warning@no@line{Package `TDtitle': No \noexpand\tutor given}}
+
+\newcommand{\matno}[1]{
+	\def\@matno{#1}
+	}
+\def\@matno{
+	\@latex@warning@no@line{Package `TDtitle': No \noexpand\matno given}}
+
+ 
+\renewcommand{\maketitle}{
+	\begin{titlepage}
+	\renewcommand{\headheight}{18.0pt}
+	\thispagestyle{fancy}
+	\renewcommand{\headrulewidth}{0.0pt}
+
+
+
+%	\begin{flushright}
+%		\vspace*{-5.5cm}{
+%		\includegraphics{logoTD}}
+%  \end{flushright}
+\lhead{\special{color cmyk 0 0 0 0.8}
+       \sf  Technische Universit\"at M\"unchen \\ 
+       \vspace*{-10pt}   \rule{0.72\textwidth}{.35pt} %\\
+%       \footnotesize Prof. Dr.-Ing. Thomas Sattelmayer \\
+%       \footnotesize Prof. Wolfgang Polifke, Ph.D. (CCNY) 
+       \special{color cmyk 0 0 0 1.}
+}
+\rhead{\raisebox{-23.3pt}[0pt][0pt]
+{\includegraphics[width = 0.25\textwidth]{lnm_logo}}
+}
+\vspace*{28pt}
+  
+  \begin{center}
+    % Change this for different kinds of reports (assignments ect.)
+	{\large \bf \sc \@thesistype \\} \vspace{36pt}
+
+	{\Large \bf  \@title \\} \vspace{48pt}
+		        
+	{\large
+	\textbf{Autor:}\\  \@author   \vspace{16pt}
+	    
+	\textbf{Matrikel-No:}\\  \@matno  \vspace{16pt}
+			      
+	\textbf{Betreuer:}\\
+	\@tutorfirst \\             % first tutor
+	\vspace{16pt}   
+    
+	\@date 			\\  % Submission
+	}
+   \end{center} 
+
+
+  \cfoot{  {{Lehrstuhl f\"ur Numerische Mechanik} \\}
+            {{Prof. Dr.-Ing. Wolfgang Wall} \\}
+	}
+  \end{titlepage}
+%% - Titelblatt
+
+
+
+
+
+% Erklärung
+\thispagestyle{empty} \mbox{ } \newpage
+\thispagestyle{empty}
+
+\noindent \textbf{\Large Erkl\"arung}
+\vspace{18pt}
+
+\noindent 
+Hiermit versichere ich, die vorliegende Arbeit selbst\"andig verfasst zu haben. Ich habe
+keine anderen Quellen und Hilfsmittel als die angegebenen verwendet.
+\vspace{3cm}
+
+\noindent  
+\begin{center}
+  \begin{tabular}{cc}
+    \line(1,0){200} & \line(1,0){200} \\ 
+     Ort, Datum &  \@author  
+  \end{tabular}
+\end{center}
+%% -  Erklärung
+
+
+% Inhaltsverzeichnis
+\addtolength{\textheight}{+24pt}
+\newpage \tableofcontents
+
+}
+%% - maketitel
+
+
+
+
+
+
+
+
+
+

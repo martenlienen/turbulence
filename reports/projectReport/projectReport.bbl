@@ -1,0 +1,41 @@
+\begin{thebibliography}{5}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Farah(2012)]{farah2012}
+P.~Farah.
+\newblock Accurate and efficient numerical integration schemes for {2D}/{3D}
+  mortar contact simulations.
+\newblock Master's thesis, Technische Universit{\"a}t M{\"u}nchen, 2012.
+
+\bibitem[Laursen and Simo(1993)]{laursen1993}
+T.~A. Laursen and J.~C. Simo.
+\newblock A continuum-based finite element formulation for the implicit
+  solution of multibody, large deformation-frictional contact problems.
+\newblock \emph{International Journal for Numerical Methods in Engineering},
+  36\penalty0 (20):\penalty0 3451--3485, 1993.
+
+\bibitem[Popp(2012)]{popp2012}
+A.~Popp.
+\newblock \emph{Mortar {M}ethods for {C}omputational {C}ontact {M}echanics and
+  {G}eneral {I}nterface {P}roblems}.
+\newblock PhD thesis, Technische Universit{\"a}t M{\"u}nchen, 2012.
+
+\bibitem[Popp et~al.(2009)Popp, Gee, and Wall]{popp2009}
+A.~Popp, M.~W. Gee, and W.~A. Wall.
+\newblock A finite deformation mortar contact formulation using a primal-dual
+  active set strategy.
+\newblock \emph{International Journal for Numerical Methods in Engineering},
+  79:\penalty0 1354--1391, 2009.
+
+\bibitem[Zavarise and Lorenzis(2009)]{zavarise2009}
+G.~Zavarise and L.~De Lorenzis.
+\newblock The node-to-segment algorithm for 2d frictionless contact: Classical
+  formulation and special cases.
+\newblock \emph{Computer Methods in Applied Mechanics and Engineering},
+  198\penalty0 (41--44):\penalty0 3428--3451, 2009.
+
+\end{thebibliography}
