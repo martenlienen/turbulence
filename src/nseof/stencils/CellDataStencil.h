@@ -53,12 +53,20 @@ CellDataStencil<T, FF>::CellDataStencil(
 
 template <typename T, typename FF>
 void CellDataStencil<T, FF>::apply(FF& flowField, int i, int j) {
-  this->data.push_back(this->apply2d(flowField, i, j));
+  if (flowField.getFlags().getValue(i, j) & OBSTACLE_SELF) {
+    this->data.push_back(0);
+  } else {
+    this->data.push_back(this->apply2d(flowField, i, j));
+  }
 }
 
 template <typename T, typename FF>
 void CellDataStencil<T, FF>::apply(FF& flowField, int i, int j, int k) {
-  this->data.push_back(this->apply3d(flowField, i, j, k));
+  if (flowField.getFlags().getValue(i, j, k) & OBSTACLE_SELF) {
+    this->data.push_back(0);
+  } else {
+    this->data.push_back(this->apply3d(flowField, i, j, k));
+  }
 }
 
 template <typename T, typename FF>
