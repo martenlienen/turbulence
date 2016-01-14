@@ -40,9 +40,11 @@ def parseArguments():
     parser = ArgumentParser(description="Submit a simulation as a batch job")
     parser.add_argument("-e",
                         "--email",
-                        help="Email-Adress to send a notification email to",
-                        required=True)
-    parser.add_argument("-n", "--name", help="Name of job", default="turb-flow")
+                        help="Email-Adress to send a notification email to")
+    parser.add_argument("-n",
+                        "--name",
+                        help="Name of job",
+                        default="turb-flow")
     parser.add_argument("--intel",
                         action="store_const",
                         const="intel",
@@ -92,6 +94,12 @@ def parseArguments():
                         type=int,
                         help="Number of cells in Z direction",
                         default=1)
+    parser.add_argument("-l",
+                        "--local",
+                        action="store_const",
+                        const=True,
+                        default=False,
+                        help="Run on local machine"),
     parser.add_argument(
         "out",
         help="Directory to store job configuration and results")
@@ -99,7 +107,12 @@ def parseArguments():
                         help="The executable to run (normally ns)")
     parser.add_argument("scenario", help="A scenario configuration file")
 
-    return parser.parse_args()
+    arguments = parser.parse_args()
+
+    if not arguments.email and not arguments.local:
+        parser.error("You need to set your email address to run on the cluster")
+
+    return arguments
 
 
 def copyPetscArguments(jobdir):
@@ -180,6 +193,14 @@ def submitJob(jobpath, logfile):
     return code == 0
 
 
+def runlocal(nranks, executable, scenario):
+    code = subprocess.call(
+        ["mpiexec", "-np", str(nranks), executable, scenario],
+        stdout=sys.stdout,
+        stderr=sys.stdout)
+    return code == 0
+
+
 def main():
     options = parseArguments()
 
@@ -214,11 +235,16 @@ def main():
                           options.vtk)
 
         nranks = options.nx * options.ny * options.nz
-        createJob(jobpath, outpath, options.out, options.name, scenario,
-                  options.architecture, nranks, options.email,
-                  os.path.realpath(options.executable), maxTime)
 
-        submitJob(jobpath, logfile)
+        if options.local:
+            runlocal(nranks, os.path.realpath(options.executable), scenario,
+                     logfile)
+        else:
+            createJob(jobpath, outpath, options.out, options.name, scenario,
+                      options.architecture, nranks, options.email,
+                      os.path.realpath(options.executable), maxTime)
+
+            submitJob(jobpath, logfile)
 
 
 if __name__ == "__main__":
