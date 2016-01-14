@@ -333,8 +333,10 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _keRHSit.iterate();
         _tiBool.iterate();
 
-	bool tempLocal = (_tsBool.getValue() && (icounter++ < _parameters.kEpsilon.adaptnrs));
-	MPI_Allreduce(&tempLocal, &tempGlobal, 1, MPI_INT, MPI_MAX, PETSC_COMM_WORLD);
+        bool tempLocal = (_tsBool.getValue() &&
+                          (icounter++ < _parameters.kEpsilon.adaptnrs));
+        MPI_Allreduce(&tempLocal, &tempGlobal, 1, MPI_INT, MPI_MAX,
+                      PETSC_COMM_WORLD);
       } while (tempGlobal);
 
       keloopcounter += icounter;

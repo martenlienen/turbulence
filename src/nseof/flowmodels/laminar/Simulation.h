@@ -52,11 +52,10 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   FieldIterator<nseof::FlowField> _velocityIterator;
   FieldIterator<nseof::FlowField> _obstacleIterator;
 
-
   std::vector<std::string> _mpiiwvector2D;
   std::vector<std::string> _mpiiwvector3D;
-  MPIIteratorWrite<nseof::FlowField,double> _mpiiw;
-  MPIIteratorRead<nseof::FlowField,double> _mpiir;
+  MPIIteratorWrite<nseof::FlowField, double> _mpiiw;
+  MPIIteratorRead<nseof::FlowField, double> _mpiir;
 
  public:
   Simulation(Parameters &parameters, nseof::geometry::GeometryManager &gm)
@@ -78,32 +77,44 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _obstacleStencil(parameters),
         _velocityIterator(*_flowField, parameters, _velocityStencil),
         _obstacleIterator(*_flowField, parameters, _obstacleStencil),
-        _mpiiwvector2D{"p","u","v"},
-        _mpiiwvector3D{"p","u","v","w"},
-        _mpiiw(*_flowField,parameters,_mpiiwvector2D,_mpiiwvector3D,
-          [](nseof::FlowField &flowField, int i, int j, int k, double &p,std::vector<int>& table) {
-        *(&p+table[0]) = flowField.getPressure().getScalar(i, j);
-        *(&p+table[1]) = flowField.getVelocity().getVector(i, j)[0];
-        *(&p+table[2]) = flowField.getVelocity().getVector(i, j)[1];
-        },
-         [](nseof::FlowField &flowField, int i, int j, int k, double &p,std::vector<int>& table) {
-        *(&p+table[0]) = flowField.getPressure().getScalar(i, j, k);
-        *(&p+table[1]) = flowField.getVelocity().getVector(i, j, k)[0];
-        *(&p+table[2]) = flowField.getVelocity().getVector(i, j, k)[1];
-        *(&p+table[3]) = flowField.getVelocity().getVector(i, j, k)[2];
-      }),
-      _mpiir(*_flowField,parameters,_mpiiwvector2D,_mpiiwvector3D,
-          [](nseof::FlowField &flowField, int i, int j, int k, double &p,std::vector<int>& table) {
-        flowField.getPressure().getScalar(i, j)    = table[0] != -1 ? *(&p+table[0]) : 0.0;
-        flowField.getVelocity().getVector(i, j)[0] = table[1] != -1 ? *(&p+table[1]) : 0.0;
-        flowField.getVelocity().getVector(i, j)[1] = table[2] != -1 ? *(&p+table[2]) : 0.0;
-      },
-          [](nseof::FlowField &flowField, int i, int j, int k, double &p,std::vector<int>& table) {
-        flowField.getPressure().getScalar(i, j, k)    = table[0] != -1 ? *(&p+table[0]) : 0.0;
-        flowField.getVelocity().getVector(i, j, k)[0] = table[1] != -1 ? *(&p+table[1]) : 0.0;
-        flowField.getVelocity().getVector(i, j, k)[1] = table[2] != -1 ? *(&p+table[2]) : 0.0;
-        flowField.getVelocity().getVector(i, j, k)[2] = table[3] != -1 ? *(&p+table[3]) : 0.0;
-      }){}
+        _mpiiwvector2D{"p", "u", "v"},
+        _mpiiwvector3D{"p", "u", "v", "w"},
+        _mpiiw(
+            *_flowField, parameters, _mpiiwvector2D, _mpiiwvector3D,
+            [](nseof::FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              *(&p + table[0]) = flowField.getPressure().getScalar(i, j);
+              *(&p + table[1]) = flowField.getVelocity().getVector(i, j)[0];
+              *(&p + table[2]) = flowField.getVelocity().getVector(i, j)[1];
+            },
+            [](nseof::FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              *(&p + table[0]) = flowField.getPressure().getScalar(i, j, k);
+              *(&p + table[1]) = flowField.getVelocity().getVector(i, j, k)[0];
+              *(&p + table[2]) = flowField.getVelocity().getVector(i, j, k)[1];
+              *(&p + table[3]) = flowField.getVelocity().getVector(i, j, k)[2];
+            }),
+        _mpiir(*_flowField, parameters, _mpiiwvector2D, _mpiiwvector3D,
+               [](nseof::FlowField &flowField, int i, int j, int k, double &p,
+                  std::vector<int> & table) {
+                 flowField.getPressure().getScalar(i, j) =
+                     table[0] != -1 ? *(&p + table[0]) : 0.0;
+                 flowField.getVelocity().getVector(i, j)[0] =
+                     table[1] != -1 ? *(&p + table[1]) : 0.0;
+                 flowField.getVelocity().getVector(i, j)[1] =
+                     table[2] != -1 ? *(&p + table[2]) : 0.0;
+               },
+               [](nseof::FlowField &flowField, int i, int j, int k, double &p,
+                  std::vector<int> & table) {
+                 flowField.getPressure().getScalar(i, j, k) =
+                     table[0] != -1 ? *(&p + table[0]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[0] =
+                     table[1] != -1 ? *(&p + table[1]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[1] =
+                     table[2] != -1 ? *(&p + table[2]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[2] =
+                     table[3] != -1 ? *(&p + table[3]) : 0.0;
+               }) {}
 
   virtual ~Simulation() {}
 
@@ -200,13 +211,9 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     _wallVelocityIterator.iterate();
   }
 
-  virtual void serialize(){
-    _mpiiw.iterate();
-  }
+  virtual void serialize() { _mpiiw.iterate(); }
 
-  virtual void deserialize(){
-    _mpiir.iterate();
-  }
+  virtual void deserialize() { _mpiir.iterate(); }
 
  protected:
   /** sets the time step*/

@@ -23,9 +23,7 @@ void MaximumNutStencil::apply(FlowField& flowField, int i, int j, int k) {
   this->maximum = std::max(maximum, flowField.getNu(i, j, k));
 }
 
-void MaximumNutStencil::reset() {
-  this->maximum = 0;
-}
+void MaximumNutStencil::reset() { this->maximum = 0; }
 }
 }
 }

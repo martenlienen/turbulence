@@ -31,4 +31,4 @@ class MultiTimer {
 };
 }
 
-#endif // _MULTI_TIMER_H_
+#endif  // _MULTI_TIMER_H_

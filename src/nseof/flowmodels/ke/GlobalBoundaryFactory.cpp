@@ -53,8 +53,7 @@ GlobalBoundaryFactory::~GlobalBoundaryFactory() {
 }
 
 GlobalBoundaryIterator<FlowField>
-GlobalBoundaryFactory::getGlobalBoundaryIterator(
-    FlowField& flowField) {
+GlobalBoundaryFactory::getGlobalBoundaryIterator(FlowField& flowField) {
   if (_parameters.geometry.dim == 2) {
     return GlobalBoundaryIterator<FlowField>(
         flowField, _parameters, *(_keStencils[0]), *(_keStencils[1]),

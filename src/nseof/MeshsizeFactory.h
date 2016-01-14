@@ -32,10 +32,10 @@ class MeshsizeFactory {
         break;
       // tanh-stretched mesh
       case TanhStretching:
-        mesh = new TanhMeshStretching(
-            parameters, (bool)parameters.geometry.stretchX,
-            (bool)parameters.geometry.stretchY,
-            (bool)parameters.geometry.stretchZ);
+        mesh = new TanhMeshStretching(parameters,
+                                      (bool)parameters.geometry.stretchX,
+                                      (bool)parameters.geometry.stretchY,
+                                      (bool)parameters.geometry.stretchZ);
         break;
       default:
         handleError(1, "Unknown meshsize type!");

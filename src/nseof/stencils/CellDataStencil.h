@@ -43,9 +43,7 @@ struct NullValue<std::vector<float>> {
   static const std::vector<float> value;
 };
 
-const std::vector<float> NullValue<std::vector<float>>::value = {0.0, 0.0,
-                                                                   0.0};
-
+const std::vector<float> NullValue<std::vector<float>>::value = {0.0, 0.0, 0.0};
 
 /**
  * Gather vtk::CellData from a flow field

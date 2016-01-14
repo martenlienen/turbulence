@@ -304,7 +304,7 @@ void PetscSolver::init() {
 
   MPI_Barrier(PETSC_COMM_WORLD);
   ScalarField &pressure = _flowField.getPressure();
-  
+
   if (_parameters.geometry.dim == 2) {
     PetscScalar **array;
 
@@ -314,7 +314,8 @@ void PetscSolver::init() {
     // fill array with new values (from old simulation)
     for (int j = _firstY; j < _firstY + _lengthY; j++) {
       for (int i = _firstX; i < _firstX + _lengthX; i++) {
-        array[j][i] = pressure.getScalar(i - _firstX + _offsetX, j - _firstY + _offsetY);
+        array[j][i] =
+            pressure.getScalar(i - _firstX + _offsetX, j - _firstY + _offsetY);
       }
     }
 
@@ -323,22 +324,22 @@ void PetscSolver::init() {
 
   } else if (_parameters.geometry.dim == 3) {
     // same form 3D
-    
+
     PetscScalar ***array;
     DMDAVecGetArray(_da, _x, &array);
 
     for (int k = _firstZ; k < _firstZ + _lengthZ; k++) {
       for (int j = _firstY; j < _firstY + _lengthY; j++) {
         for (int i = _firstX; i < _firstX + _lengthX; i++) {
-          array[k][j][i] = pressure.getScalar(i - _firstX + _offsetX, j - _firstY + _offsetY,
-                             k - _firstZ + _offsetZ);
+          array[k][j][i] =
+              pressure.getScalar(i - _firstX + _offsetX, j - _firstY + _offsetY,
+                                 k - _firstZ + _offsetZ);
         }
       }
     }
     DMDAVecRestoreArray(_da, _x, &array);
   }
 }
-
 
 void PetscSolver::solve() {
   ScalarField &pressure = _flowField.getPressure();

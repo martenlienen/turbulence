@@ -75,7 +75,5 @@ void FlowField::getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity,
   pressure = getPressure().getScalar(i, j, k);
 }
 
-const Parameters& FlowField::getParameters() {
-  return this->_parameters;
-}
+const Parameters& FlowField::getParameters() { return this->_parameters; }
 }
