@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # TUM proxy
 PROXY=halle.in.tum.de
@@ -20,8 +20,8 @@ Mandatory options:
 
 Optional options:
   -m, --mount MOUNT_POINT
-    If this is given, your cluster user's home directory is mounted at the
-    local directory MOUNT_POINT.
+    If this is given, your cluster user's home and scratch directories is
+   	mounted at the local directory MOUNT_POINT.
   -p, --port [PORT=2233]
     Use the local PORT for the SSH tunnel to TUM.
 EOF
@@ -43,11 +43,21 @@ function mount_cluster () {
   if [[ ! -e $path ]]; then
     mkdir --parents $path
   fi
+  if [[ ! -e $path/home ]]; then
+    mkdir --parents $path/home
+  fi
+  if [[ ! -e $path/scratch ]]; then
+    mkdir --parents $path/scratch
+  fi
 
   if [[ -d $path ]]; then
-    echo Mounting cluster at $path
+    echo Mounting cluster home at $path/home
     echo Please enter your cluster password
-    sshfs -p $port $cluster_user@localhost: $path
+    sshfs -p $port $cluster_user@localhost: $path/home
+
+    echo Mounting cluster scratch at $path/scratch
+    echo Please enter your cluster password
+    sshfs -p $port $cluster_user@localhost:/scratch/t1221/$cluster_user $path/scratch
   else
     echo The mount point is not a directory and could not be created as such
   fi
