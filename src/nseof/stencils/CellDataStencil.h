@@ -13,6 +13,40 @@
 
 namespace nseof {
 
+template <typename T>
+struct NullValue {};
+
+template <>
+struct NullValue<float> {
+  static const float value;
+};
+
+const float NullValue<float>::value = 0.0;
+
+template <>
+struct NullValue<double> {
+  static const double value;
+};
+
+const double NullValue<double>::value = 0.0;
+
+template <>
+struct NullValue<std::vector<double>> {
+  static const std::vector<double> value;
+};
+
+const std::vector<double> NullValue<std::vector<double>>::value = {0.0, 0.0,
+                                                                   0.0};
+
+template <>
+struct NullValue<std::vector<float>> {
+  static const std::vector<float> value;
+};
+
+const std::vector<float> NullValue<std::vector<float>>::value = {0.0, 0.0,
+                                                                   0.0};
+
+
 /**
  * Gather vtk::CellData from a flow field
  */
@@ -54,7 +88,7 @@ CellDataStencil<T, FF>::CellDataStencil(
 template <typename T, typename FF>
 void CellDataStencil<T, FF>::apply(FF& flowField, int i, int j) {
   if (flowField.getFlags().getValue(i, j) & OBSTACLE_SELF) {
-    this->data.push_back(0);
+    this->data.push_back(NullValue<T>::value);
   } else {
     this->data.push_back(this->apply2d(flowField, i, j));
   }
@@ -63,7 +97,7 @@ void CellDataStencil<T, FF>::apply(FF& flowField, int i, int j) {
 template <typename T, typename FF>
 void CellDataStencil<T, FF>::apply(FF& flowField, int i, int j, int k) {
   if (flowField.getFlags().getValue(i, j, k) & OBSTACLE_SELF) {
-    this->data.push_back(0);
+    this->data.push_back(NullValue<T>::value);
   } else {
     this->data.push_back(this->apply3d(flowField, i, j, k));
   }
