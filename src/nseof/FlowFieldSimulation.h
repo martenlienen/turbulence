@@ -80,7 +80,21 @@ class FlowFieldSimulation : public Simulation {
                                     FLOAT v[3];
                                     f.getPressureAndVelocity(p, v, i, j, k);
                                     return p;
-                                  })};
+                                  }),
+      CellDataStencil<double, FF>(this->_parameters, "velocityU",
+                                  [](FF &f, int i, int j) {
+                                    FLOAT p;
+                                    FLOAT v[3];
+                                    f.getPressureAndVelocity(p, v, i, j);
+                                    return v[0];
+                                  },
+                                  [](FF &f, int i, int j, int k) {
+                                    FLOAT p;
+                                    FLOAT v[3];
+                                    f.getPressureAndVelocity(p, v, i, j, k);
+                                    return v[0];
+                                  })
+  };
 
   std::vector<CellDataStencil<std::vector<double>, FF>> vectorStencils{
       CellDataStencil<std::vector<double>, FF>(
