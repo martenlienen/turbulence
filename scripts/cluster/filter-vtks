@@ -1,0 +1,176 @@
+#!/usr/bin/env python
+
+import csv
+import io
+import os
+import re
+import sys
+from argparse import ArgumentParser
+
+
+def parseArguments():
+    parser = ArgumentParser(
+        "Filter velocity values from VTK files for a certain X coordinate")
+    parser.add_argument("-x",
+                        type=float,
+                        help="X coordinate to filter",
+                        required=True)
+    parser.add_argument("-d",
+                        "--directory",
+                        help="Directory storing the VTK files",
+                        required=True)
+    parser.add_argument("-o",
+                        "--out",
+                        help="Path to CSV file for output (Default: STDOUT)")
+
+    return parser.parse_args()
+
+
+def group(vtks):
+    """Group VTK files by timestep and rank."""
+    filenamere = re.compile("\.(\d+)\.(\d+)\.vtk$")
+    timestepvtks = {}
+
+    for vtk in vtks:
+        match = filenamere.search(vtk)
+        rank = int(match.group(1))
+        time = int(match.group(2))
+
+        if not time in timestepvtks:
+            timestepvtks[time] = {}
+
+        timestepvtks[time][rank] = vtk
+
+    return timestepvtks
+
+
+def analyze(vtks, x):
+    """Analyze which files contain the X columns and in which lines."""
+
+    def readlines(file):
+        with open(file) as f:
+            return f.readlines()
+
+    contents = {rank: readlines(vtk) for rank, vtk in vtks.items()}
+
+    def prefixsearch(lines, prefix):
+        """Find the index of the line starting with prefix."""
+        matching = (i for i, line in enumerate(lines)
+                    if line.startswith(prefix))
+        return next(matching, None)
+
+    def xpositions(lines):
+        """Return all X coordinates contained in a VTK file."""
+        # Find dimensions line
+        i = prefixsearch(lines, "DIMENSIONS ")
+
+        if i is None:
+            return []
+        else:
+            # Read X dimension
+            X = int(lines[i].split(" ")[1])
+
+            # Jump over POINTS to the first point
+            i += 2
+
+            # Parse the X coordinate of the first X points
+            return [float(lines[j].split(" ")[0]) for j in range(i, i + X)]
+
+    xpos = {rank: xpositions(lines) for rank, lines in contents.items()}
+
+    # Find the X coordinate closest to x
+    allx = [x for pos in xpos.values() for x in pos]
+    closest = min(allx, key=lambda X: abs(X - x))
+
+    # All ranks that include that X coordinate (but not at the very end)
+    ranks = [rank
+             for rank, X in xpos.items()
+             if closest in X and not X[-1] == closest]
+    ranks.sort()
+
+    def ycoordinates(lines, xcoord):
+        """Return all Y coordinates of points with X coordinate X."""
+        i = prefixsearch(lines, "DIMENSIONS ")
+        X, Y, Z = map(int, lines[i].split(" ")[1:])
+        N = X * Y * Z
+
+        # Jump over POINTS to the first point
+        i += 2
+
+        coords = [map(float, lines[j].split(" ")[0:2])
+                  for j in range(i, i + N)]
+
+        return [y for x, y in coords if x == xcoord]
+
+    ypos = []
+    for r in ranks:
+        ypos += ycoordinates(contents[r], closest)
+
+    def velocitylines(lines, x):
+        i = prefixsearch(lines, "DIMENSIONS ")
+        X, Y, Z = map(int, lines[i].split(" ")[1:])
+
+        # Start of velocity section
+        i = prefixsearch(lines, "VECTORS velocity float")
+
+        if i is None:
+            return []
+        else:
+            return [i + x + j * (X - 1) for j in range(Y)]
+
+    lines = {r: velocitylines(contents[r], xpos[r].index(closest))
+             for r in ranks}
+
+    return ypos, (ranks, lines)
+
+
+def filter(vtks, analysis):
+    """Filter the velocities at X coordinate x from the VTK files."""
+    ranks, lines = analysis
+    x = []
+
+    for r in ranks:
+        with open(vtks[r], "r") as file:
+            L = file.readlines()
+
+        for i in lines[r]:
+            x.append(float(L[i].split(" ")[0]))
+
+    return x
+
+
+def main():
+    arguments = parseArguments()
+    vtks = [os.path.join(arguments.directory, f)
+            for f in os.listdir(arguments.directory)]
+
+    if len(vtks) == 0:
+        sys.exit("Directory is empty")
+
+    vtks = group(vtks)
+    timesteps = sorted(vtks.keys())
+    ypos, analysis = analyze(vtks[timesteps[0]], arguments.x)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Time", *ypos])
+
+    for timestep in timesteps:
+        vs = filter(vtks[timestep], analysis)
+        writer.writerow([timestep, *vs])
+
+    result = output.getvalue()
+
+    if arguments.out:
+        if os.path.isfile(arguments.out):
+            sys.exit("Outfile already exists!")
+
+        with open(arguments.out, "w") as file:
+            file.write(result)
+    else:
+        sys.stdout.write(result)
+
+
+
+if __name__ == "__main__":
+    main()
