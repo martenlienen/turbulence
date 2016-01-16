@@ -64,6 +64,10 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   FieldIterator<nseof::FlowField> _obstacleIterator;
   FieldIterator<FlowField> _obstacleIteratorKE;
 
+  std::vector<std::string> _mpiiwvector2D;
+  std::vector<std::string> _mpiiwvector3D;
+  MPIIteratorWrite<FlowField, double> _mpiiw;
+  MPIIteratorRead<FlowField, double> _mpiir;
 
   NutStencil _nutst;
   FieldIterator<FlowField> _nutit;
@@ -124,6 +128,78 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _velocityIterator(*_flowField, parameters, _velocityStencil),
         _obstacleIterator(*_flowField, parameters, _obstacleStencil),
         _obstacleIteratorKE(*_flowField, parameters, _obstacleStencilKE),
+        _mpiiwvector2D{"p",  "u",   "v", "k", "epsilon", "f1",
+                       "f2", "fmu", "d", "e", "P"},
+        _mpiiwvector3D{"p",  "u",  "v",   "w", "k", "epsilon",
+                       "f1", "f2", "fmu", "d", "e", "P"},
+        _mpiiw(
+            *_flowField, parameters, _mpiiwvector2D, _mpiiwvector3D,
+            [](FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              // clang-format off
+              *(&p + table[ 0]) = flowField.getPressure().getScalar(i, j) - flowField.getU(i, j) * flowField.getU(i, j);
+              *(&p + table[ 1]) = flowField.getVelocity().getVector(i, j)[0];
+              *(&p + table[ 2]) = flowField.getVelocity().getVector(i, j)[1];
+              *(&p + table[ 3]) = flowField.getTke(i, j);
+              *(&p + table[ 4]) = flowField.getEpsilon(i, j);
+              *(&p + table[ 5]) = flowField.getF1(i, j);
+              *(&p + table[ 6]) = flowField.getF2(i, j);
+              *(&p + table[ 7]) = flowField.getFmu(i, j);
+              *(&p + table[ 8]) = flowField.getD(i, j);
+              *(&p + table[ 9]) = flowField.getE(i, j);
+              *(&p + table[10]) = flowField.getPressure().getScalar(i, j);
+              // clang-format on
+            },
+            [](FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              // clang-format off
+              *(&p + table[ 0]) = flowField.getPressure().getScalar(i, j, k) - flowField.getU(i, j, k) * flowField.getU(i, j, k);
+              *(&p + table[ 1]) = flowField.getVelocity().getVector(i, j, k)[0];
+              *(&p + table[ 2]) = flowField.getVelocity().getVector(i, j, k)[1];
+              *(&p + table[ 3]) = flowField.getVelocity().getVector(i, j, k)[2];
+              *(&p + table[ 4]) = flowField.getTke(i, j, k);
+              *(&p + table[ 5]) = flowField.getEpsilon(i, j, k);
+              *(&p + table[ 6]) = flowField.getF1(i, j, k);
+              *(&p + table[ 7]) = flowField.getF2(i, j, k);
+              *(&p + table[ 8]) = flowField.getFmu(i, j, k);
+              *(&p + table[ 9]) = flowField.getD(i, j, k);
+              *(&p + table[10]) = flowField.getE(i, j, k);
+              *(&p + table[11]) = flowField.getPressure().getScalar(i, j, k);
+              // clang-format on
+            }),
+        _mpiir(
+            *_flowField, parameters, _mpiiwvector2D, _mpiiwvector3D,
+            [](FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              // clang-format off
+                 flowField.getPressure().getScalar(i, j)    = table[10] != -1 ? *(&p + table[10]) : 0.0;
+                 flowField.getVelocity().getVector(i, j)[0] = table[1]  != -1 ? *(&p + table[ 1]) : 0.0;
+                 flowField.getVelocity().getVector(i, j)[1] = table[2]  != -1 ? *(&p + table[ 2]) : 0.0;
+                 flowField.getTke(i, j)                     = table[3]  != -1 ? *(&p + table[ 3]) : 0.0;
+                 flowField.getEpsilon(i, j)                 = table[4]  != -1 ? *(&p + table[ 4]) : 0.0;
+                 flowField.getF1(i, j)                      = table[5]  != -1 ? *(&p + table[ 5]) : 0.0;
+                 flowField.getF2(i, j)                      = table[6]  != -1 ? *(&p + table[ 6]) : 0.0;
+                 flowField.getFmu(i, j)                     = table[7]  != -1 ? *(&p + table[ 7]) : 0.0;
+                 flowField.getD(i, j)                       = table[8]  != -1 ? *(&p + table[ 8]) : 0.0;
+                 flowField.getE(i, j)                       = table[9]  != -1 ? *(&p + table[ 9]) : 0.0;
+              // clang-format on
+            },
+            [](FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              // clang-format off
+                 flowField.getPressure().getScalar(i, j, k)    = table[11] != -1 ? *(&p + table[11]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[0] = table[1]  != -1 ? *(&p + table[ 1]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[1] = table[2]  != -1 ? *(&p + table[ 2]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[2] = table[3]  != -1 ? *(&p + table[ 3]) : 0.0;
+                 flowField.getTke(i, j, k)                     = table[4]  != -1 ? *(&p + table[ 4]) : 0.0;
+                 flowField.getEpsilon(i, j, k)                 = table[5]  != -1 ? *(&p + table[ 5]) : 0.0;
+                 flowField.getF1(i, j, k)                      = table[6]  != -1 ? *(&p + table[ 6]) : 0.0;
+                 flowField.getF2(i, j, k)                      = table[7]  != -1 ? *(&p + table[ 7]) : 0.0;
+                 flowField.getFmu(i, j, k)                     = table[8]  != -1 ? *(&p + table[ 8]) : 0.0;
+                 flowField.getD(i, j, k)                       = table[9]  != -1 ? *(&p + table[ 9]) : 0.0;
+                 flowField.getE(i, j, k)                       = table[10] != -1 ? *(&p + table[10]) : 0.0;
+              // clang-format on
+            }),
         _nutst(parameters),
         _nutit(*_flowField, _parameters, _nutst, 0, 1),
         _hst(parameters, gm),
@@ -364,6 +440,10 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     // calc help variables: f_mu, f_1 and f_2
     _keFit.iterate();
   }
+
+  virtual void serialize() { _mpiiw.iterate(); }
+
+  virtual void deserialize() { _mpiir.iterate(); }
 
  protected:
   /** sets the time step*/
