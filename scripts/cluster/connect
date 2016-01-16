@@ -81,7 +81,7 @@ while [[ $# > 0 ]]; do
   case "$1" in
     -c|--cluster)
       if [[ "$2" == "linux" ]]; then
-        cluster=login5.lrz.de
+        cluster=lxlogin5.lrz.de
       fi
       shift
       ;;
