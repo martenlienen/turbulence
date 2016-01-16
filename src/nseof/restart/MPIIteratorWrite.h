@@ -20,8 +20,8 @@ class MPIIteratorWrite : public MPIIterator<FF, T> {
                                       std::vector<int>&)> apply2D,
                    std::function<void(FF& flowField, int, int, int, T&,
                                       std::vector<int>&)> apply3D)
-      : MPIIterator<FF, T>(flowField, parameters, vec2D, vec3D, apply2D,
-                           apply3D) {
+      : MPIIterator<FF, T>(flowField, parameters, parameters.restart.out, vec2D,
+                           vec3D, apply2D, apply3D) {
     // set scenario
     std::string type = this->_p.simulation.type;
 

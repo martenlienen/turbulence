@@ -125,11 +125,6 @@ class VTKParameters {
   FLOAT start = 0.0;
 };
 
-struct CheckpointParameters {
-  bool enabled;
-  std::string prefix;
-};
-
 class ParallelParameters {
  public:
   int rank;  //! Rank of the current processor
@@ -166,6 +161,11 @@ struct TimingParameters {
   std::string prefix;
 };
 
+struct RestartParameters {
+  std::string in;
+  std::string out;
+};
+
 //@}
 
 /** A class to store and pass around the parameters
@@ -189,10 +189,10 @@ class Parameters {
   GeometricParameters geometry;
   WallParameters walls;
   VTKParameters vtk;
-  CheckpointParameters checkpoints;
   ParallelParameters parallel;
   BFStepParameters bfStep;
   TimingParameters timing;
+  RestartParameters restart;
   // TODO WS2: include parameters for turbulence
   Meshsize *meshsize;
 };

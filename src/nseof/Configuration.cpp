@@ -364,22 +364,6 @@ void Configuration::loadParameters(Parameters &parameters,
     readIntOptional(parameters.vtk.highoffset, node, "highoffset", 1);
 
     //--------------------------------------------------
-    // Checkpoint parameters
-    //--------------------------------------------------
-
-    node = confFile.FirstChildElement()->FirstChildElement("checkpoints");
-
-    if (node) {
-      readBoolOptional(parameters.checkpoints.enabled, node, "enabled", true);
-
-      if (parameters.checkpoints.enabled) {
-        readStringMandatory(parameters.checkpoints.prefix, node);
-      }
-    } else {
-      parameters.checkpoints.enabled = false;
-    }
-
-    //--------------------------------------------------
     // Parallel parameters
     //--------------------------------------------------
 
@@ -410,6 +394,17 @@ void Configuration::loadParameters(Parameters &parameters,
       }
     } else {
       parameters.timing.enabled = false;
+    }
+
+    //--------------------------------------------------
+    // Restart parameters
+    //--------------------------------------------------
+
+    node = confFile.FirstChildElement()->FirstChildElement("restart");
+
+    if (node) {
+      readStringOptional(parameters.restart.in, node, "in");
+      readStringOptional(parameters.restart.out, node, "out");
     }
 
     // Start neighbors on null in case that no parallel configuration is used
@@ -587,6 +582,10 @@ void Configuration::loadParameters(Parameters &parameters,
 
   MPI_Bcast(&parameters.timing.enabled, 1, MPI_INT, 0, communicator);
   broadcastString(parameters.timing.prefix, communicator);
+
+  // broadcast restart parameters
+  broadcastString(parameters.restart.in, communicator);
+  broadcastString(parameters.restart.out, communicator);
 
   // TODO WS2: broadcast turbulence parameters
   broadcastString(parameters.flow.type, communicator);

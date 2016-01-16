@@ -12,7 +12,7 @@ namespace nseof {
 template <typename FF, typename T>
 class MPIIterator : public Iterator<FF> {
  public:
-  MPIIterator(FF& flowField, const Parameters& parameters,
+  MPIIterator(FF& flowField, const Parameters& parameters, std::string fname,
               std::vector<std::string> vec2D, std::vector<std::string> vec3D,
               std::function<void(FF& flowField, int, int, int, T&,
                                  std::vector<int>&)> apply2D,
@@ -28,7 +28,7 @@ class MPIIterator : public Iterator<FF> {
         _data(0),
         _p(parameters),
         _apply(parameters.geometry.dim == 2 ? apply2D : apply3D),
-        _fname(parameters.checkpoints.prefix) {}
+        _fname(fname) {}
 
   void iterate();
 
