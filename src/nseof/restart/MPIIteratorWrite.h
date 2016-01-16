@@ -42,6 +42,10 @@ class MPIIteratorWrite : public MPIIterator<FF, T> {
 
 template <typename FF, typename T>
 void MPIIteratorWrite<FF, T>::iterate() {
+  if (this->_fname == "") {
+    return;
+  }
+
   MPI_File fh;
   MPI_Status status;
   MPI_Offset my_offset = 0;
@@ -52,6 +56,8 @@ void MPIIteratorWrite<FF, T>::iterate() {
                              this->_infocells);
   } else {
     // define type in the first cell of binary file
+    std::cout << "Write of backup file started for scenario type: "
+              << this->_scenario << std::endl;
     this->_data[this->counter++] = this->_scenario;
   }
 
