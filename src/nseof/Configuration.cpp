@@ -364,6 +364,22 @@ void Configuration::loadParameters(Parameters &parameters,
     readIntOptional(parameters.vtk.highoffset, node, "highoffset", 1);
 
     //--------------------------------------------------
+    // Checkpoint parameters
+    //--------------------------------------------------
+
+    node = confFile.FirstChildElement()->FirstChildElement("checkpoints");
+
+    if (node) {
+      readBoolOptional(parameters.checkpoints.enabled, node, "enabled", true);
+
+      if (parameters.checkpoints.enabled) {
+        readStringMandatory(parameters.checkpoints.prefix, node);
+      }
+    } else {
+      parameters.checkpoints.enabled = false;
+    }
+
+    //--------------------------------------------------
     // Parallel parameters
     //--------------------------------------------------
 
@@ -542,8 +558,11 @@ void Configuration::loadParameters(Parameters &parameters,
   MPI_Bcast(&(parameters.vtk.start), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.vtk.lowoffset), 1, MPI_INT, 0, communicator);
   MPI_Bcast(&(parameters.vtk.highoffset), 1, MPI_INT, 0, communicator);
-
   broadcastString(parameters.vtk.prefix, communicator);
+
+  MPI_Bcast(&(parameters.checkpoints.enabled), 1, MPI_INT, 0, communicator);
+  broadcastString(parameters.checkpoints.prefix, communicator);
+
   broadcastString(parameters.simulation.type, communicator);
   broadcastString(parameters.simulation.scenario, communicator);
 

@@ -125,6 +125,11 @@ class VTKParameters {
   FLOAT start = 0.0;
 };
 
+struct CheckpointParameters {
+  bool enabled;
+  std::string prefix;
+};
+
 class ParallelParameters {
  public:
   int rank;  //! Rank of the current processor
@@ -184,6 +189,7 @@ class Parameters {
   GeometricParameters geometry;
   WallParameters walls;
   VTKParameters vtk;
+  CheckpointParameters checkpoints;
   ParallelParameters parallel;
   BFStepParameters bfStep;
   TimingParameters timing;

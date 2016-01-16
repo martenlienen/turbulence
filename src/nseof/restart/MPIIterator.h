@@ -28,7 +28,7 @@ class MPIIterator : public Iterator<FF> {
         _data(0),
         _p(parameters),
         _apply(parameters.geometry.dim == 2 ? apply2D : apply3D),
-        _fname(parameters.vtk.prefix) {}
+        _fname(parameters.checkpoints.prefix) {}
 
   void iterate();
 

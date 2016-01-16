@@ -211,9 +211,17 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     _wallVelocityIterator.iterate();
   }
 
-  virtual void serialize() { _mpiiw.iterate(); }
+  virtual void serialize() {
+    if (_parameters.checkpoints.enabled) {
+      _mpiiw.iterate();
+    }
+  }
 
-  virtual void deserialize() { _mpiir.iterate(); }
+  virtual void deserialize() {
+    if (_parameters.checkpoints.enabled) {
+      _mpiir.iterate();
+    }
+  }
 
  protected:
   /** sets the time step*/
