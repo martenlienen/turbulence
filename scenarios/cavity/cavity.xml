@@ -35,7 +35,6 @@
         </back>
     </walls>
     <vtk interval="0.01">results/a</vtk>
-    <checkpoints enabled="true">checkpoints</checkpoints>
     <stdOut interval="0.01" />
     <parallel numProcessorsX="2" numProcessorsY="2" numProcessorsZ="1" />
 </configuration>

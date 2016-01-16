@@ -555,9 +555,6 @@ void Configuration::loadParameters(Parameters &parameters,
   MPI_Bcast(&(parameters.vtk.highoffset), 1, MPI_INT, 0, communicator);
   broadcastString(parameters.vtk.prefix, communicator);
 
-  MPI_Bcast(&(parameters.checkpoints.enabled), 1, MPI_INT, 0, communicator);
-  broadcastString(parameters.checkpoints.prefix, communicator);
-
   broadcastString(parameters.simulation.type, communicator);
   broadcastString(parameters.simulation.scenario, communicator);
 
