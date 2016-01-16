@@ -1,4 +1,5 @@
 #include "PetscSolver.h"
+#include "nseof/MultiTimer.h"
 
 namespace nseof {
 
@@ -342,12 +343,17 @@ void PetscSolver::init() {
 }
 
 void PetscSolver::solve() {
+  MultiTimer *timer = MultiTimer::get();
   ScalarField &pressure = _flowField.getPressure();
 
   if (_parameters.geometry.dim == 2) {
+    timer->start("poisson");
+
     KSPSetComputeRHS(_ksp, computeRHS2D, &_ctx);
     KSPSetComputeOperators(_ksp, computeMatrix2D, &_ctx);
     KSPSolve(_ksp, PETSC_NULL, _x);
+
+    timer->stop("poisson");
 
     // Then extract the information
     PetscScalar **array;
@@ -361,9 +367,13 @@ void PetscSolver::solve() {
     }
     DMDAVecRestoreArray(_da, _x, &array);
   } else if (_parameters.geometry.dim == 3) {
+    timer->start("poisson");
+
     KSPSetComputeRHS(_ksp, computeRHS3D, &_ctx);
     KSPSetComputeOperators(_ksp, computeMatrix3D, &_ctx);
     KSPSolve(_ksp, PETSC_NULL, _x);
+
+    timer->stop("poisson");
 
     // Then extract the information
     PetscScalar ***array;
