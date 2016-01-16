@@ -27,9 +27,9 @@ class MPIIteratorWrite : public MPIIterator<FF, T> {
 
     if (type == "dns") {
       this->_scenario = 0;
-    } else if (type == "aturb") {
+    } else if (type == "algebraic") {
       this->_scenario = 1;
-    } else if (type == "keturb") {
+    } else if (type == "ke") {
       this->_scenario = 2;
     }
 
