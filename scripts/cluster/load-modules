@@ -3,22 +3,59 @@
 # Initialize the module system
 . /lrz/sys/share/modules/init/bash
 
-# Needed by the simulation
-module load gcc/4.9
-module load cmake
-module unload mpi.intel
-module load mpi.intel/4.1
-module load petsc/3.5
+function print_usage () {
+  cat <<EOF
+Usage: load-modules [OPTIONS]...
 
-# Our python scripts are not compatible with ancient python versions
-module load python/3.3_anaconda_nompi
+Optional options:
+  -t, --tuning
+  load modules needed for tuning
+  (scorep, cube, vampir, ...)
 
-module list
+EOF
+}
 
-# The default petsc module configuration puts both parts in PETSC_ARCH but the
-# CMake-PETSc-module expects the directory and archicture split into two
-# variables.
-if [[ -z "$PETSC_ARCH" ]]; then
-  export PETSC_ARCH=$(basename $PETSC_DIR)
-  export PETSC_DIR=$(dirname $PETSC_DIR)
+while [[ $# > 0 ]]; do
+  case "$1" in
+    -t|--tuning)
+      tuning=1
+      shift
+      ;;
+    -h|--help)
+      help=1
+      ;;
+  esac
+
+  shift
+done
+
+if [[ "$help" ]]; then
+  print_usage
+else
+  # Needed by the simulation
+  module load gcc/4.9
+  module load cmake
+  module unload mpi.intel
+  module load mpi.intel/4.1
+  module load petsc/3.5
+
+  if [[ "$tuning" ]]; then
+    module load vampir/8.0
+    module load cube
+    module load scorep
+    export PATH=$PATH:/lrz/sys/tools/scorep/1.4.2/intel3.CMUC2/bin
+  fi
+
+  # Our python scripts are not compatible with ancient python versions
+  module load python/3.3_anaconda_nompi
+
+  module list
+
+  # The default petsc module configuration puts both parts in PETSC_ARCH but the
+  # CMake-PETSc-module expects the directory and archicture split into two
+  # variables.
+  if [[ -z "$PETSC_ARCH" ]]; then
+    export PETSC_ARCH=$(basename $PETSC_DIR)
+    export PETSC_DIR=$(dirname $PETSC_DIR)
+  fi
 fi
