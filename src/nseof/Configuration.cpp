@@ -255,7 +255,7 @@ void Configuration::loadParameters(Parameters &parameters,
 
     readFloatMandatory(parameters.flow.Re, node, "Re");
     parameters.flow.visc = 1 / parameters.flow.Re;
-    readStringOptional(parameters.flow.type, node, "type", "laminar");
+    readStringOptional(parameters.flow.type, node, "type", "turbulent");
 
     //--------------------------------------------------
     // Solver parameters
