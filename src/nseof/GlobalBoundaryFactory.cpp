@@ -123,6 +123,33 @@ GlobalBoundaryFactory::GlobalBoundaryFactory(Parameters& parameters)
     parameters.walls.typeTop = NEUMANN;
     parameters.walls.typeFront = DIRICHLET;
     parameters.walls.typeBack = NEUMANN;
+  } else if (scenario == "free") {
+    // To the left, we have the input
+    _velocityStencils[0] = _channelInput[0];
+    _FGHStencils[0] = _channelInput[1];
+
+    // To the right, there is an outflow boundary
+    _velocityStencils[1] = _outflow[0];
+    _FGHStencils[1] = _outflow[1];
+
+    _velocityStencils[2] = _outflow[0];
+    _FGHStencils[2] = _outflow[1];
+
+    _velocityStencils[3] = _outflow[0];
+    _FGHStencils[3] = _outflow[1];
+
+    _velocityStencils[4] = _outflow[0];
+    _FGHStencils[4] = _outflow[1];
+
+    _velocityStencils[5] = _outflow[0];
+    _FGHStencils[5] = _outflow[1];
+
+    parameters.walls.typeLeft = DIRICHLET;
+    parameters.walls.typeRight = NEUMANN;
+    parameters.walls.typeBottom = NEUMANN;
+    parameters.walls.typeTop = NEUMANN;
+    parameters.walls.typeFront = NEUMANN;
+    parameters.walls.typeBack = NEUMANN;
   } else if (scenario == "pressure-channel") {
     // we have Dirichlet conditions for pressure on both sides,
     // hence outflow conditions for the velocities

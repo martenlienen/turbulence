@@ -20,15 +20,19 @@ class MPIIteratorRead : public MPIIterator<FF, T> {
                                      std::vector<int>&)> apply2D,
                   std::function<void(FF& flowField, int, int, int, T&,
                                      std::vector<int>&)> apply3D)
-      : MPIIterator<FF, T>(flowField, parameters, vec2D, vec3D, apply2D,
-                           apply3D) {}
+      : MPIIterator<FF, T>(flowField, parameters, parameters.restart.in, vec2D,
+                           vec3D, apply2D, apply3D) {}
 
   void iterate();
 };
 
 template <typename FF, typename T>
 void MPIIteratorRead<FF, T>::iterate() {
-  // is file existent
+  // is file existent?
+  if (this->_fname == "") {
+    return;
+  }
+
   if (!this->is_file_exist(this->_fname.c_str())) {
     return;
   }
@@ -61,6 +65,9 @@ void MPIIteratorRead<FF, T>::iterate() {
       MPI_File_seek(fh2, 0, MPI_SEEK_SET);
       MPI_File_read(fh2, &(this->_scenario), 1, MPI_DOUBLE, &status2);
       MPI_File_close(&fh2);
+
+      std::cout << "Read of backup file (scenario type:" << this->_scenario
+                << ") started" << this->_scenario << std::endl;
     }
   }
 

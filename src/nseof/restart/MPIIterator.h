@@ -12,7 +12,7 @@ namespace nseof {
 template <typename FF, typename T>
 class MPIIterator : public Iterator<FF> {
  public:
-  MPIIterator(FF& flowField, const Parameters& parameters,
+  MPIIterator(FF& flowField, const Parameters& parameters, std::string fname,
               std::vector<std::string> vec2D, std::vector<std::string> vec3D,
               std::function<void(FF& flowField, int, int, int, T&,
                                  std::vector<int>&)> apply2D,
@@ -28,7 +28,7 @@ class MPIIterator : public Iterator<FF> {
         _data(0),
         _p(parameters),
         _apply(parameters.geometry.dim == 2 ? apply2D : apply3D),
-        _fname(parameters.checkpoints.prefix) {}
+        _fname(fname) {}
 
   void iterate();
 
@@ -58,13 +58,13 @@ class MPIIterator : public Iterator<FF> {
 
   std::vector<std::vector<std::string>> _table2D{
       {"p", "u", "v"},
-      {"p", "u", "v", "nut"},
-      {"p", "u", "v", "k", "epsilon", "f1", "f2", "fmu", "d", "e"},
+      {"p", "u", "v", "nut", "P"},
+      {"p", "u", "v", "k", "epsilon", "f1", "f2", "fmu", "d", "e", "P"},
   };
   std::vector<std::vector<std::string>> _table3D{
       {"p", "u", "v", "w"},
-      {"p", "u", "v", "w", "nut"},
-      {"p", "u", "v", "w", "k", "epsilon", "f1", "f2", "fmu", "d", "e"},
+      {"p", "u", "v", "w", "nut", "P"},
+      {"p", "u", "v", "w", "k", "epsilon", "f1", "f2", "fmu", "d", "e", "P"},
   };
 
   bool is_file_exist(const char* fileName) {

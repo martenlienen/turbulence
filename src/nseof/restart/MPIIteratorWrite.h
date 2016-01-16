@@ -20,16 +20,16 @@ class MPIIteratorWrite : public MPIIterator<FF, T> {
                                       std::vector<int>&)> apply2D,
                    std::function<void(FF& flowField, int, int, int, T&,
                                       std::vector<int>&)> apply3D)
-      : MPIIterator<FF, T>(flowField, parameters, vec2D, vec3D, apply2D,
-                           apply3D) {
+      : MPIIterator<FF, T>(flowField, parameters, parameters.restart.out, vec2D,
+                           vec3D, apply2D, apply3D) {
     // set scenario
     std::string type = this->_p.simulation.type;
 
     if (type == "dns") {
       this->_scenario = 0;
-    } else if (type == "aturb") {
+    } else if (type == "algebraic") {
       this->_scenario = 1;
-    } else if (type == "keturb") {
+    } else if (type == "ke") {
       this->_scenario = 2;
     }
 
@@ -42,6 +42,10 @@ class MPIIteratorWrite : public MPIIterator<FF, T> {
 
 template <typename FF, typename T>
 void MPIIteratorWrite<FF, T>::iterate() {
+  if (this->_fname == "") {
+    return;
+  }
+
   MPI_File fh;
   MPI_Status status;
   MPI_Offset my_offset = 0;
@@ -52,6 +56,8 @@ void MPIIteratorWrite<FF, T>::iterate() {
                              this->_infocells);
   } else {
     // define type in the first cell of binary file
+    std::cout << "Write of backup file started for scenario type: "
+              << this->_scenario << std::endl;
     this->_data[this->counter++] = this->_scenario;
   }
 

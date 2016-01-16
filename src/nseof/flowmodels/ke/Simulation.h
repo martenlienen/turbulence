@@ -64,18 +64,18 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   FieldIterator<nseof::FlowField> _obstacleIterator;
   FieldIterator<FlowField> _obstacleIteratorKE;
 
-  PetscSolver _solver;
+  std::vector<std::string> _mpiiwvector2D;
+  std::vector<std::string> _mpiiwvector3D;
+  MPIIteratorWrite<FlowField, double> _mpiiw;
+  MPIIteratorRead<FlowField, double> _mpiir;
 
   NutStencil _nutst;
   FieldIterator<FlowField> _nutit;
   nseof::flowmodels::turbulent::HStencil _hst;
   FieldIterator<nseof::flowmodels::turbulent::FlowField> _hit;
 
-  PredicateStencil<FlowField, FLOAT> _tst;
-  FieldIterator<FlowField> _tit;
-
-  PredicateStencil<FlowField, FLOAT> _tsFmuNut;
-  FieldIterator<FlowField> _tiFmuNut;
+  nseof::flowmodels::turbulent::MaximumNutStencil _maxmnutst;
+  FieldIterator<nseof::flowmodels::turbulent::FlowField> _maxmnutit;
 
   PredicateStencil<FlowField, bool> _tsBool;
   FieldIterator<FlowField> _tiBool;
@@ -128,22 +128,84 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _velocityIterator(*_flowField, parameters, _velocityStencil),
         _obstacleIterator(*_flowField, parameters, _obstacleStencil),
         _obstacleIteratorKE(*_flowField, parameters, _obstacleStencilKE),
-        _solver(*_flowField, parameters),
+        _mpiiwvector2D{"p",  "u",   "v", "k", "epsilon", "f1",
+                       "f2", "fmu", "d", "e", "P"},
+        _mpiiwvector3D{"p",  "u",  "v",   "w", "k", "epsilon",
+                       "f1", "f2", "fmu", "d", "e", "P"},
+        _mpiiw(
+            *_flowField, parameters, _mpiiwvector2D, _mpiiwvector3D,
+            [](FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              // clang-format off
+              *(&p + table[ 0]) = flowField.getPressure().getScalar(i, j) - flowField.getU(i, j) * flowField.getU(i, j);
+              *(&p + table[ 1]) = flowField.getVelocity().getVector(i, j)[0];
+              *(&p + table[ 2]) = flowField.getVelocity().getVector(i, j)[1];
+              *(&p + table[ 3]) = flowField.getTke(i, j);
+              *(&p + table[ 4]) = flowField.getEpsilon(i, j);
+              *(&p + table[ 5]) = flowField.getF1(i, j);
+              *(&p + table[ 6]) = flowField.getF2(i, j);
+              *(&p + table[ 7]) = flowField.getFmu(i, j);
+              *(&p + table[ 8]) = flowField.getD(i, j);
+              *(&p + table[ 9]) = flowField.getE(i, j);
+              *(&p + table[10]) = flowField.getPressure().getScalar(i, j);
+              // clang-format on
+            },
+            [](FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              // clang-format off
+              *(&p + table[ 0]) = flowField.getPressure().getScalar(i, j, k) - flowField.getU(i, j, k) * flowField.getU(i, j, k);
+              *(&p + table[ 1]) = flowField.getVelocity().getVector(i, j, k)[0];
+              *(&p + table[ 2]) = flowField.getVelocity().getVector(i, j, k)[1];
+              *(&p + table[ 3]) = flowField.getVelocity().getVector(i, j, k)[2];
+              *(&p + table[ 4]) = flowField.getTke(i, j, k);
+              *(&p + table[ 5]) = flowField.getEpsilon(i, j, k);
+              *(&p + table[ 6]) = flowField.getF1(i, j, k);
+              *(&p + table[ 7]) = flowField.getF2(i, j, k);
+              *(&p + table[ 8]) = flowField.getFmu(i, j, k);
+              *(&p + table[ 9]) = flowField.getD(i, j, k);
+              *(&p + table[10]) = flowField.getE(i, j, k);
+              *(&p + table[11]) = flowField.getPressure().getScalar(i, j, k);
+              // clang-format on
+            }),
+        _mpiir(
+            *_flowField, parameters, _mpiiwvector2D, _mpiiwvector3D,
+            [](FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              // clang-format off
+                 flowField.getPressure().getScalar(i, j)    = table[10] != -1 ? *(&p + table[10]) : 0.0;
+                 flowField.getVelocity().getVector(i, j)[0] = table[1]  != -1 ? *(&p + table[ 1]) : 0.0;
+                 flowField.getVelocity().getVector(i, j)[1] = table[2]  != -1 ? *(&p + table[ 2]) : 0.0;
+                 flowField.getTke(i, j)                     = table[3]  != -1 ? *(&p + table[ 3]) : 0.0;
+                 flowField.getEpsilon(i, j)                 = table[4]  != -1 ? *(&p + table[ 4]) : 0.0;
+                 flowField.getF1(i, j)                      = table[5]  != -1 ? *(&p + table[ 5]) : 0.0;
+                 flowField.getF2(i, j)                      = table[6]  != -1 ? *(&p + table[ 6]) : 0.0;
+                 flowField.getFmu(i, j)                     = table[7]  != -1 ? *(&p + table[ 7]) : 0.0;
+                 flowField.getD(i, j)                       = table[8]  != -1 ? *(&p + table[ 8]) : 0.0;
+                 flowField.getE(i, j)                       = table[9]  != -1 ? *(&p + table[ 9]) : 0.0;
+              // clang-format on
+            },
+            [](FlowField &flowField, int i, int j, int k, double &p,
+               std::vector<int> & table) {
+              // clang-format off
+                 flowField.getPressure().getScalar(i, j, k)    = table[11] != -1 ? *(&p + table[11]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[0] = table[1]  != -1 ? *(&p + table[ 1]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[1] = table[2]  != -1 ? *(&p + table[ 2]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[2] = table[3]  != -1 ? *(&p + table[ 3]) : 0.0;
+                 flowField.getTke(i, j, k)                     = table[4]  != -1 ? *(&p + table[ 4]) : 0.0;
+                 flowField.getEpsilon(i, j, k)                 = table[5]  != -1 ? *(&p + table[ 5]) : 0.0;
+                 flowField.getF1(i, j, k)                      = table[6]  != -1 ? *(&p + table[ 6]) : 0.0;
+                 flowField.getF2(i, j, k)                      = table[7]  != -1 ? *(&p + table[ 7]) : 0.0;
+                 flowField.getFmu(i, j, k)                     = table[8]  != -1 ? *(&p + table[ 8]) : 0.0;
+                 flowField.getD(i, j, k)                       = table[9]  != -1 ? *(&p + table[ 9]) : 0.0;
+                 flowField.getE(i, j, k)                       = table[10] != -1 ? *(&p + table[10]) : 0.0;
+              // clang-format on
+            }),
         _nutst(parameters),
         _nutit(*_flowField, _parameters, _nutst, 0, 1),
         _hst(parameters, gm),
         _hit(*_flowField, _parameters, _hst, 0, 1),
-        _tst(parameters, 0.0, [](FLOAT a, FLOAT b) { return a > b; },
-             [](int i, int j, int k, const Parameters &pp, FlowField & ff) {
-               return ff.getNu(i, j, k);
-             }),
-        _tit(*_flowField, _parameters, _tst, 0, 0),
-        _tsFmuNut(
-            parameters, 0.0, [](FLOAT a, FLOAT b) { return a > b; },
-            [](int i, int j, int k, const Parameters &pp, FlowField & ff) {
-              return ff.getNu(i, j, k) * ff.getFmu(i, j, k);
-            }),
-        _tiFmuNut(*_flowField, _parameters, _tsFmuNut, 0, 0),
+        _maxmnutst(parameters),
+        _maxmnutit(*_flowField, _parameters, _maxmnutst, 1, 0),
         _tsBool(parameters, false,
                 [](bool a, bool b) {
                   if (a) {
@@ -379,11 +441,15 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     _keFit.iterate();
   }
 
+  virtual void serialize() { _mpiiw.iterate(); }
+
+  virtual void deserialize() { _mpiir.iterate(); }
+
  protected:
   /** sets the time step*/
   virtual void setTimeStep() {
-    _tit.iterate();
-    _tiFmuNut.iterate();
+    _maxmnutst.reset();
+    _maxmnutit.iterate();
 
     FLOAT localMin, globalMin;
     assertion(_parameters.geometry.dim == 2 || _parameters.geometry.dim == 3);
@@ -404,29 +470,14 @@ class Simulation : public FlowFieldSimulation<FlowField> {
       _parameters.timestep.dt = 1.0 / _maxUStencil.getMaxValues()[0];
     }
 
-    FLOAT maxNut = _tst.getValue();
-    _tst.reset();
-
-    FLOAT maxFmuNut = maxNut;
-    _tsFmuNut.reset();
-
-    FLOAT temp = min(min(0.5 / (1 / _parameters.flow.Re + maxNut), 1 / maxNut),
-                     1 / maxFmuNut) /
-                 (factor);
-
-    FLOAT tempu = 0.5 / (1 / _parameters.flow.Re + maxNut) / factor;
-    FLOAT tempk = 1 / maxNut / factor;
-    FLOAT tempe = 1 / maxFmuNut / factor;
-
-    std::cout << (tempu == temp ? " U: " : " u: ") << tempu
-              << (tempk == temp ? " K: " : " k: ") << tempk
-              << (tempe == temp ? " E: " : " e: ") << tempe << " min: " << temp
-              << std::endl;
-
-    localMin =
-        std::min(_parameters.timestep.dt,
-                 std::min(std::min(temp, 1.0 / _maxUStencil.getMaxValues()[0]),
-                          1.0 / _maxUStencil.getMaxValues()[1]));
+    // determin minimal timestep on domain with formula:
+    // dt = 1/(2 * (nu+nut))/(dx_min^-2+dy_min^-2+dz_min^-2))
+    localMin = std::min(_parameters.timestep.dt,
+                        std::min(std::min(1 / (1 / _parameters.flow.Re +
+                                               _maxmnutst.getMaximum()) /
+                                              (2 * factor),
+                                          1.0 / _maxUStencil.getMaxValues()[0]),
+                                 1.0 / _maxUStencil.getMaxValues()[1]));
 
     globalMin = MY_FLOAT_MAX;
     MPI_Allreduce(&localMin, &globalMin, 1, MY_MPI_FLOAT, MPI_MIN,

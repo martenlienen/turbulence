@@ -99,30 +99,35 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _obstacleStencil(parameters),
         _velocityIterator(*_flowField, parameters, _velocityStencil),
         _obstacleIterator(*_flowField, parameters, _obstacleStencil),
-        _mpiiwvector2D{"p", "u", "v", "nut"},
-        _mpiiwvector3D{"p", "u", "v", "w", "nut"},
+        _mpiiwvector2D{"p", "u", "v", "nut", "P"},
+        _mpiiwvector3D{"p", "u", "v", "w", "nut", "P"},
         _mpiiw(
             *_flowField, parameters, _mpiiwvector2D, _mpiiwvector3D,
             [](FlowField &flowField, int i, int j, int k, double &p,
                std::vector<int> & table) {
-              *(&p + table[0]) = flowField.getPressure().getScalar(i, j);
+              *(&p + table[0]) = flowField.getPressure().getScalar(i, j) -
+                                 flowField.getU(i, j) * flowField.getU(i, j);
               *(&p + table[1]) = flowField.getVelocity().getVector(i, j)[0];
               *(&p + table[2]) = flowField.getVelocity().getVector(i, j)[1];
               *(&p + table[3]) = flowField.getNu(i, j);
+              *(&p + table[4]) = flowField.getPressure().getScalar(i, j);
             },
             [](FlowField &flowField, int i, int j, int k, double &p,
                std::vector<int> & table) {
-              *(&p + table[0]) = flowField.getPressure().getScalar(i, j, k);
+              *(&p + table[0]) =
+                  flowField.getPressure().getScalar(i, j, k) -
+                  flowField.getU(i, j, k) * flowField.getU(i, j, k);
               *(&p + table[1]) = flowField.getVelocity().getVector(i, j, k)[0];
               *(&p + table[2]) = flowField.getVelocity().getVector(i, j, k)[1];
               *(&p + table[3]) = flowField.getVelocity().getVector(i, j, k)[2];
               *(&p + table[4]) = flowField.getNu(i, j, k);
+              *(&p + table[5]) = flowField.getPressure().getScalar(i, j, k);
             }),
         _mpiir(*_flowField, parameters, _mpiiwvector2D, _mpiiwvector3D,
                [](FlowField &flowField, int i, int j, int k, double &p,
                   std::vector<int> & table) {
                  flowField.getPressure().getScalar(i, j) =
-                     table[0] != -1 ? *(&p + table[0]) : 0.0;
+                     table[4] != -1 ? *(&p + table[4]) : 0.0;
                  flowField.getVelocity().getVector(i, j)[0] =
                      table[1] != -1 ? *(&p + table[1]) : 0.0;
                  flowField.getVelocity().getVector(i, j)[1] =
@@ -133,7 +138,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
                [](FlowField &flowField, int i, int j, int k, double &p,
                   std::vector<int> & table) {
                  flowField.getPressure().getScalar(i, j, k) =
-                     table[0] != -1 ? *(&p + table[0]) : 0.0;
+                     table[5] != -1 ? *(&p + table[5]) : 0.0;
                  flowField.getVelocity().getVector(i, j, k)[0] =
                      table[1] != -1 ? *(&p + table[1]) : 0.0;
                  flowField.getVelocity().getVector(i, j, k)[1] =
@@ -228,6 +233,17 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     _solver.reInitMatrix();
 
     _hit.iterate();
+  }
+
+  virtual void init() {
+    // from super
+    FlowFieldSimulation::init();
+
+    // compute vortex viscosity
+    _nutit.iterate();
+
+    // communicate vortex viscosity
+    nutComm.communicate(*this->_flowField);
   }
 
   virtual void solveTimestep() {
