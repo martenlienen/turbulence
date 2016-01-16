@@ -64,7 +64,6 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   FieldIterator<nseof::FlowField> _obstacleIterator;
   FieldIterator<FlowField> _obstacleIteratorKE;
 
-  PetscSolver _solver;
 
   NutStencil _nutst;
   FieldIterator<FlowField> _nutit;
@@ -125,7 +124,6 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _velocityIterator(*_flowField, parameters, _velocityStencil),
         _obstacleIterator(*_flowField, parameters, _obstacleStencil),
         _obstacleIteratorKE(*_flowField, parameters, _obstacleStencilKE),
-        _solver(*_flowField, parameters),
         _nutst(parameters),
         _nutit(*_flowField, _parameters, _nutst, 0, 1),
         _hst(parameters, gm),
