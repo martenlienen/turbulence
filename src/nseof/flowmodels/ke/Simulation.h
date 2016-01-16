@@ -71,11 +71,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   nseof::flowmodels::turbulent::HStencil _hst;
   FieldIterator<nseof::flowmodels::turbulent::FlowField> _hit;
 
-  PredicateStencil<FlowField, FLOAT> _tst;
-  FieldIterator<FlowField> _tit;
-
-  PredicateStencil<FlowField, FLOAT> _tsFmuNut;
-  FieldIterator<FlowField> _tiFmuNut;
+  nseof::flowmodels::turbulent::MaximumNutStencil _maxmnutst;
+  FieldIterator<nseof::flowmodels::turbulent::FlowField> _maxmnutit;
 
   PredicateStencil<FlowField, bool> _tsBool;
   FieldIterator<FlowField> _tiBool;
@@ -133,17 +130,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _nutit(*_flowField, _parameters, _nutst, 0, 1),
         _hst(parameters, gm),
         _hit(*_flowField, _parameters, _hst, 0, 1),
-        _tst(parameters, 0.0, [](FLOAT a, FLOAT b) { return a > b; },
-             [](int i, int j, int k, const Parameters &pp, FlowField & ff) {
-               return ff.getNu(i, j, k);
-             }),
-        _tit(*_flowField, _parameters, _tst, 0, 0),
-        _tsFmuNut(
-            parameters, 0.0, [](FLOAT a, FLOAT b) { return a > b; },
-            [](int i, int j, int k, const Parameters &pp, FlowField & ff) {
-              return ff.getNu(i, j, k) * ff.getFmu(i, j, k);
-            }),
-        _tiFmuNut(*_flowField, _parameters, _tsFmuNut, 0, 0),
+        _maxmnutst(parameters),
+        _maxmnutit(*_flowField, _parameters, _maxmnutst, 1, 0),
         _tsBool(parameters, false,
                 [](bool a, bool b) {
                   if (a) {
@@ -382,8 +370,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
  protected:
   /** sets the time step*/
   virtual void setTimeStep() {
-    _tit.iterate();
-    _tiFmuNut.iterate();
+    _maxmnutst.reset();
+    _maxmnutit.iterate();
 
     FLOAT localMin, globalMin;
     assertion(_parameters.geometry.dim == 2 || _parameters.geometry.dim == 3);
@@ -404,29 +392,14 @@ class Simulation : public FlowFieldSimulation<FlowField> {
       _parameters.timestep.dt = 1.0 / _maxUStencil.getMaxValues()[0];
     }
 
-    FLOAT maxNut = _tst.getValue();
-    _tst.reset();
-
-    FLOAT maxFmuNut = maxNut;
-    _tsFmuNut.reset();
-
-    FLOAT temp = min(min(0.5 / (1 / _parameters.flow.Re + maxNut), 1 / maxNut),
-                     1 / maxFmuNut) /
-                 (factor);
-
-    FLOAT tempu = 0.5 / (1 / _parameters.flow.Re + maxNut) / factor;
-    FLOAT tempk = 1 / maxNut / factor;
-    FLOAT tempe = 1 / maxFmuNut / factor;
-
-    std::cout << (tempu == temp ? " U: " : " u: ") << tempu
-              << (tempk == temp ? " K: " : " k: ") << tempk
-              << (tempe == temp ? " E: " : " e: ") << tempe << " min: " << temp
-              << std::endl;
-
-    localMin =
-        std::min(_parameters.timestep.dt,
-                 std::min(std::min(temp, 1.0 / _maxUStencil.getMaxValues()[0]),
-                          1.0 / _maxUStencil.getMaxValues()[1]));
+    // determin minimal timestep on domain with formula:
+    // dt = 1/(2 * (nu+nut))/(dx_min^-2+dy_min^-2+dz_min^-2))
+    localMin = std::min(_parameters.timestep.dt,
+                        std::min(std::min(1 / (1 / _parameters.flow.Re +
+                                               _maxmnutst.getMaximum()) /
+                                              (2 * factor),
+                                          1.0 / _maxUStencil.getMaxValues()[0]),
+                                 1.0 / _maxUStencil.getMaxValues()[1]));
 
     globalMin = MY_FLOAT_MAX;
     MPI_Allreduce(&localMin, &globalMin, 1, MY_MPI_FLOAT, MPI_MIN,
