@@ -42,6 +42,7 @@ make
 scripts/cluster/connect -h
 
 # Connect to cluster
+# To connect to the linux cluster from lrz, pass `-c linux`
 scripts/cluster/connect ...
 
 # On the cluster

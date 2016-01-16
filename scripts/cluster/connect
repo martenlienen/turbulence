@@ -3,9 +3,6 @@
 # TUM proxy
 PROXY=halle.in.tum.de
 
-# Cluster login point
-CLUSTER=mac-login-intel.tum-mac.cos.lrz.de
-
 function print_usage () {
   cat <<EOF
 Usage: connect [OPTION]...
@@ -13,6 +10,8 @@ Usage: connect [OPTION]...
 Mandatory options:
   -h, --help
     Show this usage information.
+  -c, --cluster [CLUSTER = mac]
+    Select between mac or linux
   -u, --user USER
     Your rechnerhalle user at TUM.
   -cu, --cluster-user CLUSTER_USER
@@ -30,7 +29,7 @@ EOF
 function open_tunnel () {
   echo Open an SSH tunnel to the cluster
   echo Please enter your rechnerhalle password
-  ssh -f -N -L $port:$CLUSTER:22 $user@$PROXY
+  ssh -f -N -L $port:$cluster:22 $user@$PROXY
 }
 
 function close_tunnel () {
@@ -75,10 +74,17 @@ function ssh_into_cluster () {
 }
 
 # Default values
+cluster=mac-login-intel.tum-mac.cos.lrz.de
 port=2233
 
 while [[ $# > 0 ]]; do
   case "$1" in
+    -c|--cluster)
+      if [[ "$2" == "linux" ]]; then
+        cluster=login5.lrz.de
+      fi
+      shift
+      ;;
     -p|--port)
       port="$2"
       shift
