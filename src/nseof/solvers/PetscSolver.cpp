@@ -257,20 +257,29 @@ PetscSolver::PetscSolver(FlowField &flowField, Parameters &parameters)
   KSPSetDM(_ksp, _da);
   KSPSetComputeOperators(_ksp, computeMatrix, &_ctx);
 
-  KSPSetType(_ksp, KSPFGMRES);
+  PetscBool hasKsp;
+  PetscBool hasPc;
+  PetscOptionsHasName(NULL, "-ksp_type", &hasKsp);
+  PetscOptionsHasName(NULL, "-pc_type", &hasPc);
+
+  if (!hasKsp) {
+    KSPSetType(_ksp, KSPFGMRES);
+  }
 
   int comm_size;
   MPI_Comm_size(PETSC_COMM_WORLD, &comm_size);
 
-  if (comm_size == 1) {
-    // if serial
-    PCSetType(_pc, PCILU);
-    PCFactorSetLevels(_pc, 1);
-    KSPSetPC(_ksp, _pc);
-  } else {
-    // if parallel
-    PCSetType(_pc, PCASM);
-    KSPSetPC(_ksp, _pc);
+  if (!hasPc) {
+    if (comm_size == 1) {
+      // if serial
+      PCSetType(_pc, PCILU);
+      PCFactorSetLevels(_pc, 1);
+      KSPSetPC(_ksp, _pc);
+    } else {
+      // if parallel
+      PCSetType(_pc, PCASM);
+      KSPSetPC(_ksp, _pc);
+    }
   }
 
   KSPSetFromOptions(_ksp);
