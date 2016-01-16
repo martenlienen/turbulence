@@ -210,7 +210,7 @@ def main():
     options.out = os.path.realpath(options.out)
 
     if not os.path.isdir(options.out):
-        os.mkdir(options.out)
+        os.makedirs(options.out)
 
     t = time.strptime(options.time, "%H:%M")
     maxTime = time.strftime("%H:%M:00", t)
