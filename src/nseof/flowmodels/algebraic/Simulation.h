@@ -230,6 +230,17 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     _hit.iterate();
   }
 
+  virtual void init() {
+    // from super
+    FlowFieldSimulation::init();
+
+    // compute vortex viscosity
+    _nutit.iterate();
+
+    // communicate vortex viscosity
+    nutComm.communicate(*this->_flowField);
+  }
+
   virtual void solveTimestep() {
     MultiTimer *timer = MultiTimer::get();
 
