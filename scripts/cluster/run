@@ -197,10 +197,12 @@ def submitJob(jobpath, logfile):
 
 
 def runlocal(nranks, executable, scenario):
-    code = subprocess.call(
-        ["mpiexec", "-np", str(nranks), executable, scenario],
-        stdout=sys.stdout,
-        stderr=sys.stdout)
+    if nranks > 1:
+        command = ["mpiexec", "-np", str(nranks), executable, scenario]
+    else:
+        command = [executable, scenario]
+
+    code = subprocess.call(command, stdout=sys.stdout, stderr=sys.stdout)
     return code == 0
 
 
