@@ -186,8 +186,10 @@ void MPICommunicator<T, FF>::sendrecv2(int lRank, const void* lSendBuf,
                                        MPI_Datatype type) {
   MPI_Request requests[4];
 
-  MPI_Isend(lSendBuf, lNumSend, type, lRank, 0, MPI_COMM_WORLD, &requests[0]);
-  MPI_Isend(rSendBuf, rNumSend, type, rRank, 0, MPI_COMM_WORLD, &requests[1]);
+  MPI_Isend(const_cast<void*>(lSendBuf), lNumSend, type, lRank, 0,
+            MPI_COMM_WORLD, &requests[0]);
+  MPI_Isend(const_cast<void*>(rSendBuf), rNumSend, type, rRank, 0,
+            MPI_COMM_WORLD, &requests[1]);
   MPI_Irecv(lRecvBuf, lNumRecv, type, lRank, 0, MPI_COMM_WORLD, &requests[2]);
   MPI_Irecv(rRecvBuf, rNumRecv, type, rRank, 0, MPI_COMM_WORLD, &requests[3]);
 

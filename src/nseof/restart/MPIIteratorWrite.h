@@ -59,7 +59,7 @@ void MPIIteratorWrite<FF, T>::iterate() {
   MPIIterator<FF, T>::iterate();
 
   // Write data to file
-  MPI_File_open(MPI_COMM_WORLD, this->_fname.c_str(),
+  MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(this->_fname.c_str()),
                 MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
   MPI_File_seek(fh, my_offset, MPI_SEEK_SET);
   MPI_File_write(fh, this->_data.data(), this->_sizetotal, MPI_DOUBLE, &status);
