@@ -62,6 +62,9 @@ cd turbulence
 # execution of the script.
 . scripts/cluster/load-modules
 
+# Parallel Programming Analysis tools can also be loaded with
+. scripts/cluster/load-modules --tuning
+
 # Compile the simulation
 cmake -DCLUSTER=ON -DCMAKE_BUILD_TYPE=Release .
 make
@@ -75,9 +78,15 @@ scripts/cluster/run -e <you@tum.de> <OUTPUT DIR> ns scenario.xml
 There is also a `PROFILING` option in our CMake configuration to enable
 profiling that will produce a `gmon.out` that you can analyze with `gprof`.
 
+The `SCOREP` option in CMake makes with the ScoreP instrumentation.
+
 ```sh
 # Configure a profiling build
 cmake -DPROFILING=ON .
+
+# Alternatively configure with SCOREP. This can only be done on the Linux
+# cluster after the proper modules have been loaded.
+cmake -DSCOREP=ON -DCLUSTER=ON .
 
 # Compile it
 make
