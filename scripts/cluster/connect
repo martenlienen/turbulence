@@ -71,7 +71,7 @@ function unmount_cluster () {
 function ssh_into_cluster () {
   echo Logging into cluster
   echo Please enter your cluster password
-  ssh -C -p $port $cluster_user@localhost
+  ssh -YC -p $port $cluster_user@localhost
 }
 
 # Default values
