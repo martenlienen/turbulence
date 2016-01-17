@@ -172,7 +172,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
             [](FlowField &flowField, int i, int j, int k, double &p,
                std::vector<int> & table) {
               // clang-format off
-                 flowField.getPressure().getScalar(i, j)    = table[10] != -1 ? *(&p + table[10]) : 0.0;
+                 flowField.getPressure().getScalar(i, j)    = table[10] != -1 ? *(&p + table[10]) : (table[0] != -1 ? *(&p + table[0]) : 0.0);
                  flowField.getVelocity().getVector(i, j)[0] = table[1]  != -1 ? *(&p + table[ 1]) : 0.0;
                  flowField.getVelocity().getVector(i, j)[1] = table[2]  != -1 ? *(&p + table[ 2]) : 0.0;
                  flowField.getTke(i, j)                     = table[3]  != -1 ? *(&p + table[ 3]) : 0.0;
@@ -187,7 +187,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
             [](FlowField &flowField, int i, int j, int k, double &p,
                std::vector<int> & table) {
               // clang-format off
-                 flowField.getPressure().getScalar(i, j, k)    = table[11] != -1 ? *(&p + table[11]) : 0.0;
+                 flowField.getPressure().getScalar(i, j, k)    = table[11] != -1 ? *(&p + table[11]) : (table[0] != -1 ? *(&p + table[0]) : 0.0);
                  flowField.getVelocity().getVector(i, j, k)[0] = table[1]  != -1 ? *(&p + table[ 1]) : 0.0;
                  flowField.getVelocity().getVector(i, j, k)[1] = table[2]  != -1 ? *(&p + table[ 2]) : 0.0;
                  flowField.getVelocity().getVector(i, j, k)[2] = table[3]  != -1 ? *(&p + table[ 3]) : 0.0;
