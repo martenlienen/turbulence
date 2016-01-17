@@ -16,6 +16,9 @@ def parseArguments():
         "Run a scenario with all combinations of solvers and preconditioners",
         epilog=
         "Additional arguments are passed directly to scripts/cluster/run")
+    parser.add_argument("-c",
+                        "--configurations",
+                        help="File with one configuration per line")
     parser.add_argument("directory", help="Directory for runs and output")
     parser.add_argument("scenario", help="Scenario to run")
 
@@ -83,7 +86,11 @@ def main():
     shutil.copyfile(os.path.realpath("./ns"), ns)
     os.chmod(ns, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
-    combinations = list(itertools.product(SOLVERS, PRECONDITIONERS))
+    if arguments.configurations:
+        with open(arguments.configurations, "r") as f:
+            combinations = [l.strip().split("-") for l in f.readlines()]
+    else:
+        combinations = list(itertools.product(SOLVERS, PRECONDITIONERS))
 
     for solver, preconditioner in combinations:
         outdir = os.path.join(evaluations, "{}-{}".format(solver,
