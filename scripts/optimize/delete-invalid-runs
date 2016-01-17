@@ -18,12 +18,13 @@ def maxXVelocity(vtk):
         lines = file.readlines()
 
     n = len(lines)
-    i = next(i
-             for i, line in enumerate(lines)
-             if line.startswith("VECTORS velocity float"))
+    i = next(
+        (i
+         for i, line in enumerate(lines)
+         if line.startswith("VECTORS velocity float")), n)
     i = i + 1
 
-    max = None
+    max = 0
     while i < n:
         parts = lines[i].split(" ")
 
@@ -61,7 +62,7 @@ def main():
         lastvtks = bytime[max(bytime.keys())]
         maxU = max([maxXVelocity(os.path.join(vtkdir, v)) for v in lastvtks])
 
-        if maxU < 1.0:
+        if maxU < 0.8:
             print("Delete {}".format(outdir))
             shutil.rmtree(outdir)
 
