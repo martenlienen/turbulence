@@ -257,6 +257,9 @@ PetscSolver::PetscSolver(FlowField &flowField, Parameters &parameters)
   KSPSetDM(_ksp, _da);
   KSPSetComputeOperators(_ksp, computeMatrix, &_ctx);
 
+  KSPSetFromOptions(_ksp);
+  KSPSetInitialGuessNonzero(_ksp, PETSC_TRUE);
+
   PetscBool hasKsp;
   PetscBool hasPc;
   PetscOptionsHasName(NULL, "-ksp_type", &hasKsp);
@@ -274,23 +277,17 @@ PetscSolver::PetscSolver(FlowField &flowField, Parameters &parameters)
       // if serial
       PCSetType(_pc, PCILU);
       PCFactorSetLevels(_pc, 1);
-      KSPSetPC(_ksp, _pc);
     } else {
       // if parallel
       PCSetType(_pc, PCASM);
-      KSPSetPC(_ksp, _pc);
     }
+
+    KSPSetPC(_ksp, _pc);
   }
 
-  KSPSetFromOptions(_ksp);
-  KSPSetInitialGuessNonzero(_ksp, PETSC_TRUE);
   KSPSetUp(_ksp);
 
-  // from here we can change sub_ksp if necessary
-  // that has to be done after setup. The other solvers above
-  // can be changed before setup with KSPSetFromOptions
-
-  if (comm_size > 1) {
+  if (!hasPc && comm_size > 1) {
     KSP *subksp;
     PC subpc;
 
@@ -302,10 +299,13 @@ PetscSolver::PetscSolver(FlowField &flowField, Parameters &parameters)
     PetscOptionsHasName(NULL, "-sub_pc_factor_levels", &has_fl);
     PetscOptionsHasName(NULL, "-sub_pc_type", &has_sub_type);
 
-    if (!(has_sub_type)) PCSetType(subpc, PCILU);
-    if (!(has_fl)) PCFactorSetLevels(subpc, 1);
+    if (!has_sub_type) {
+      PCSetType(subpc, PCILU);
+    }
 
-    KSPSetUp(_ksp);
+    if (!has_fl) {
+      PCFactorSetLevels(subpc, 1);
+    }
   }
 }
 
