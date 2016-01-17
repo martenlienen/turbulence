@@ -12,6 +12,9 @@ for conf in $(ls "$directory/evaluations"); do
     continue
   fi
 
-  time=$(grep poisson "$dir/timing/rank-0" | cut -d " " -f 2)
-  echo -e "$time\t$conf"
+  if [[ -e "$dir/timing/rank-0" ]]; then
+    time=$(grep poisson "$dir/timing/rank-0" | cut -d " " -f 2)
+
+    echo -e "$time\t$conf"
+  fi
 done
