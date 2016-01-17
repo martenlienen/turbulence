@@ -66,6 +66,9 @@ PRECONDITIONERS = [
     "gamg", "bddc", "ksp", "lu", "cholesky", "none"
 ]
 
+# Fastest PCs that are potentially parallel
+FAST_PCS = ["jacobi", "bjacobi", "asm"]
+
 
 def main():
     arguments, rest = parseArguments()
@@ -88,18 +91,28 @@ def main():
 
     if arguments.configurations:
         with open(arguments.configurations, "r") as f:
-            combinations = [l.strip().split("-") for l in f.readlines()]
+            combinations = []
+            for l in f.readlines():
+                solv, subpc = l.strip().split("-")
+
+                for pc in FAST_PCS:
+                    combinations.append((solv, pc, solv, subpc))
     else:
         combinations = list(itertools.product(SOLVERS, PRECONDITIONERS))
+        combinations = [(c[0], c[1], c[0], c[1]) for c in combinations]
 
-    for solver, preconditioner in combinations:
-        outdir = os.path.join(evaluations, "{}-{}".format(solver,
-                                                          preconditioner))
-        jobname = "bf-{}-{}".format(solver[0:3], preconditioner[0:3])
-        options = {"ksp_type": solver,
-                   "pc_type": preconditioner,
-                   "sub_ksp_type": solver,
-                   "sub_pc_type": preconditioner}
+    for solv, pc, subsolv, subpc in combinations:
+        if solv == subsolv and pc == subpc:
+            outdir = os.path.join(evaluations, "{}-{}".format(solv, pc))
+        else:
+            outdir = os.path.join(evaluations, "{}-{}-{}-{}".format(
+                solv, pc, subsolv, subpc))
+
+        jobname = "bf-{}-{}".format(solv[0:3], pc[0:3])
+        options = {"ksp_type": solv,
+                   "pc_type": pc,
+                   "sub_ksp_type": solv,
+                   "sub_pc_type": pc}
         logfile = os.path.join(outdir, "log")
 
         os.makedirs(outdir)
