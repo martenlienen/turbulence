@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 
 def parseArguments():
     parser = ArgumentParser(
-        description="Delete runs with unreasonably low max-velocities")
+        description="Filter out runs with unreasonably low max-velocities")
     parser.add_argument("directory", help="Directory of run directories")
 
     return parser.parse_args()
@@ -44,11 +44,16 @@ def maxXVelocity(vtk):
 def main():
     arguments = parseArguments()
     directory = arguments.directory
+    evaluationsdir = os.path.join(directory, "evaluations")
 
-    for d in os.listdir(directory):
-        outdir = os.path.join(directory, d)
+    for d in os.listdir(evaluationsdir):
+        outdir = os.path.join(evaluationsdir, d)
         vtkdir = os.path.join(outdir, "vtks")
         vtks = os.listdir(vtkdir)
+
+        if len(vtks) == 0:
+            print(d, "is empty")
+            continue
 
         bytime = {}
         for v in vtks:
@@ -62,9 +67,12 @@ def main():
         lastvtks = bytime[max(bytime.keys())]
         maxU = max([maxXVelocity(os.path.join(vtkdir, v)) for v in lastvtks])
 
-        if maxU < 0.8:
-            print("Delete {}".format(outdir))
-            shutil.rmtree(outdir)
+        if maxU < 1.0:
+            invaliddir = os.path.join(directory, "invalid")
+            os.makedirs(invaliddir, exist_ok=True)
+
+            print(d)
+            shutil.move(outdir, invaliddir)
 
 
 if __name__ == "__main__":
