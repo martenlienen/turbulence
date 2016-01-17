@@ -3,6 +3,7 @@
 import fileinput
 import itertools
 import math
+import operator
 import os
 import shutil
 import subprocess
@@ -55,7 +56,10 @@ processes in each dimension.
                         type=int,
                         default=None,
                         help="Number of cells in X direction")
-    parser.add_argument("--limit", type=int, default=8, help="Maximum exponent")
+    parser.add_argument("--limit",
+                        type=int,
+                        default=8,
+                        help="Maximum exponent")
     parser.add_argument(
         "out",
         help="Directory to store job configuration and results")
@@ -112,14 +116,16 @@ def primeFactors(N):
         return [N]
 
 
-def balance(N, n):
+def balance(N, n, shape):
     factors = primeFactors(N)
     vector = [1] * n
-
+#TODO check that shape has same rank as dim
+#is this already done with the lambda func?
     while len(factors) > 0:
         f = factors.pop()
-        m = min(vector)
-        vector[vector.index(m)] = m * f
+        m = min(range(n), key=lambda i: vector[i] / int(shape[i]))
+        vector[m] = vector[m] * f
+    print("Rank", N, "distribution", vector)
 
     return vector
 
@@ -163,7 +169,8 @@ def main():
     wdtemplate = os.path.join(options.out, "job-{}_{}-{}-{}")
 
     for rank in ranks:
-        N = balance(rank, dimension)
+
+        N = balance(rank, dimension, (options.sx, options.sy, options.sz))
 
         combinations = list(itertools.permutations(N, len(N)))
 
@@ -178,9 +185,9 @@ def main():
             nx = combo[0]
             ny = combo[1]
             nz = combo[2]
-            sx = options.sx
-            sy = options.sy
-            sz = options.sz
+            sx = int(options.sx)
+            sy = int(options.sy)
+            sz = int(options.sz)
 
             if options.scaling == "strong":
                 if sx % nx != 0:
@@ -197,20 +204,20 @@ def main():
 
             logfile = os.path.join(workingdir, "scaling-log")
             run = os.path.join(
-                os.path.dirname(os.path.realpath(__file__)), "run")
+            os.path.dirname(os.path.realpath(__file__)), "run")
 
             command = [run, "--" + options.architecture, "--nx", nx, "--ny",
-                       ny, "--nz", nz]
+            ny, "--nz", nz]
 
             if options.scaling == "strong":
-                command += ["--sx", sx, "--sy", sy, "--sz", sz]
+            command += ["--sx", sx, "--sy", sy, "--sz", sz]
             else:
-                command += ["--sx", sx * nx, "--sy", sy * ny, "--sz", sz * nz]
+            command += ["--sx", sx * nx, "--sy", sy * ny, "--sz", sz * nz]
 
             command += rest + [workingdir, options.executable, options.scenario]
 
             with open(logfile, "w") as log:
-                subprocess.call(map(str, command), stdout=log, stderr=log)
+            subprocess.call(map(str, command), stdout=log, stderr=log)
 
 
 if __name__ == "__main__":
