@@ -11,7 +11,9 @@ import tempfile
 from argparse import ArgumentParser
 
 SOLVER = "bcgs"
-PRECONDITIONER = "ilu"
+PC = "asm"
+SUBSOLVER = "preonly"
+SUBPC = "ilu"
 
 
 def parseArguments():
@@ -39,8 +41,11 @@ def createPetscArgs(options):
 
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as file:
         for k, v in ops.items():
-            if isinstance(v, bool) and v:
-                line = "-{}".format(k)
+            if isinstance(v, bool):
+                if v:
+                    line = "-{}".format(k)
+                else:
+                    continue
             elif isinstance(v, float):
                 line = "-{} {:f}".format(k, v)
             elif isinstance(v, int):
@@ -116,12 +121,11 @@ def main():
         logfile = os.path.join(outdir, "log")
         conffile = os.path.join(outdir, "conf.json")
         options = {"ksp_type": SOLVER,
-                   "pc_type": PRECONDITIONER,
-                   "sub_ksp_type": SOLVER,
-                   "sub_pc_type": PRECONDITIONER}
+                   "pc_type": PC,
+                   "sub_ksp_type": SUBSOLVER,
+                   "sub_pc_type": SUBPC}
 
         for k, v in c.items():
-            options["pc_factor_{}".format(k)] = v
             options["sub_pc_factor_{}".format(k)] = v
 
         os.makedirs(outdir)
