@@ -97,22 +97,23 @@ def main():
 
                 for pc in FAST_PCS:
                     combinations.append((solv, pc, solv, subpc))
+                    combinations.append((solv, pc, "preonly", subpc))
     else:
         combinations = list(itertools.product(SOLVERS, PRECONDITIONERS))
         combinations = [(c[0], c[1], c[0], c[1]) for c in combinations]
 
     for solv, pc, subsolv, subpc in combinations:
-        if solv == subsolv and pc == subpc:
-            outdir = os.path.join(evaluations, "{}-{}".format(solv, pc))
-        else:
+        if arguments.configurations:
             outdir = os.path.join(evaluations, "{}-{}-{}-{}".format(
                 solv, pc, subsolv, subpc))
+        else:
+            outdir = os.path.join(evaluations, "{}-{}".format(solv, pc))
 
         jobname = "bf-{}-{}".format(solv[0:3], pc[0:3])
         options = {"ksp_type": solv,
                    "pc_type": pc,
-                   "sub_ksp_type": solv,
-                   "sub_pc_type": pc}
+                   "sub_ksp_type": subsolv,
+                   "sub_pc_type": subpc}
         logfile = os.path.join(outdir, "log")
 
         os.makedirs(outdir)
