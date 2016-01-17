@@ -1,5 +1,143 @@
 \input{header}
+
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{multirow}
+
+%%
+\usepackage[framemethod=tikz]{mdframed}
+\usetikzlibrary{calc}
+\usepackage{kantlipsum}
+
+%\usepackage{dingbat}%\eye and \leftpointright
+
+\newcounter{error}[chapter]
+\renewcommand*\theerror{\thechapter.\arabic{error}}
+\tikzset{
+errorsymbol/.style={%
+    rectangle,draw=blue,
+   ,scale=2,overlay}}
+
+\tikzset{
+ lampsymbol/.style={%
+   ,scale=2,overlay}}
+
+\newmdenv[hidealllines=true,backgroundcolor=blue!5,%
+ frametitle={\stepcounter{error}Comman~Programming~Error~\theerror},
+ frametitlefont=\color{blue!80!black}\bfseries,
+ skipabove=\topsep,skipbelow=\topsep,nobreak,
+ leftmargin=.3cm,rightmargin=.3cm, innerleftmargin=2cm,
+ singleextra={\path let \p1=(P), \p2=(O) in ($(\x2,0)+0.5*(2,\y1)$) node[errorsymbol] {aaa};},%
+]{error}
+
+
+\newmdenv[nobreak,middlelinewidth=.8pt,
+ frametitlefont=\bfseries,
+ leftmargin=.3cm,rightmargin=.3cm, innerleftmargin=2cm,
+ skipabove=\topsep,skipbelow=\topsep,
+ singleextra={\path let \p1=(P), \p2=(O) in ($(\x2,0)+0.5*(2,\y1)$) node[ lampsymbol] {.h};
+                          \draw[line width=.8pt,white,] ($(O|-P)+(.2cm,0)$) -- ($(P)-(.2cm,0)$); 
+                          \draw[line width=.8pt,white,] ($(O)+(.2cm,0)$) -- ($(P|-O)-(.2cm,0)$);
+    },%
+]{bbbb}
+
+\newcommand{\infobox}[1]{\begin{bbbb}[frametitle={Reference to NS-EOF namespaces}]#1\end{bbbb}}
+
+
+
+%%
+
+%%
+\usepackage{lscape}
+%\usepackage{adjustbox}
+%%
+
+\usepackage{etex}
 \newcounter{alteSeitenzahl}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,chains}
+\usepackage{xcolor}
+
+\usepackage{graphicx}
+%\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+
+\usepackage{dirtree}
+\usepackage{epstopdf}
+\usepackage{textcomp}
+\usepackage[final]{listings}
+\definecolor{lightgray}{rgb}{.7,.7,.7}
+\definecolor{gray}{rgb}{.4,.4,.4}
+\definecolor{darkblue}{rgb}{0,0,.3}
+
+\newcommand{\noi}{\noindent}
+\newcommand{\noii}{\vspace{3mm}\noindent}
+
+\newcommand{\abl}[2]{\frac{\partial\,#1}{\partial\,#2}}
+\newcommand{\abll}[2]{\frac{\partial^2\,#1}{\partial\,#2^2}}
+\newcommand{\ave}[1]{\left\langle #1 \right\rangle}
+\newcommand{\new}[1]{\textcolor{red}{#1}}
+
+%\lstset{
+%showstringspaces=false,
+%extendedchars=true,
+%frameround=fttt,
+%frame=single,
+%upquote=true,
+%breaklines=true
+%}
+
+\newcommand{\xmll}[2]{
+    \lstset{
+numberstyle=\tiny,%5
+basicstyle={\ttfamily},%
+    language=xml,
+    %tabsize=3,
+    %frame=lines,
+    %caption=Test,
+    %label=code:sample,
+    %frame=shadowbox,
+    %rulesepcolor=\color{gray},
+    %xleftmargin=20pt,
+    %framexleftmargin=15pt,
+    frame=single,
+    keywordstyle=\color{blue}\bf,
+    commentstyle=\color{OliveGreen},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    %numbersep=5pt,
+    breaklines=true,
+    showstringspaces=false,
+    %basicstyle=\footnotesize,
+    emph={food,name,price},emphstyle={\color{magenta}}}
+\lstinputlisting[firstline=#2]{#1}}
+
+\newcommand{\bashh}[2]{
+    \lstset{
+numberstyle=\tiny,%5
+basicstyle={\ttfamily},%
+    language=xml,
+    %tabsize=3,
+    %frame=lines,
+    %caption=Test,
+    %label=code:sample,
+    %frame=shadowbox,
+    %rulesepcolor=\color{gray},
+    %xleftmargin=20pt,
+    %framexleftmargin=15pt,
+    frame=single,
+    keywordstyle=\color{blue}\bf,
+    commentstyle=\color{OliveGreen},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    %numbersep=5pt,
+    breaklines=true,
+    showstringspaces=false,
+    %basicstyle=\footnotesize,
+    emph={food,name,price},emphstyle={\color{magenta}}}
+\lstinputlisting[firstline=#2]{#1}}
 
 \begin{document}
 
@@ -42,12 +180,15 @@
 \include{chapters/chapter08}
 
 
+
+
+
 \pagenumbering{roman}
 \setcounter{page}{\thealteSeitenzahl}
 \appendix
 \include{chapters/appendixMain}
 
-\listoffigures
+%\listoffigures
 \bibliography{my_bachelor_thesis}{}
 \bibliographystyle{plainnat}
 %\bibliography{my_bachelor_thesis}{}

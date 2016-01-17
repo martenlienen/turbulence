@@ -4,6 +4,21 @@
 % Peter
 
 
-Contact phenomena are widespread in mechanical engineering, their appearance ranges from classical technical problems in civil-, automotive- or aeronautical engineering to more recent fields of research as bioengineering. To get an accurate understanding of these phenomena, contact interaction of deformable bodies and related problem domains have been embedded in numerical simulation tools as the Finite Element Method (FEM). To enforce contact constraints in the classical mathematical framework of FEM two common approaches exist, the node-to-segment approach, described e.g. in \citet{laursen1993} or \citet{zavarise2009}, and the segment-to-segment approach. Current developments in computational contact mechanics tend towards so-called mortar methods which enforce contact constraints in a weak sense and thus can be related to the segment-to-segment approach. In contrast to the node-to-segment approach the mortar methods are capable to fulfill simple patch tests and are thus preferred. Patch tests, also referred to as mesh tying or tied contact problems, especially get important when different types of finite element interpolations are used, bodies with different resolutions requirements in particular subdomains are modeled or dissimilar meshes are simulated.
+The k-$\varepsilon$-turbulence model was implemented part of the lab course 'Turbulent Flow Simulation on HPC-Systems'. For the purpose of efficiency, stability and testing a literature study was performed and following aspects have been considered and added to the existing code framework:
+
+\begin{itemize}
+\item wall models
+\item new scenarios
+\item PETSc optimization
+\item adaptive time stepping
+\item restart point \& initialisation of the pressure field in PETSc.
+\end{itemize}
+
+\noi Results were compared to literature: the wall near velocities (linear and logarithmic layer) matched well with the expected profile. The terms of the transport equations were predicted qualitatively well due to the chosen wall model (Chien).
+
+\noii Furthermore comparisons of the DNS results with measurement results were conducted for a backwards facing step scenario and a flow around a cylinder (Karman Vortex Street).
+High emphasis was put on the stochastic evaluation. To be able to simulate a flow around a circle the possibility of importing any arbitrary geometry was implemented.
+
+\noii Extensive thoughts were made how to structure the files of each project in an optimal way (usability \& later clarity).
 
 % chapter introduction (end)

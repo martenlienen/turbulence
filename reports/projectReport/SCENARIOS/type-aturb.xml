@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <flow Re="1000" type="turbulent"/>
+    <simulation finalTime="1000">
+        <type nulimiter="0">algebraic</type>
+        <.../>
+    </simulation>
+</configuration>

@@ -1,3 +1,5 @@
+%!TEX root = ./../projectReport.tex
+
 \nomenclature[A]{CPP}{Closest point projection}
 \nomenclature[A]{FE}{Finite element}
 \nomenclature[A]{FEM}{Finite element method}
@@ -5,20 +7,122 @@
 \chapter{Turbulence modeling with k-Epsilon model} % (fold)
 \label{cha:turbulence_modeling_with_k_epsilon_model}
 
-Josef
+This first section will give a short introduction to the basic equations solved for in the underlying code. Afterwards
+the k-$\varepsilon$-model as a method to model the Reynolds-Stress-tensor will be focused on. To conclude with, the discretization of the model and
+stability aspects of the model at the wall near region will be mentioned.  
 
 \section{Governing equations} % (fold)
 \label{sec:governing_equations}
 
-
+In general, resolving turbulent structures in time and space in detail is not necessary and also not possible due to limiting computational aspects.
+Thus, turbulent behavior of a flow has to be modelled.
+Since turbulent behavior is characterized by fluctuations of the flow quantities, they are splitted up as the sum of its mean and fluctuations around it. This yields exemplarilly for the velocity
+\begin{equation}
+	u_i(\underline{x},t) = \langle u_i \rangle (\underline{x},t) + u^{\prime}_i(\underline{x},t),
+\end{equation}
+and is also known as Reynolds averaging. Therein the operator $\langle \cdot \rangle$ denotes the mean, and the operator $\cdot^{\prime}$ the fluctuation of the respective quantity. Reynolds averaging in the context of incompressible flows is necessary for all velocity components and the
+density.
 
 \section{RANS equations} % (fold)
 \label{sec:rans_equations}
+Applying this approach to the dimensionless Navier-Stokes-Equations and the continuity equation for incompressible flows yields
+\begin{equation}
+	\abl{\langle u_i \rangle}{x_i} = 0
+\end{equation}
+and
+\begin{equation}
+	\label{eq:RANS}
+	\abl{\langle u_i \rangle}{t} + \langle u_j \rangle \abl{\langle u_i \rangle}{x_j} = -\frac{1}{\rho} \abl{\langle p \rangle}{x_i}
+	               																		+\frac{1}{Re} \abll{\langle u_i \rangle}{x_j}
+	               																		-\abl{\langle u_i^{\prime}u_j^{\prime} \rangle}{x_j}.
+\end{equation}
+Equation \eqref{eq:RANS} is also known as "Reynolds Averaged Navier Stokes Equation" (RANS). For the sake of simplicity the mean operator $\ave{\cdot}$ will not be written in the following since all quantities are averaged. Compared to the Navier-Stokes-Equation for laminar flows, on the right hand side of equation \eqref{eq:RANS} the divergence of the Reynolds stress tensor (RST) $\langle -u_i^{\prime}u_j^{\prime} \rangle$ occurs. This term leads to a closure problem and thus has to be modelled.
 
+This can be done by using the physical analogy between molecular and turbulent friction. Dimensional analysis yields for the RST
+\begin{equation}
+	\label{eq:RST}
+	\langle -u_i^{\prime}u_j^{\prime} \rangle = 2\nu_T S_{ij} - \frac{2}{3} K \delta_{ij},
+\end{equation}
+where $\nu_T$ refers to the turbulent viscosity, $K$ to the turbulent kinetic energy (TKE) and $\delta_{ij}$ to the Kronecker delta.
+Inserting equation \eqref{eq:RST} into equation \eqref{eq:RANS} finally yields
+\begin{equation}
+	\label{eq:RANSmodified}
+	\abl{u_i}{t}+\abl{u_i\,u_j}{x_j}=-\frac{1}{\rho}\,\abl{P}{x_i}+2\,\abl{}{x_j}\left( \left(\nu+\nu_T\right)\,S_{ij} \right)+f_i,
+\end{equation}
+with $f_i$ denoting an additional term for volume forces compared to the the RANS equation \eqref{eq:RANS}. Furthermore, it can be shown that
+\begin{equation}
+	\begin{split}
+		\frac{P}{\rho} &= \frac{p}{\rho}+\frac{2}{3}\,K \\
+		S_{ij}         &= \frac{1}{2}\left(\abl{u_i}{x_j}+\abl{u_j}{x_i}\right)
+	\end{split}
+\end{equation}
+holds for $P$ and $S_{ij}$. 
+
+Further modelling is necessary to determine the turbulent viscosity $\nu_T$. During the project phase the approach of k-$\varepsilon$ models is pursued for that purpose. Therefor two additional equations for the turbulent kinetic energy $K$ and the dissipation $\varepsilon$ have to be solved.
 % subsubsection rans_equations (end)
 
 \section{K-epsilon transport equations} % (fold)
 \label{sec:k_epsilon_transport_equations}
+
+Dimensional analysis yields for the TKE
+\begin{equation}
+	K = \frac{1}{2} \ave{u_i^{\prime}u_j^{\prime}}
+\end{equation}
+where $\ave{u_i^{\prime}u_j^{\prime}}$ denotes the trace of the RST. Based on the RANS equation \eqref{eq:RANS} and the continuity equation for incompressible flows, a transport equation for $K$ can be derived after some extensive mathematical calculus. Since the detailed derivation would be beyond the scope of this report the final expression for the TKE transport equation will be given. It states
+\begin{equation} \label{tkeTransport}
+	\abl{K}{t} + u_i\,\abl{K}{x_i}
+	=
+	\abl{}{x_i}\left(  B_k \abl{K}{x_i} \right) 
+	-
+	\varepsilon
+	+
+	F,
+\end{equation}
+with
+\begin{equation}
+	\begin{split}
+		B_k &= \nu + \frac{\nu_T}{\sigma_k}, \\
+		F   &= 2\,\nu_T\,S_{i,j}S_{i,j}.
+	\end{split}
+\end{equation}
+The first term on the left side therein denotes the material derivative of the TKE. Change in TKE can occur by either diffusion (first term on the right side), dissipation (second term on the right side) or production (third term on the right side). As will be seen in the following, the dissipation term could also be generalized to a reaction term.
+The transport equation for the dissipation $\varepsilon$, which also occurs in the TKE transport equation \eqref{tkeTransport}, could also be derived mathematically. Since the resulting equation is quite complex and leads to further unclosed terms, the $\varepsilon$ transport equation is modelled in a way similar to the TKE transport equation. This yields
+\begin{equation}
+	\begin{split}
+		\abl{\varepsilon}{t} + u_i\,\abl{\varepsilon}{x_i}
+		&=
+		\abl{}{x_i}\left( B_\varepsilon \abl{\varepsilon}{x_i} \right) 
+		-
+		C_{\varepsilon 2}\,\frac{\varepsilon^2}{K}
+		+
+		C_{\varepsilon 1}\,F
+	\end{split}
+\end{equation}
+with
+\begin{equation}
+	\begin{split}
+		B_\varepsilon = \nu + \frac{\nu_T}{\sigma_\varepsilon}
+	\end{split}
+\end{equation}
+where $F$ is similar defined as in \eqref{tkeTransport}. The interpretation of the single terms also is similar to the TKE case, besides the already mentioned generalization to a reaction term for the first term on the right hand side. Applying this generalization by introducing the time scale $T = K/\varepsilon$, which arises in the epsilon transport equation, yields for the respective transport equation
+
+\begin{alignat*}{3}
+		\abl{K}{t} + u_i\,\abl{K}{x_i}
+		&=
+		\abl{}{x_i}\left(  B_k \abl{K}{x_i} \right) 
+		-
+		\frac{1}{T}\,K
+		&&+
+		F, \\
+		\underbrace{\abl{\varepsilon}{t} + u_i\,\abl{\varepsilon}{x_i}}_{1}
+		&=
+		\underbrace{\abl{}{x_i}\left( B_\varepsilon \abl{\varepsilon}{x_i} \right)}_{2} 
+		-
+		\underbrace{C_{\varepsilon 2}\,\frac{1}{T}\,\varepsilon}_{3}
+		&&+
+		\underbrace{C_{\varepsilon 1}\,F}_{4}.
+\end{alignat*}
+Where $1$, $2$, $3$ and $4$ can be interpeted as the material derivative, dissipation term, reaction term and production term respectively, as mentioned before.
 
 % subsubsection k_epsilon_transport_equations (end)
 
@@ -27,15 +131,161 @@ Josef
 \section{Discretization} % (fold)
 \label{sec:discretization}
 
+exemplary discretised for $i=x$:
+\begin{itemize}
+\item see: \textsc{StencilFunctions.dAdBdMdM()}
+\end{itemize}
+\begin{align*}
+\left[\abl{}{x}\left(A\,\abl{B}{x}\right)\right]_{i,j,k}
+= \frac{2}{\Delta x_{i,j,k}}
+\left( 
+\frac{(\Delta x_{i+1,j,k}\cdot A_{i,j,k}+\Delta x_{i,j,k}\cdot A_{i+1,j,k}) \cdot (B_{i+1,j,k}-B_{i,j,k})}{(\Delta x_{i+1,j,k}+\Delta x_{i,j,k})^2} \right.\\
+-\left.
+\frac{(\Delta x_{i,j,k}\cdot A_{i-1,j,k}+\Delta x_{i-1,j,k}\cdot A_{i,j,k}) \cdot (B_{i,j,k}-B_{i-1,j,k})}{(\Delta x_{i,j,k}+\Delta x_{i-1,j,k})^2} 
+\right)
+\end{align*}
+
+\begin{itemize}
+\item see: \textsc{StencilFunctions.dUCdM()}
+\end{itemize}
+
+\begin{align*}
+\left[\abl{(u\,B)}{x}\right]_{i,j,k}
+= 
+\frac{1}{\Delta x_{i,j,k}}\left(
+u_{i,j,k}\frac{\Delta x_{i+1,j,k}B_{i,j,k}+\Delta x_{i,j,k}B_{i+1,j,k}}{\Delta x_{i+1,j,k}+\Delta x_{i,j,k}}
+-
+u_{i-1,j,k}\frac{\Delta x_{i,j,k}B_{i-1,j,k}+\Delta x_{i-1,j,k}B_{i,j,k}}{\Delta x_{i,j,k}+\Delta x_{i-1,j,k}}
+\right)
+\end{align*}
+
 % subsection discretization (end)
 
 \section{Modification 1: Low-Reynolds models for wall near region} % (fold)
 \label{sec:modification_1_low_reynolds_models_for_wall_near_region}
 
+A low-Reynolds-number model according to [Gri-90] was implemented to account damping effects near the wall or boundary layer. The coefficients of the $k$-$\varepsilon$ model was adjusted the following way:
+
+\begin{align}
+\abl{k}{t} + u_i\,\abl{k}{x_i}
+&=
+\abl{}{x_i}\left(  \new{B_k} \abl{k}{x_i} \right) 
+-
+\gamma \, k
++
+F
+-
+D
+\\
+\abl{\varepsilon}{t} + u_i\,\abl{\varepsilon}{x_i}
+&=
+\abl{}{x_i}\left( \new{B_\varepsilon} \abl{\varepsilon}{x_i} \right) 
+-
+\new{C_{\varepsilon 2} f_2}\,\gamma \, \varepsilon
++
+\new{C_{\varepsilon 1} f_1}\,F
++
+E
+\end{align}
+with:
+\begin{align}
+\new{B_k = \nu + \frac{\nu_T}{\sigma_k}} \\
+\new{B_\varepsilon = \nu + \frac{\nu_T}{\sigma_{\varepsilon}}} \\
+\new{F_k = 2\,\nu_T\,S_{i,j}S_{i,j}}.
+\end{align}
+The turbulent viscosity therein is defined as
+\begin{align}
+	\new{ \nu_T = C_\nu f_\nu \frac{k^2}{\varepsilon} }.
+\end{align}
+Furthermore, five model constants $C_{\mu}, \sigma_k, \sigma_{\epsilon}, C_{\epsilon 1}, C_{\epsilon 2}$ and five parameters $f_{\mu}, f_1, f_2, D, E$ can be identified in these equations. The model constants are choosen as proposed in Kuz as
+\begin{align}
+    \new{C_{\mu} = 0.09} , \\
+    \new{\sigma_k = 1.0} , \\
+    \new{\sigma_{\epsilon} = 1.3} , \\
+    \new{C_{\epsilon 1} = 1.4} , \\
+    \new{C_{\epsilon 2} = 1.8} .	
+\end{align}
+
+
+For the damping parameters different models have been implemented. In the following a table with the implemented models and the respective terms for the parameters is shown.
+
+\begin{landscape}
+
+    \begin{tabular}{| >{$}l<{$} | >{$}c<{$} | >{$}c<{$} | >{$}c<{$} | >{$}c<{$} | >{$}c<{$} |}
+      \hline
+      \text{} & f_{\mu} & f_1 & f_2 & \text{D} & \text{E} \\
+      \hline
+      \text{Jones and Launder}
+      & \exp{\left\lbrack \frac{-2.5}{\left( 1+\frac{R_t}{50} \right)} \right\rbrack}
+      & 1.0
+      & 1-0.3 \exp{\left(-R_t^2\right)}
+      & 2 \nu \left( \abl{\sqrt{k^2}}{y} \right)
+      & 2 \nu \nu_T \left( \abll{u}{y} \right)^2 \\
+      \text{Chien}
+      & 1-\exp{\left( -0.0115 y^+ \right)}
+      & 1.0
+      & 1-\left( 2/9 \right) \exp{\left\lbrack -\left( \frac{R_t}{6} \right)^2 \right\rbrack}
+      & 2 \nu \frac{k}{y^2}
+      & -2 \nu \frac{\epsilon}{y^2} \exp{\left( -0.5y^+ \right)} \\
+      \text{Lam and Bremhorst}
+      & \left\lbrack 1-\exp{\left( -0.0165 R_y \right)} \right\rbrack^2 \left( 1+ \frac{20.5}{R_t} \right)
+      & 1+\left(\frac{0.05}{f_{\mu}} \right)^3
+      & 1-\exp{\left( -R_t^2 \right)}
+      & 0.0
+      & 0.0 \\
+      \text{Myong and Kasagi}
+      & \left\lbrack 1+\frac{3.45}{\sqrt{R_t}} \right\rbrack \times \left\lbrack 1-\exp{\left( -\frac{y^+}{5} \right)} \right\rbrack
+      & 1.0
+      & \left\lbrack 1-\frac{2}{9} \exp{-\left( \frac{R_t}{6} \right)^2} \right\rbrack \times \left\lbrack 1-\exp{\left( -\frac{y^+}{5} \right)} \right\rbrack
+      & 0.0
+      & 0.0 \\
+      \text{Nagano and Hishida}
+      & \left\lbrack 1-\exp{\left( -\frac{y^+}{26.5} \right)} \right\rbrack^2
+      & 1.0
+      & 1-0.3\exp{\left( -R_t^2 \right)}
+      & 2 \nu \left( \abl{\sqrt{k^2}}{y} \right)^2
+      & 2 \nu \nu_T \left( 1-f_{\mu} \right) \left( \abll{u}{y} \right)^2 \\
+      \text{Fan}
+      & 0.4 \frac{f_w}{\sqrt{R_t}}+\left( 1-\frac{f_w}{\sqrt{R_t}} \right) \left\lbrack 1- \exp{\left( -\frac{R_y}{42.63} \right)} \right\rbrack^3
+      & 1.0
+      & \left\{ 1.0 - \frac{0.4}{1.8} \exp{\left\lbrack -\left( \frac{R_t}{6} \right)^2 \right\rbrack} \right\} f_w^2
+      & 0.0
+      & 0.0 \\
+      \hline
+    \end{tabular}
+
+  Therein, for the model of Fan, a additional parameter $f_w$ is necessary. It is defined as
+  \begin{equation}
+    f_w = 1 - \exp{\left\{ -\frac{\sqrt{r_y}}{2.30} + \left( \frac{\sqrt{r_y}}{2.30} - \frac{R_y}{8.89} \right) \left\lbrack 1-\exp{\left( -\frac{R_y}{20} \right)} \right\rbrack^3  \right\}}
+  \end{equation}
+
+\end{landscape}
+
 % subsection modification_1_low_reynolds_models_for_wall_near_region (end)
 
 \section{Modification 2: Limitation of source and reaction terms in transport equtions} % (fold)
 \label{sec:modification_2_limitation_of_source_and_reaction_terms_in_transport_equtions}
+
+Solving equations shows as quite instable. Main reason for this is non-physical negative $k$ and $\varepsilon$ might occur. One might limit the values of $k$ and $\varepsilon$ directly. We chose, however, to limit the reasons as proposed in  [Law-15]. 
+
+\vspace{0.2cm}
+
+\noindent The values of $D_k$, $D_\varepsilon$, $\gamma_k$, $\gamma_\varepsilon$, $F_k$ and $F_\varepsilon$ have to be positive for stability reasons.
+
+\vspace{0.2cm}
+
+\noindent The factors $D_k$, $D_\varepsilon$ and $F_k$ are by its definition positive since $\nu_T$ is positive. The factors $\gamma_k$, $\gamma_\varepsilon$ and $F_\varepsilon$ are forced by the program to be greater than zero:
+\begin{align}
+\gamma_k &= \max{(0,\, \varepsilon/k)}\\
+\gamma_\varepsilon &= c_2\cdot\max{(0,\, \varepsilon/k)}\\
+F_\varepsilon &= 2\,c_1\,  \,S_{i,j}S_{i,j}\cdot\max{(0,\,k)}
+\end{align}
+The eddy-viscosity is limited the following way:
+\new{
+\begin{align}
+\nu_T=\max{(\nu_T,\,10^{-4}\cdot\nu)}
+\end{align}}
+
 
 % subsection modification_2_limitation_of_source_and_reaction_terms_in_transport_equtions (end)
 
@@ -45,3 +295,4 @@ Josef
 % subsection modified_equations_and_discretization (end)
 
 % chapter turbulence_modeling_with_k_epsilon_model (end)
+

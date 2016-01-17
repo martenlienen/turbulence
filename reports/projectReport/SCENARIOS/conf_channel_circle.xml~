@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <.../>
+    <simulation ...>
+        <type>tke</type>
+        <scenario uniform="true">channel-symm</scenario>
+    </simulation>
+    <keparameter 
+        ce1="1.4" ce2="1.8" cmu="0.09" sigmaK="1.0" sigmaE="1.3" 
+        model="2"
+        start="0.0"
+        adaptnrs="5" adapterr="-0.001"
+    />
+    <.../>
+</configuration>

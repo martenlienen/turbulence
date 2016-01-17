@@ -1,33 +1,71 @@
 \chapter{Performance, efficiency and further modifications} % (fold)
 \label{cha:performance_efficiency_and_further_modifications}
 
-\begin{itemize}
-  \item High simulated physical time to reach steady state flow
-  \item Small time steps due to high eddy viscosity  
-\end{itemize}
+During simulations it was seen that the time steps decreased rapidly due to high eddy viscosity (especially at the inlet) and that the simulation takes a long time to reach steady state flow. This lead to very high computational times resulting us dealing with this situation (e.g. reducing the computational time with different methods).
+
+\noii Please note that this section also mentions further modifications not related to the topic.
  
 \section{New scenarios} % (fold)
 \label{sec:new_scenarios}
 
-Peter
+All scenarios are working for DNS, algebraic and $k$-$\epsilon$-simulations.
+
+\infobox{
+nseof::GlobalBoundaryFactory,\\ nseof::flowmodels::ke:GlobalBoundaryFactory
+}
 
 % subsection new_scenarios (end)
 
-\subsection{Channel section with symmetry boundary condition} % (fold)
+\subsection*{Channel section with symmetry boundary condition} % (fold)
 \label{sub:channel_section_with_symmetry_boundary_condition}
+
+The top and the back walls of the 'channel'-scenario are replaced by free slip conditions:
+
+\begin{equation}
+\abl{u}{n}=0
+\qquad
+v = 0
+\qquad
+\abl{k}{n}=0
+\qquad
+\abl{\varepsilon}{n}=0
+\end{equation}  
+
+\noii The free slip condition is often imposed along a line or plane of symmetry  thereby reducing in this case the size of the domain where the flow has to be computed by a half respectively by a forth in the 2D and 3D case. This is a valid assumption for a channel flow if we neglect recirculations in the channel.
+
+\noii By the way: if the x- and y-ratio of a backwards facing step are specified, it is possible to simulate a free jet similar flow\footnote{Free jet is not a symmetrical phenomenon. A symmetric boundary condition leads obviously to non-physical deviation in the results.}.
 
 % subsubsection channel_section_with_symmetry_boundary_condition (end)
 
-\subsection{Boundary layer over flat plate} % (fold)
+\subsection*{Boundary layer over flat plate} % (fold)
 \label{sub:boundary_layer_over_flat_plate}
 
-% subsubsection boundary_layer_over_flat_plate (end)
+For a 2D-simulation the top wall of the 'channel'-scenario was replaced by an opening (Neumann boundary condition).
 
-\subsection{Arbitrary geometric obstacles} % (fold)
+\noii With this scenario a boundary layer over a flat plat can be modelled provided that the heigth y is selected big enough compared the local boundary layer width.
+
+\subsection*{Free} % (fold)
+\label{sub:free}
+
+In this scenario all wall boundary conditions of the 'channel'-scenario were removed and replaced by openings.
+
+\subsection*{Arbitrary geometric obstacles} % (fold)
 \label{sub:arbitrary_geometric_obstacles}
+
+In any scenario an obstacle of any form (see section~XY) can be placed into the middle of the flow field. This way the free shear flow plane wake can be modelled. The most notable example is the flow around a circle with certain repeating flow patterns behind the obstacle also know the K\'{a}rm\'{a}n Vortex street (see section-XY).
+
+\noii The capability to determining the wall distance to an arbitrary geometry was no problem for our k-D-tree implementation.
+
+\noii Limitation: 2D and 1 processor
+
+\infobox{
+nseof::geometry::GeometryManager, \\
+nseof::WallDistanceManager
+}
 
 % subsubsection arbitrary_geometric_obstacles (end)
 
+\newpage
 \section{PETSC-optimization} % (fold)
 \label{sec:petsc_optimization}
 
@@ -35,10 +73,48 @@ Marten und Walter
 
 % subsection petsc_optimization (end)
 
+\newpage
 \section{Restart points} % (fold)
 \label{sec:restart_points}
 
-Peter
+Respart points were created for the pupose of:
+\begin{itemize}
+\item faster convergence: starting the simulation with a good initial condition
+\item security: in the case of a crash or unexpected end of a simulation.
+\end{itemize}
+
+\noii At every restart point a backup file (.bak) is created, which can be loaded at the beginning of a simulation and which is used as the initial condition by PETSc. Following variables are written to the file for each simulation type:
+
+\newcommand{\che}{$\checkmark$}
+
+\begin{center}
+
+\newcolumntype{R}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+\begin{tabular}{l  R{2cm}R{2cm}R{2cm}}\hline
+ & DNS & Algebraic & $k$-$\varepsilon$\\\hline
+Pressure $p$      & \che & \che &  \che \\
+Velocity $u_i$          & \che & \che & \che \\\hline
+Eddy viscosity $\nu_t$        &      & \che &  \\
+Pressure + TKE $P$      &  & \che &  \che \\\hline
+Turbulent kinetic energy $k$            &      &      & \che \\
+Dissipation rate $\varepsilon$ &      &      & \che \\
+Additional $k$-source term $D$            &      &      & \che \\
+Additional $\varepsilon$-source term Factor $E$            &      &      & \che \\
+Factor $f_1$                                               &      &      & \che \\
+Factor $f_2$          &      &      & \che \\
+Factor $f_3$          &      &      & \che \\\hline
+\end{tabular}
+
+\end{center}
+It is possible also to use the backup file of one simulation type for an other one: e.g. DNS simulation can be started for a $k$-$\epsilon$ backup file and vice versa. For another simulation type unknown variables are set to be zero.
+
+\noii Please note that no interpolation function has been implemented: simulations can be only started from backup files with the same number of processors and the same mesh configuration.
+
+\infobox{
+MPIIterator.h, MPIIteratorReader.h, MPIIteratorWriter.h,\\ PetscSolver.h
+}
+
 
 % subsection restart_points (end)
 
