@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+
+import os
+import shutil
+from argparse import ArgumentParser
+
+
+def parseArguments():
+    parser = ArgumentParser(
+        description="Delete runs with unreasonably low max-velocities")
+    parser.add_argument("directory", help="Directory of run directories")
+
+    return parser.parse_args()
+
+
+def maxXVelocity(vtk):
+    with open(vtk, "r") as file:
+        lines = file.readlines()
+
+    n = len(lines)
+    i = next(i
+             for i, line in enumerate(lines)
+             if line.startswith("VECTORS velocity float"))
+    i = i + 1
+
+    max = None
+    while i < n:
+        parts = lines[i].split(" ")
+
+        try:
+            v = float(parts[0])
+        except ValueError:
+            break
+
+        if max is None or v > max:
+            max = v
+
+        i = i + 1
+
+    return max
+
+
+def main():
+    arguments = parseArguments()
+    directory = arguments.directory
+
+    for d in os.listdir(directory):
+        outdir = os.path.join(directory, d)
+        vtkdir = os.path.join(outdir, "vtks")
+        vtks = os.listdir(vtkdir)
+
+        bytime = {}
+        for v in vtks:
+            time = int(v.split(".")[-2])
+
+            if not time in bytime:
+                bytime[time] = []
+
+            bytime[time].append(v)
+
+        lastvtks = bytime[max(bytime.keys())]
+        maxU = max([maxXVelocity(os.path.join(vtkdir, v)) for v in lastvtks])
+
+        if maxU < 1.0:
+            print("Delete {}".format(outdir))
+            shutil.rmtree(outdir)
+
+
+if __name__ == "__main__":
+    main()
