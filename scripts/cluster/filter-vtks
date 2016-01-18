@@ -33,6 +33,10 @@ def group(vtks):
 
     for vtk in vtks:
         match = filenamere.search(vtk)
+
+        if match is None:
+            sys.exit("Invalid filename: {}".format(vtk))
+
         rank = int(match.group(1))
         time = int(match.group(2))
 
