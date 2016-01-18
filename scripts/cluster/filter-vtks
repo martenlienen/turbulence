@@ -153,11 +153,11 @@ def main():
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Time", *ypos])
+    writer.writerow(["Time"] + ypos)
 
     for timestep in timesteps:
         vs = filter(vtks[timestep], analysis)
-        writer.writerow([timestep, *vs])
+        writer.writerow([timestep] + vs)
 
     result = output.getvalue()
 
