@@ -48,6 +48,10 @@ find_package(PETSc REQUIRED)
 include_directories(${PETSC_INCLUDES})
 add_definitions(${PETSC_DEFINITIONS})
 
+find_package(HDF5 REQUIRED)
+include_directories(${HDF5_INCLUDE_DIRS})
+add_definitions(${HDF5_DEFINITIONS})
+
 add_subdirectory("3rdparty/tinyxml2")
 include_directories("3rdparty/tinyxml2")
 

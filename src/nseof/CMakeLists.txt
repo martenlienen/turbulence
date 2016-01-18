@@ -22,4 +22,5 @@ set(NSEOF_SRCS ${root_src} ${NSEOF_FLOWMODELS_SRCS} ${parallel_src}
   ${solvers_src} ${stencils_src})
 
 add_library(nseof ${NSEOF_SRCS})
-target_link_libraries(nseof tinyxml2 vtk ${PETSC_LIBRARIES} ANN)
+target_link_libraries(nseof tinyxml2 vtk ${PETSC_LIBRARIES}
+  ${HDF5_LIBRARIES} ${HDF5_CXX_LIBRARIES} ANN)
