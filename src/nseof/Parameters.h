@@ -170,6 +170,7 @@ struct TimingParameters {
 struct RestartParameters {
   std::string in;
   std::string out;
+  FLOAT interval;
 };
 
 //@}

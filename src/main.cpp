@@ -107,6 +107,7 @@ int main(int argc, char *argv[]) {
 
   nseof::FLOAT time = 0.0;
   nseof::FLOAT timeVTK = parameters.vtk.interval;
+  nseof::FLOAT timeBAK = parameters.restart.interval;
   int timeSteps = 0;
 
   // TODO WS1: plot initial state
@@ -165,6 +166,11 @@ int main(int argc, char *argv[]) {
       timeHDF5 += parameters.hdf5.interval;
     }
 #endif
+
+    if (time >= timeBAK) {
+      simulation->serialize();
+      timeBAK += parameters.restart.interval;
+    }
   }
 
   // TODO WS1: plot final output

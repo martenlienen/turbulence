@@ -374,25 +374,25 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   }
 
   virtual void solveTimestep() {
+    FLOAT olddt = _parameters.timestep.dt;
+    
     // determine and set max. timestep which is allowed in this simulation
     setTimeStep();
     int icounter = 0;
 
     // calculate laminar or turbulent?
     if (_parameters.timestep.time > _parameters.kEpsilon.start) {
-      // calculate rhs of epsilon and tke
-
-      _parameters.timestep.dt *= 2.0;
-
-      std::cout << _parameters.timestep.timeSteps << std::endl;
-
       // calculate rhs of epsilon- & tke-transport-equv. and check
-      int tempGlobal;
 
+      // calculate rhs of epsilon and tke
+      _keRHSit.iterate();
+
+      // determin new timestep
+      int tempGlobal;
+      _parameters.timestep.dt *= 2.0;
       do {
         _tsBool.reset();
         _parameters.timestep.dt /= 2.0;
-        _keRHSit.iterate();
         _tiBool.iterate();
 
         int tempLocal = (_tsBool.getValue() &&
@@ -402,6 +402,11 @@ class Simulation : public FlowFieldSimulation<FlowField> {
                       PETSC_COMM_WORLD);
       } while (tempGlobal);
 
+      
+      // prevent too high dt jumps
+      _parameters.timestep.dt = _parameters.timestep.dt/olddt > 1.1 ?
+        olddt*1.1 : _parameters.timestep.dt;
+      
       keloopcounter += icounter;
 
       std::cout << "ke-loop: " << icounter << " of " << keloopcounter << std::endl;
