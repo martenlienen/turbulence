@@ -1,6 +1,7 @@
 set(root_src Configuration.cpp DataStructures.cpp GlobalBoundaryFactory.cpp
   FlowField.cpp LinearSolver.cpp Meshsize.cpp MemoizedMesh.cpp SimpleTimer.cpp
   MultiTimer.cpp)
+set(HDF5_SRCS hdf5/HDF5Plotter.cpp hdf5/XDMF.cpp hdf5/HDF5.cpp)
 set(NSEOF_FLOWMODELS_SRCS flowmodels/turbulent/FlowField.cpp
   flowmodels/turbulent/HStencil.cpp flowmodels/turbulent/MaximumNutStencil.cpp
   flowmodels/turbulent/FGHStencil.cpp flowmodels/algebraic/NutStencil.cpp
@@ -18,7 +19,7 @@ set(stencils_src stencils/BFInputStencils.cpp stencils/BFStepInitStencil.cpp
   stencils/RHSStencil.cpp stencils/VelocityStencil.cpp
   walldistance/WallDistanceManager.cpp geometry/GeometryManager.cpp)
 
-set(NSEOF_SRCS ${root_src} ${NSEOF_FLOWMODELS_SRCS} ${parallel_src}
+set(NSEOF_SRCS ${root_src} ${HDF5_SRCS} ${NSEOF_FLOWMODELS_SRCS} ${parallel_src}
   ${solvers_src} ${stencils_src})
 
 add_library(nseof ${NSEOF_SRCS})

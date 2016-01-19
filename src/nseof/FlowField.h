@@ -1,8 +1,12 @@
 #ifndef _FLOW_FIELD_H_
 #define _FLOW_FIELD_H_
 
+#include <memory>
+#include <vector>
+
 #include "DataStructures.h"
 #include "Parameters.h"
+#include "plotting/Reader.h"
 
 namespace nseof {
 
@@ -96,6 +100,9 @@ class FlowField {
   void getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity, int i,
                               int j, int k);
 
+  const std::vector<std::unique_ptr<nseof::plotting::Reader>>& getReaders()
+      const;
+
  protected:
   const Parameters& getParameters();
 
@@ -117,6 +124,8 @@ class FlowField {
   VectorField _FGH;
 
   ScalarField _RHS;  //! Right hand side for the Poisson equation
+
+  std::vector<std::unique_ptr<nseof::plotting::Reader>> readers;
 };
 }
 

@@ -1,4 +1,5 @@
 #include "FlowField.h"
+#include "plotting/LambdaReader.h"
 
 namespace nseof {
 
@@ -25,7 +26,13 @@ FlowField::FlowField(const Parameters& parameters)
                : VectorField(_size_x + 3, _size_y + 3, _size_z + 3)),
       _RHS(parameters.geometry.dim == 2
                ? ScalarField(_size_x + 3, _size_y + 3)
-               : ScalarField(_size_x + 3, _size_y + 3, _size_z + 3)) {}
+               : ScalarField(_size_x + 3, _size_y + 3, _size_z + 3)) {
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "Pressure", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getPressure().getScalar(i, j, k)};
+          }));
+}
 
 int FlowField::getNx() const { return _size_x; }
 
@@ -76,4 +83,9 @@ void FlowField::getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity,
 }
 
 const Parameters& FlowField::getParameters() { return this->_parameters; }
+
+const std::vector<std::unique_ptr<nseof::plotting::Reader>>&
+FlowField::getReaders() const {
+  return this->readers;
+}
 }
