@@ -5,11 +5,29 @@
 #include <functional>
 #include <string>
 
+#include <hdf5.h>
+
 #include "Reader.h"
 
 namespace nseof {
 
 namespace plotting {
+
+template <typename T>
+struct HDF5Types {};
+
+template <>
+struct HDF5Types<float> {
+  static hid_t getType() { return H5T_IEEE_F32LE; }
+  static hid_t getNativeType() { return H5T_NATIVE_FLOAT; }
+};
+
+template <>
+struct HDF5Types<double> {
+  static hid_t getType() { return H5T_IEEE_F64LE; }
+  static hid_t getNativeType() { return H5T_NATIVE_DOUBLE; }
+};
+
 
 template <typename T, typename FF, int n>
 class LambdaReader : public Reader {
@@ -20,6 +38,8 @@ class LambdaReader : public Reader {
 
   int getDim();
   std::string getName();
+  hid_t getHDF5Type();
+  hid_t getHDF5NativeType();
   void write(const hid_t dataset, Parameters& params, nseof::hdf5::HDF5& hdf5);
 
  private:
@@ -38,6 +58,16 @@ int LambdaReader<T, FF, n>::getDim() {
 template <typename T, typename FF, int n>
 std::string LambdaReader<T, FF, n>::getName() {
   return this->name;
+}
+
+template <typename T, typename FF, int n>
+hid_t LambdaReader<T, FF, n>::getHDF5Type() {
+  return HDF5Types<T>::getType();
+}
+
+template <typename T, typename FF, int n>
+hid_t LambdaReader<T, FF, n>::getHDF5NativeType() {
+  return HDF5Types<T>::getNativeType();
 }
 
 template <typename T, typename FF, int n>
@@ -65,7 +95,7 @@ void LambdaReader<T, FF, n>::write(const hid_t dataset, Parameters& params,
     }
   }
 
-  hdf5.write(dataset, buffer.data(), H5T_NATIVE_DOUBLE);
+  hdf5.write(dataset, buffer.data(), this->getHDF5NativeType());
 }
 }
 }

@@ -13,6 +13,8 @@ class Reader {
  public:
   virtual int getDim() = 0;
   virtual std::string getName() = 0;
+  virtual hid_t getHDF5Type() = 0;
+  virtual hid_t getHDF5NativeType() = 0;
 
   /**
    * Read data from the flow field and write it into an hdf5 file

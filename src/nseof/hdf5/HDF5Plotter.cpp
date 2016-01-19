@@ -74,8 +74,8 @@ void HDF5Plotter::plotFlowField(int timestep, const FlowField& flowField) {
       hid_t dataspace = H5Screate_simple(2, dimensions, NULL);
 
       hid_t dataset = H5Dcreate(this->hdf5->getFile(), location.str().c_str(),
-                                H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT,
-                                H5P_DEFAULT, H5P_DEFAULT);
+                                readers[j]->getHDF5NativeType(), dataspace,
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
       H5Sclose(dataspace);
 
