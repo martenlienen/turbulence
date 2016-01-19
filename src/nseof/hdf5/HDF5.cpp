@@ -9,36 +9,13 @@ namespace hdf5 {
 HDF5::HDF5(std::string path) { this->open(path); }
 HDF5::~HDF5() { this->close(); }
 
-void HDF5::writeGeometry(int rank,
-                         const std::vector<std::array<float, 3>>& points) {
-  const hsize_t dimensions[2] = {points.size(), 3};
-  hid_t dataspace = H5Screate_simple(2, dimensions, NULL);
+void HDF5::write(const hid_t dataset, const void* buffer, hid_t type) {
+  hid_t plist = H5Pcreate(H5P_DATASET_XFER);
+  H5Pset_dxpl_mpio(plist, H5FD_MPIO_INDEPENDENT);
 
-  std::ostringstream name;
-  name << "Rank-" << rank;
-  hid_t dataset =
-      H5Dcreate(this->geometry, name.str().c_str(), H5T_NATIVE_FLOAT, dataspace,
-                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, plist, buffer);
 
-  H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-           points.data());
-
-  H5Dclose(dataset);
-  H5Sclose(dataspace);
-}
-
-void HDF5::write(std::string location, hsize_t n, hsize_t dim,
-                 const void* buffer, hid_t type) {
-  const hsize_t dimensions[2] = {n, dim};
-  hid_t dataspace = H5Screate_simple(2, dimensions, NULL);
-
-  hid_t dataset = H5Dcreate(this->data, location.c_str(), type, dataspace,
-                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
-
-  H5Dclose(dataset);
-  H5Sclose(dataspace);
+  H5Pclose(plist);
 }
 
 void HDF5::createGroup(std::string location) {
@@ -47,8 +24,16 @@ void HDF5::createGroup(std::string location) {
   H5Gclose(group);
 }
 
+const hid_t& HDF5::getFile() { return this->file; }
+const hid_t& HDF5::getGeometry() { return this->geometry; }
+
 void HDF5::open(std::string path) {
-  this->file = H5Fcreate(path.c_str(), H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
+  hid_t plist = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fapl_mpio(plist, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+  this->file = H5Fcreate(path.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, plist);
+  H5Pclose(plist);
+
   this->geometry = H5Gcreate2(this->file, "Geometries", H5P_DEFAULT,
                               H5P_DEFAULT, H5P_DEFAULT);
   this->data =

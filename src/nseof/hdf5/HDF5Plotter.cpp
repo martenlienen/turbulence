@@ -10,7 +10,10 @@ namespace nseof {
 namespace hdf5 {
 
 HDF5Plotter::HDF5Plotter(Parameters& params, int rank, int nranks)
-    : params(params), rank(rank), hdf5(new HDF5(params.hdf5.file)) {
+    : params(params),
+      rank(rank),
+      nranks(nranks),
+      hdf5(new HDF5(params.hdf5.file)) {
   if (rank == 0) {
     this->xdmf = XDMF::fromParameters(params, params.hdf5.file, nranks);
   }
@@ -30,7 +33,9 @@ HDF5Plotter::~HDF5Plotter() {
     file << h5file << ".xmf";
   }
 
-  this->xdmf->write(file.str());
+  if (this->rank == 0) {
+    this->xdmf->write(file.str());
+  }
 }
 
 void HDF5Plotter::plotFlowField(int timestep, const FlowField& flowField) {
@@ -40,18 +45,52 @@ void HDF5Plotter::plotFlowField(int timestep, const FlowField& flowField) {
     this->xdmf->addTimestep(timestep, readers);
   }
 
+  GeometricParameters& gp = this->params.geometry;
+  ParallelParameters& pp = this->params.parallel;
+
+  int cellsX = pp.localSize[0];
+  int cellsY = pp.localSize[1];
+  int cellsZ = gp.dim == 3 ? pp.localSize[2] : 1;
+  int ncells = cellsX * cellsY * cellsZ;
+
   std::ostringstream group;
   group << "/Data/Time-" << timestep;
   this->hdf5->createGroup(group.str());
 
-  group << "/Rank-" << this->rank;
-  this->hdf5->createGroup(group.str());
+  std::vector<std::vector<hid_t>> datasets(this->nranks,
+                                           std::vector<hid_t>(readers.size()));
 
-  for (auto& reader : readers) {
-    std::ostringstream location;
-    location << group.str() << "/" << reader->getName();
+  for (int i = 0; i < this->nranks; i++) {
+    std::ostringstream rankGroup;
+    rankGroup << group.str() << "/Rank-" << i;
+    this->hdf5->createGroup(rankGroup.str());
 
-    reader->write(location.str(), this->params, *this->hdf5);
+    for (size_t j = 0; j < readers.size(); j++) {
+      std::ostringstream location;
+      location << rankGroup.str() << "/" << readers[j]->getName();
+
+      const hsize_t dimensions[2] = {(hsize_t)ncells,
+                                     (hsize_t)readers[j]->getDim()};
+      hid_t dataspace = H5Screate_simple(2, dimensions, NULL);
+
+      hid_t dataset = H5Dcreate(this->hdf5->getFile(), location.str().c_str(),
+                                H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT,
+                                H5P_DEFAULT, H5P_DEFAULT);
+
+      H5Sclose(dataspace);
+
+      datasets[i][j] = dataset;
+    }
+  }
+
+  for (size_t i = 0; i < readers.size(); i++) {
+    readers[i]->write(datasets[this->rank][i], this->params, *this->hdf5);
+  }
+
+  for (int i = 0; i < this->nranks; i++) {
+    for (size_t j = 0; j < readers.size(); j++) {
+      H5Dclose(datasets[i][j]);
+    }
   }
 }
 
@@ -85,7 +124,28 @@ void HDF5Plotter::plotGeometry(Parameters& params) {
     }
   }
 
-  this->hdf5->writeGeometry(this->rank, buffer);
+  std::vector<hid_t> datasets(this->nranks);
+
+  for (int i = 0; i < this->nranks; i++) {
+    const hsize_t dimensions[2] = {(hsize_t)npoints, 3};
+    hid_t dataspace = H5Screate_simple(2, dimensions, NULL);
+
+    std::ostringstream name;
+    name << "Rank-" << i;
+    hid_t dataset = H5Dcreate(this->hdf5->getGeometry(), name.str().c_str(),
+                              H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT,
+                              H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Sclose(dataspace);
+
+    datasets[i] = dataset;
+  }
+
+  this->hdf5->write(datasets[this->rank], buffer.data(), H5T_NATIVE_FLOAT);
+
+  for (auto& dataset : datasets) {
+    H5Dclose(dataset);
+  }
 }
 }
 }

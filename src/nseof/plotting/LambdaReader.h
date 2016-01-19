@@ -20,7 +20,7 @@ class LambdaReader : public Reader {
 
   int getDim();
   std::string getName();
-  void write(std::string location, Parameters& params, nseof::hdf5::HDF5& hdf5);
+  void write(const hid_t dataset, Parameters& params, nseof::hdf5::HDF5& hdf5);
 
  private:
   FF& flowField;
@@ -41,7 +41,7 @@ std::string LambdaReader<T, FF, n>::getName() {
 }
 
 template <typename T, typename FF, int n>
-void LambdaReader<T, FF, n>::write(std::string location, Parameters& params,
+void LambdaReader<T, FF, n>::write(const hid_t dataset, Parameters& params,
                                    nseof::hdf5::HDF5& hdf5) {
   GeometricParameters& gp = params.geometry;
   ParallelParameters& pp = params.parallel;
@@ -65,7 +65,7 @@ void LambdaReader<T, FF, n>::write(std::string location, Parameters& params,
     }
   }
 
-  hdf5.write(location, ncells, n, buffer.data(), H5T_NATIVE_DOUBLE);
+  hdf5.write(dataset, buffer.data(), H5T_NATIVE_DOUBLE);
 }
 }
 }

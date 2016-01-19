@@ -27,6 +27,7 @@ class HDF5Plotter {
  private:
   Parameters& params;
   int rank;
+  int nranks;
   std::unique_ptr<HDF5> hdf5;
   std::unique_ptr<XDMF> xdmf;
 

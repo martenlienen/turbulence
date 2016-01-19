@@ -17,7 +17,7 @@ class Reader {
   /**
    * Read data from the flow field and write it into an hdf5 file
    */
-  virtual void write(std::string location, Parameters& p,
+  virtual void write(const hid_t dataset, Parameters& p,
                      nseof::hdf5::HDF5& hdf5) = 0;
 };
 }

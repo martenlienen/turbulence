@@ -16,12 +16,12 @@ class HDF5 {
   HDF5(std::string path);
   ~HDF5();
 
-  void writeGeometry(int rank, const std::vector<std::array<float, 3>>& points);
-
-  void write(std::string location, hsize_t n, hsize_t dim, const void* buffer,
-             hid_t type);
+  void write(const hid_t dataset, const void* buffer, hid_t type);
 
   void createGroup(std::string location);
+
+  const hid_t& getFile();
+  const hid_t& getGeometry();
 
  private:
   void open(std::string path);
