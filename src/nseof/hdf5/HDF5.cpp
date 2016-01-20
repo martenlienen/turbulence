@@ -1,6 +1,8 @@
-#include <sstream>
-
+// Ensure that mpi.h is included before everything else (otherwise MAC-Cluster
+// complains)
 #include "HDF5.h"
+
+#include <sstream>
 
 namespace nseof {
 

@@ -1,11 +1,13 @@
 #ifndef _NSEOF_HDF5_HDF5_H_
 #define _NSEOF_HDF5_HDF5_H_
 
+// Ensure that mpi.h is included before everything else (otherwise MAC-Cluster
+// complains)
+#include <hdf5.h>
+
 #include <array>
 #include <string>
 #include <vector>
-
-#include <hdf5.h>
 
 namespace nseof {
 

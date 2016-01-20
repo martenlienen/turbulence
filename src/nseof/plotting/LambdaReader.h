@@ -1,11 +1,13 @@
 #ifndef _NSEOF_PLOTTING_LAMBDA_READER_H_
 #define _NSEOF_PLOTTING_LAMBDA_READER_H_
 
+// Ensure that mpi.h is included before everything else (otherwise MAC-Cluster
+// complains)
+#include <hdf5.h>
+
 #include <array>
 #include <functional>
 #include <string>
-
-#include <hdf5.h>
 
 #include "Reader.h"
 
