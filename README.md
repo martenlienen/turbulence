@@ -99,6 +99,12 @@ make
 gprof ./ns gmon.out
 ```
 
+## HDF5
+
+We also support HDF5 as an alternative output format to VTK. To enable it, pass
+`-DHDF5=on` to `cmake` and enable it in your scenario with `<hdf5 enabled="true"
+interval="0.1">result.h5</hdf5>`.
+
 ## Style Guide
 
 We use

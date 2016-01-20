@@ -1,6 +1,7 @@
 #ifndef _SIMULATION_H_
 #define _SIMULATION_H_
 
+#include "FlowField.h"
 #include "Parameters.h"
 
 namespace nseof {
@@ -20,6 +21,8 @@ class Simulation {
   virtual void serialize() = 0;
   virtual void deserialize() = 0;
   virtual void init() = 0;
+
+  virtual const FlowField& getFlowField() = 0;
 
  protected:
   Parameters &_parameters;

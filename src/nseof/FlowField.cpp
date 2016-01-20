@@ -1,3 +1,7 @@
+// Ensure that mpi.h is included before everything else (otherwise MAC-Cluster
+// complains)
+#include "plotting/LambdaReader.h"
+
 #include "FlowField.h"
 
 namespace nseof {
@@ -25,7 +29,39 @@ FlowField::FlowField(const Parameters& parameters)
                : VectorField(_size_x + 3, _size_y + 3, _size_z + 3)),
       _RHS(parameters.geometry.dim == 2
                ? ScalarField(_size_x + 3, _size_y + 3)
-               : ScalarField(_size_x + 3, _size_y + 3, _size_z + 3)) {}
+               : ScalarField(_size_x + 3, _size_y + 3, _size_z + 3)) {
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "Pressure", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getPressure().getScalar(i, j, k)};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "Velocity-U", [](FlowField& ff, int i, int j, int k) {
+            FLOAT p;
+            FLOAT v[3];
+            ff.getPressureAndVelocity(p, v, i, j, k);
+            return std::array<FLOAT, 1>{v[0]};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 3>>(
+          *this, "Velocity", [](FlowField& ff, int i, int j, int k) {
+            FLOAT p;
+            FLOAT v[3];
+            ff.getPressureAndVelocity(p, v, i, j, k);
+            return std::array<FLOAT, 3>{v[0], v[1], v[2]};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 3>>(
+          *this, "Velocity-Raw", [](FlowField& ff, int i, int j, int k) {
+            FLOAT* v = ff.getVelocity().getVector(i, j, k);
+
+            return std::array<FLOAT, 3>{v[0], v[1], v[2]};
+          }));
+}
 
 int FlowField::getNx() const { return _size_x; }
 
@@ -76,4 +112,9 @@ void FlowField::getPressureAndVelocity(FLOAT& pressure, FLOAT* const velocity,
 }
 
 const Parameters& FlowField::getParameters() { return this->_parameters; }
+
+const std::vector<std::unique_ptr<nseof::plotting::Reader>>&
+FlowField::getReaders() const {
+  return this->readers;
+}
 }

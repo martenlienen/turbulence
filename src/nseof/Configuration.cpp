@@ -364,6 +364,31 @@ void Configuration::loadParameters(Parameters &parameters,
     readIntOptional(parameters.vtk.highoffset, node, "highoffset", 1);
 
     //--------------------------------------------------
+    // HDF5 parameters
+    //--------------------------------------------------
+
+    node = confFile.FirstChildElement()->FirstChildElement("hdf5");
+
+    if (node) {
+      readBoolOptional(parameters.hdf5.enabled, node, "enabled", true);
+
+      if (parameters.hdf5.enabled) {
+        readFloatOptional(parameters.hdf5.interval, node, "interval");
+
+        std::string file = node->GetText();
+
+        if (file.size() > 0) {
+          parameters.hdf5.file = file;
+        } else {
+          parameters.hdf5.file = "result.h5";
+        }
+      }
+    } else {
+      parameters.hdf5.enabled = true;
+      parameters.hdf5.file = "result.h5";
+    }
+
+    //--------------------------------------------------
     // Parallel parameters
     //--------------------------------------------------
 
@@ -554,6 +579,10 @@ void Configuration::loadParameters(Parameters &parameters,
   MPI_Bcast(&(parameters.vtk.lowoffset), 1, MPI_INT, 0, communicator);
   MPI_Bcast(&(parameters.vtk.highoffset), 1, MPI_INT, 0, communicator);
   broadcastString(parameters.vtk.prefix, communicator);
+
+  MPI_Bcast(&(parameters.hdf5.enabled), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(parameters.hdf5.interval), 1, MY_MPI_FLOAT, 0, communicator);
+  broadcastString(parameters.hdf5.file, communicator);
 
   broadcastString(parameters.simulation.type, communicator);
   broadcastString(parameters.simulation.scenario, communicator);

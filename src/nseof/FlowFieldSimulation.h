@@ -177,6 +177,10 @@ class FlowFieldSimulation : public Simulation {
 
   virtual void init() { _solver.init(); }
 
+  const FlowField& getFlowField() {
+    return *this->_flowField;
+  }
+
  private:
   vtk::Dataset datasetFromMesh(int los, int hos) {
     Parameters &p = this->_parameters;

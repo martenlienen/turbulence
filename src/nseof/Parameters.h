@@ -125,6 +125,12 @@ class VTKParameters {
   FLOAT start = 0.0;
 };
 
+struct HDF5Parameters {
+  bool enabled;
+  std::string file;
+  FLOAT interval;
+};
+
 class ParallelParameters {
  public:
   int rank;  //! Rank of the current processor
@@ -189,6 +195,7 @@ class Parameters {
   GeometricParameters geometry;
   WallParameters walls;
   VTKParameters vtk;
+  HDF5Parameters hdf5;
   ParallelParameters parallel;
   BFStepParameters bfStep;
   TimingParameters timing;

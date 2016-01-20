@@ -9,6 +9,8 @@ option(SCOREP "Do you want to use scorep profiling?" OFF)
 
 option(PROFILING "Compile in extra profiling information for gprof" OFF)
 
+option(HDF5 "Build with HDF5 plotting" OFF)
+
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Debug")
   set(CMAKE_BUILD_TYPE "Debug")
@@ -37,6 +39,10 @@ add_compile_options(-std=c++14)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -Wpedantic")
 
+# Enable minimal optimization so that HDF5 compiles on systems with
+# FORTIFY_SOURCE enabled in the compiler.
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1")
+
 if (PROFILING)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
@@ -47,6 +53,14 @@ list(APPEND CMAKE_MODULE_PATH "./cmake/modules")
 find_package(PETSc REQUIRED)
 include_directories(${PETSC_INCLUDES})
 add_definitions(${PETSC_DEFINITIONS})
+
+if (HDF5)
+  find_package(HDF5 REQUIRED)
+  include_directories(${HDF5_INCLUDE_DIRS})
+  add_definitions(${HDF5_DEFINITIONS})
+
+  add_definitions(-DWITH_HDF5)
+endif()
 
 add_subdirectory("3rdparty/tinyxml2")
 include_directories("3rdparty/tinyxml2")

@@ -1,3 +1,9 @@
+// Ensure that mpi.h is included before everything else (otherwise MAC-Cluster
+// complains)
+#include "../../plotting/LambdaReader.h"
+
+#include <memory>
+
 #include "FlowField.h"
 
 namespace nseof {
@@ -51,7 +57,57 @@ FlowField::FlowField(const Parameters& parameters)
       _sijsij(parameters.geometry.dim == 2
                   ? ScalarField(this->getCellsX(), this->getCellsY())
                   : ScalarField(this->getCellsX(), this->getCellsY(),
-                                this->getCellsZ())) {}
+                                this->getCellsZ())) {
+  // turbulent kinetic energy
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "lm", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getTke(i, j, k)};
+          }));
+
+  // dissipation rate
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "epsilon", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getEpsilon(i, j, k)};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "F1", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getF1(i, j, k)};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "F2", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getF2(i, j, k)};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "Fmu", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getFmu(i, j, k)};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "SijSij", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getsijsij(i, j, k)};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "D", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getD(i, j, k)};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "E", [](FlowField& ff, int i, int j, int k) {
+            return std::array<FLOAT, 1>{ff.getE(i, j, k)};
+          }));
+}
 
 ScalarField& FlowField::getFmu() { return _fmu; }
 ScalarField& FlowField::getF1() { return _f1; }
