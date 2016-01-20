@@ -1,0 +1,9 @@
+Programm for creating an arbitrary geometry
+
+Steps:
+1) Open 'mainbatch.m' and set reference to the config file (it contains all informations of geometry and mesh)
+2) Choose and specify information to the arbitrary geometry
+3) Run 'mainbatch.m'
+
+Bug:
+

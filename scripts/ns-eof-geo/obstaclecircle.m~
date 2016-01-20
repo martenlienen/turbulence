@@ -1,0 +1,24 @@
+function [ fu ] = obstaclecircle( x00,y00,r00 )
+
+    fu = @fuu;
+
+    function z = fuu(conf,x,y,z)
+        x0 = conf.lx*x00;
+        y0 = conf.ly*y00;
+        r0 = conf.ly*r00;
+        
+        %% Create obstacles
+        for i=1:length(x)
+            for j=1:length(y)
+                if((x(i)-x0)^2+(y(j)-y0)^2<r0^2)
+                    z(i,j) = 0;
+                end
+            end
+        end
+        
+        
+    end
+
+
+end
+

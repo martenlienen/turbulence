@@ -1,0 +1,92 @@
+clear all
+global file Re l form colt
+
+%% Half height of the channel
+l = 0.5;
+
+% colt = reducedatacols('aturb'); colt.BY = colt.U1;
+% file = 'data100turb0.csv';
+% Re   = 100;
+% form = 'k-+';
+% tauwmain();
+
+% colt = reducedatacols('aturb'); colt.BY = colt.U1;
+% file = 'data1000turb0.csv';
+% Re   = 1000;
+% form = 'k-o';
+% tauwmain();
+
+
+% colt = reducedatacols('aturb'); colt.BY = colt.H;
+% file = 'data5600turb0.csv';
+% Re   = 5600;
+% form = 'k--';
+% tauwmain();
+
+
+
+
+
+colt = reducedatacols('keturb-de'); colt.BY = colt.H;
+file = 'data_2_1000_coarse.csv';
+Re   = 1000;   tauwb = true; div = 1;
+form = 'm';
+tauwmain();
+
+colt = reducedatacols('keturb-de'); colt.BY = colt.H;
+file = 'data_2_5600.csv';
+Re   = 5600;        tauwb = true; div = 1;
+form = 'r';
+tauwmain();
+
+% colt = reducedatacols('aturb'); colt.BY = colt.H;
+% file = 'data5600turb0.csv';
+% Re   = 5600;        tauwb = false; div = 2;
+% form = 'k--';
+% tauwmain();
+
+colt = reducedatacols('keturb-de'); colt.BY = colt.H;
+file = 'data_2_13750_fine.csv';
+Re   = 13750;       tauwb = true; div = 1;
+form = 'b'; 
+tauwmain();
+
+%%
+figure(2000)
+set(gcf,'color','w');
+
+subplot(1,3,1);ylim([0,1]);plot([0 1], [1 0],'k--');
+subplot(1,3,2);ylim([0,1]);plot([0 1], [1 0],'k--');
+
+%%
+figure(3000)
+
+y1 = logspace(0,1.1,10);
+semilogx(y1,y1,'k--');
+
+y2 = logspace(0.9,3,10);
+semilogx(y2,log(y2)/0.41+5.2,'k--');
+set(gcf,'color','w');
+xlabel('y+ [-]');ylabel('w+ [-]');
+
+% legend(...
+%     'k-epsilon',...
+%     'algebraic',...
+%     'measurement Re=13750',...
+%     'w+=y+',...
+%     'w+=log(y+)/0.41+5.2','Location','southeast');
+
+legend(...
+    'measurement Re=1000',...
+    'measurement Re=5600',...
+    'measurement Re=13750',...
+    'w+=y+',...
+    'w+=log(y+)/0.41+5.2','Location','southeast');
+%%
+
+% legend('re=100',...
+%        're=100',...
+%        're=1000',...
+%        're=1000',...
+%        're=5600',...
+%        're=5600','Location','northeast');
