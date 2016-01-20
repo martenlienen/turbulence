@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "../Parameters.h"
 #include "../hdf5/HDF5.h"
 
 namespace nseof {

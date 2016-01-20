@@ -104,6 +104,8 @@ class FlowField {
       const;
 
  protected:
+  std::vector<std::unique_ptr<nseof::plotting::Reader>> readers;
+
   const Parameters& getParameters();
 
  private:
@@ -124,8 +126,6 @@ class FlowField {
   VectorField _FGH;
 
   ScalarField _RHS;  //! Right hand side for the Poisson equation
-
-  std::vector<std::unique_ptr<nseof::plotting::Reader>> readers;
 };
 }
 

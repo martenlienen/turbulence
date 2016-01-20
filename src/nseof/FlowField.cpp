@@ -1,5 +1,8 @@
-#include "FlowField.h"
+// Ensure that mpi.h is included before everything else (otherwise MAC-Cluster
+// complains)
 #include "plotting/LambdaReader.h"
+
+#include "FlowField.h"
 
 namespace nseof {
 
@@ -31,6 +34,32 @@ FlowField::FlowField(const Parameters& parameters)
       std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
           *this, "Pressure", [](FlowField& ff, int i, int j, int k) {
             return std::array<FLOAT, 1>{ff.getPressure().getScalar(i, j, k)};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
+          *this, "Velocity-U", [](FlowField& ff, int i, int j, int k) {
+            FLOAT p;
+            FLOAT v[3];
+            ff.getPressureAndVelocity(p, v, i, j, k);
+            return std::array<FLOAT, 1>{v[0]};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 3>>(
+          *this, "Velocity", [](FlowField& ff, int i, int j, int k) {
+            FLOAT p;
+            FLOAT v[3];
+            ff.getPressureAndVelocity(p, v, i, j, k);
+            return std::array<FLOAT, 3>{v[0], v[1], v[2]};
+          }));
+
+  readers.push_back(
+      std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 3>>(
+          *this, "Velocity-Raw", [](FlowField& ff, int i, int j, int k) {
+            FLOAT* v = ff.getVelocity().getVector(i, j, k);
+
+            return std::array<FLOAT, 3>{v[0], v[1], v[2]};
           }));
 }
 
