@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+
+import os
+
+import matplotlib.pyplot as pp
+import numpy as np
+
+from argparse import ArgumentParser
+
+parser = ArgumentParser(description="Plot summarized scaling results")
+parser.add_argument("-o", "--out", help="Path to write plot to")
+parser.add_argument("-t",
+                    "--type",
+                    default="laminar")
+parser.add_argument("directory", help="Root directory with scaling jobs")
+
+arguments = parser.parse_args()
+
+runs = [{"label": "Optimized (Level = 0)",
+         "dir": "scaling-channel-strong-{}-level-0".format(arguments.type),
+         "ls": "--o"},
+        {"label": "Optimized (Level = 1)",
+         "dir": "scaling-channel-strong-{}-level-1".format(arguments.type),
+         "ls": ":s"},
+        {"label": "Optimized (Level = Default)",
+         "dir":
+         "scaling-channel-strong-{}-level-default".format(arguments.type),
+         "ls": "-.+"},
+        {"label": "Default",
+         "dir": "scaling-channel-strong-{}-old".format(arguments.type),
+         "ls": "-D"}] # yapf: disable
+
+
+timingdata = {}
+
+for run in runs:
+    path = os.path.join(arguments.directory, run["dir"], "summary.csv")
+    timingdata[run["label"]] = np.genfromtxt(path,
+                                             skip_header=1,
+                                             delimiter=",")
+
+pp.figure(figsize=(16, 8), dpi=80)
+pp.subplot(1, 2, 1)
+
+# Plot absolute times
+for run in runs:
+    data = timingdata[run["label"]]
+    data = data[np.logical_not(np.isnan(data[:, 2]))]
+
+    pp.plot(data[:, 0], data[:, 2], run["ls"], label=run["label"], lw=2)
+
+pp.grid()
+pp.xlabel("Number of Processes")
+pp.ylabel("Total PETSc Time [s]")
+pp.legend()
+
+defaultData = timingdata["Default"]
+
+# Normalize times with default time
+for run in runs:
+    timingdata[run["label"]][:, 2] /= defaultData[:, 2]
+
+pp.subplot(1, 2, 2)
+pp.yscale("log")
+
+# Plot normalized times
+for run in runs:
+    data = timingdata[run["label"]]
+    data = data[np.logical_not(np.isnan(data[:, 2]))]
+
+    pp.plot(data[:, 0], data[:, 2], run["ls"], label=run["label"], lw=2)
+
+pp.grid(which="both")
+pp.xlabel("Number of Processes")
+pp.ylabel("Running Time of PETSc Relative to Default [-]")
+pp.legend()
+
+if arguments.out:
+    pp.savefig(arguments.out, bbox_inches="tight")
+else:
+    pp.show()

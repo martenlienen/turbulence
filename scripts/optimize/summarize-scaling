@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+
+import csv
+import os
+import re
+from argparse import ArgumentParser
+
+
+def parseArguments():
+    parser = ArgumentParser(
+        description="Summarize the results of a scaling run as CSV")
+    parser.add_argument("directory", help="Root directory of the scaling run")
+
+    return parser.parse_args()
+
+
+jobre = re.compile("job-(\d+)_\d+-\d+-\d+")
+
+def diverged(outfile):
+    with open(outfile, "r") as f:
+        for l in f:
+            if "DIVERGED_" in l:
+                return True
+
+    return False
+
+
+def main():
+    arguments = parseArguments()
+
+    dirs = os.listdir(arguments.directory)
+    dirs = [
+        (int(jobre.match(d).group(1)),
+         os.path.join(arguments.directory, d)) for d in dirs if jobre.match(d)
+    ]
+    dirs.sort(key=lambda p: p[0])
+
+    data = []
+
+    for np, d in dirs:
+        outfile = os.path.join(d, "out")
+        timingfile = os.path.join(d, "timing", "rank-0")
+
+        if not os.path.isfile(timingfile) or diverged(outfile):
+            data.append((np, None, None))
+            continue
+
+        if os.path.isfile(timingfile):
+            with open(timingfile, "r") as f:
+                lines = f.readlines()
+
+            times = {l.split(" ")[0]: l.split(" ")[1].strip() for l in lines}
+
+            data.append((np, times["total"], times["poisson"]))
+
+    outfile = os.path.join(arguments.directory, "summary.csv")
+    with open(outfile, "w") as f:
+        csvfile = csv.writer(f)
+        csvfile.writerow(["np", "total", "poisson"])
+
+        for row in data:
+            csvfile.writerow(row)
+
+
+if __name__ == "__main__":
+    main()
