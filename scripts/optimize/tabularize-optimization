@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+
+import json
+import os
+from argparse import ArgumentParser
+
+
+def diverged(outfile):
+    with open(outfile, "r") as f:
+        for l in f:
+            if "DIVERGED_" in l:
+                return True
+
+    return False
+
+
+def configuration(directory):
+    conffile = os.path.join(directory, "conf.json")
+
+    with open(conffile, "r") as f:
+        return json.load(f)
+
+
+def poissonTime(directory):
+    outfile = os.path.join(directory, "out")
+    timingfile = os.path.join(directory, "timing", "rank-0")
+
+    if diverged(outfile):
+        return None
+
+    if not os.path.isfile(timingfile):
+        return None
+
+    with open(timingfile, "r") as f:
+        lines = f.readlines()
+
+    times = {l.split(" ")[0]: l.split(" ")[1] for l in lines}
+
+    return float(times["poisson"])
+
+
+parser = ArgumentParser(
+    description=
+    "Create a LaTeX Table of Poisson Times From Optimization Results")
+parser.add_argument("directory", help="Evaluations Directory")
+
+arguments = parser.parse_args()
+dirs = os.listdir(arguments.directory)
+
+data = [(configuration(os.path.join(arguments.directory, d)),
+         poissonTime(os.path.join(arguments.directory, d))) for d in dirs]
+
+data.sort(key=lambda pair: float(pair[1] or 10**6))
+
+rank = 1
+finished = True
+print("\\hline Rank & ", " & ".join(sorted(data[0][0].keys())),
+      " & PETSc-Time\\\\ \\hline")
+for conf, time in data:
+    options = list(conf.keys())
+    options.sort()
+
+    def toString(o):
+        if isinstance(o, bool):
+            if o:
+                return "Yes"
+            else:
+                return "No"
+        else:
+            return str(o)
+
+    values = [toString(conf[o]) for o in options]
+
+    if finished and time is None:
+        print("\\hline")
+        finished = False
+
+    print(rank, "&", " & ".join(values), "&", time or "-", "\\\\")
+    rank = rank + 1
+
+print("\\hline")

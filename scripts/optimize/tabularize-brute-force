@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+
+import os
+from argparse import ArgumentParser
+
+
+def diverged(outfile):
+    with open(outfile, "r") as f:
+        for l in f:
+            if "DIVERGED_" in l:
+                return True
+
+    return False
+
+
+def poissonTime(directory):
+    outfile = os.path.join(directory, "out")
+    timingfile = os.path.join(directory, "timing", "rank-0")
+
+    if diverged(outfile):
+        return None
+
+    if not os.path.isfile(timingfile):
+        return None
+
+    with open(timingfile, "r") as f:
+        lines = f.readlines()
+
+    times = {l.split(" ")[0]: l.split(" ")[1] for l in lines}
+
+    return float(times["poisson"])
+
+
+parser = ArgumentParser(
+    description=
+    "Create a LaTeX Table of Poisson Times From Brute-Force Results")
+parser.add_argument("directory", help="Evaluations Directory")
+
+arguments = parser.parse_args()
+dirs = os.listdir(arguments.directory)
+
+data = [(d.split("-"), poissonTime(os.path.join(arguments.directory, d)))
+        for d in dirs]
+
+data.sort(key=lambda pair: float(pair[1] or 10**6))
+
+rank = 1
+finished = True
+print("""\\hline Rank & Solver & Preconditioner & Sub-Solver & Sub-Preconditioner & PETSc-Time\\\\ \\hline
+""") # yapf: disable
+for conf, time in data:
+    if len(conf) == 2:
+        conf = [*conf, "-", "-"]
+
+    if finished and time is None:
+        print("\\hline")
+        finished = False
+
+    print(rank, "&", " & ".join(conf), "&", time or "-", "\\\\")
+    rank = rank + 1
+
+print("\\hline")
