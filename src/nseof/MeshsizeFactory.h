@@ -46,9 +46,9 @@ class MeshsizeFactory {
     if (mesh == NULL) {
       handleError(1, "parameters.meshsize==NULL!");
     } else {
-      parameters.meshsize = mesh;
-      // parameters.meshsize = new MemoizedMesh(parameters,
-      //                                        std::unique_ptr<Meshsize>(mesh));
+      // parameters.meshsize = mesh;
+      parameters.meshsize =
+          new MemoizedMesh(parameters, std::unique_ptr<Meshsize>(mesh));
     }
   }
 
