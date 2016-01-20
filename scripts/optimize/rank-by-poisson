@@ -1,0 +1,20 @@
+#!/bin/bash
+
+directory=$1
+
+for conf in $(ls "$directory/evaluations"); do
+  dir="$directory/evaluations/$conf"
+  if grep -q "PETSC ERROR" "$dir/out"; then
+    continue
+  fi
+
+  if grep -q "DIVERGED_" "$dir/out"; then
+    continue
+  fi
+
+  if [[ -e "$dir/timing/rank-0" ]]; then
+    time=$(grep poisson "$dir/timing/rank-0" | cut -d " " -f 2)
+
+    echo -e "$time\t$conf"
+  fi
+done

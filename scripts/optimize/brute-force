@@ -1,0 +1,133 @@
+#!/usr/bin/env python
+
+import itertools
+import os
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+from argparse import ArgumentParser
+
+
+def parseArguments():
+    parser = ArgumentParser(
+        description=
+        "Run a scenario with all combinations of solvers and preconditioners",
+        epilog=
+        "Additional arguments are passed directly to scripts/cluster/run")
+    parser.add_argument("-c",
+                        "--configurations",
+                        help="File with one configuration per line")
+    parser.add_argument("directory", help="Directory for runs and output")
+    parser.add_argument("scenario", help="Scenario to run")
+
+    return parser.parse_known_args()
+
+# Static options to apply in any case
+OPTIONS = {
+    "ksp_converged_reason": True,
+    "ksp_atol": 1e-6,
+    "ksp_rtol": 1e-6,
+    "ksp_max_it": int(1e5)
+}
+
+
+def createPetscArgs(options):
+    ops = OPTIONS.copy()
+    ops.update(options)
+
+    with tempfile.NamedTemporaryFile(delete=False, mode="w") as file:
+        for k, v in ops.items():
+            if isinstance(v, bool) and v:
+                line = "-{}".format(k)
+            elif isinstance(v, float):
+                line = "-{} {:f}".format(k, v)
+            elif isinstance(v, int):
+                line = "-{} {:d}".format(k, v)
+            elif isinstance(v, str):
+                line = "-{} {}".format(k, v)
+            else:
+                sys.exit("Unknown type for option {}".format(k))
+
+            file.write(line + "\n")
+
+        return file.name
+
+# Options and possible values for different solvers
+SOLVERS = [
+    "chebyshev", "cg", "bicg", "gmres", "fgmres", "dgmres", "gcr", "bcgs",
+    "cgs", "tfqmr", "tcqmr", "cr", "lsqr"
+]
+
+# Options and possible values for different preconditioners
+PRECONDITIONERS = [
+    "jacobi", "bjacobi", "sor", "eisenstat", "icc", "ilu", "asm", "gasm",
+    "gamg", "bddc", "ksp", "lu", "cholesky", "none"
+]
+
+# Fastest PCs that are potentially parallel
+FAST_PCS = ["jacobi", "bjacobi", "asm"]
+
+
+def main():
+    arguments, rest = parseArguments()
+    arguments.directory = os.path.realpath(arguments.directory)
+
+    if os.path.exists(arguments.directory):
+        sys.exit("{} already exists".format(arguments.directory))
+
+    os.makedirs(arguments.directory)
+
+    dir = arguments.directory
+    ns = os.path.join(dir, "ns")
+    scenario = os.path.join(dir, "scenario.xml")
+    evaluations = os.path.join(dir, "evaluations")
+
+    # Copy all relevant files
+    shutil.copyfile(arguments.scenario, scenario)
+    shutil.copyfile(os.path.realpath("./ns"), ns)
+    os.chmod(ns, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
+    if arguments.configurations:
+        with open(arguments.configurations, "r") as f:
+            combinations = []
+            for l in f.readlines():
+                solv, subpc = l.strip().split("-")
+
+                for pc in FAST_PCS:
+                    combinations.append((solv, pc, solv, subpc))
+                    combinations.append((solv, pc, "preonly", subpc))
+    else:
+        combinations = list(itertools.product(SOLVERS, PRECONDITIONERS))
+        combinations = [(c[0], c[1], c[0], c[1]) for c in combinations]
+
+    for solv, pc, subsolv, subpc in combinations:
+        if arguments.configurations:
+            outdir = os.path.join(evaluations, "{}-{}-{}-{}".format(
+                solv, pc, subsolv, subpc))
+        else:
+            outdir = os.path.join(evaluations, "{}-{}".format(solv, pc))
+
+        jobname = "bf-{}-{}".format(solv[0:3], pc[0:3])
+        options = {"ksp_type": solv,
+                   "pc_type": pc,
+                   "sub_ksp_type": subsolv,
+                   "sub_pc_type": subpc}
+        logfile = os.path.join(outdir, "log")
+
+        os.makedirs(outdir)
+
+        with open(logfile, "w") as log:
+            petsc_args = createPetscArgs(options)
+
+            command = ["scripts/cluster/run", "--petsc-args", petsc_args,
+                       "--name", jobname]
+            command += rest
+            command += [outdir, ns, scenario]
+
+            subprocess.call(command, stdout=log, stderr=log)
+
+
+if __name__ == "__main__":
+    main()

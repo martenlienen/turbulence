@@ -1,0 +1,148 @@
+#!/usr/bin/env python
+
+import itertools
+import json
+import os
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+from argparse import ArgumentParser
+
+SOLVER = "bcgs"
+PC = "asm"
+SUBSOLVER = "preonly"
+SUBPC = "ilu"
+
+
+def parseArguments():
+    parser = ArgumentParser(
+        description="Test all combinations of options for bcgs-ilu",
+        epilog=
+        "Additional arguments are passed directly to scripts/cluster/run")
+    parser.add_argument("directory", help="Directory for runs and output")
+    parser.add_argument("scenario", help="Scenario to run")
+
+    return parser.parse_known_args()
+
+# Static options to apply in any case
+OPTIONS = {
+    "ksp_converged_reason": True,
+    "ksp_atol": 1e-6,
+    "ksp_rtol": 1e-6,
+    "ksp_max_it": int(1e5)
+}
+
+
+def createPetscArgs(options):
+    ops = OPTIONS.copy()
+    ops.update(options)
+
+    with tempfile.NamedTemporaryFile(delete=False, mode="w") as file:
+        for k, v in ops.items():
+            if isinstance(v, bool):
+                if v:
+                    line = "-{}".format(k)
+                else:
+                    continue
+            elif isinstance(v, float):
+                line = "-{} {:f}".format(k, v)
+            elif isinstance(v, int):
+                line = "-{} {:d}".format(k, v)
+            elif isinstance(v, str):
+                line = "-{} {}".format(k, v)
+            else:
+                sys.exit("Unknown type for option {}".format(k))
+
+            file.write(line + "\n")
+
+        return file.name
+
+
+ILU_OPTIONS = {
+    "levels": [0, 1, 2, 3],
+    "diagonal_fill": [True, False],
+    "reuse_ordering": [True, False],
+    "nonzeros_along_diagonal": [True, False],
+    "pivot_in_blocks": [True, False]
+}
+
+
+def iluOptionCombinations():
+    options = [itertools.product([k], v) for k, v in ILU_OPTIONS.items()]
+    options = itertools.product(*options)
+
+    return [{k: v for k, v in o} for o in options]
+
+
+def main():
+    arguments, rest = parseArguments()
+    arguments.directory = os.path.realpath(arguments.directory)
+
+    if os.path.exists(arguments.directory):
+        sys.exit("{} already exists".format(arguments.directory))
+
+    os.makedirs(arguments.directory)
+
+    dir = arguments.directory
+    ns = os.path.join(dir, "ns")
+    scenario = os.path.join(dir, "scenario.xml")
+    evaluations = os.path.join(dir, "evaluations")
+
+    # Copy all relevant files
+    shutil.copyfile(arguments.scenario, scenario)
+    shutil.copyfile(os.path.realpath("./ns"), ns)
+    os.chmod(ns, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
+    combinations = iluOptionCombinations()
+
+    def shorten(value):
+        if isinstance(value, bool):
+            if value:
+                return "y"
+            else:
+                return "n"
+        elif isinstance(value, int):
+            return str(value)
+        elif isinstance(value, str):
+            return value[:4]
+
+    def summarize(combination):
+        keys = sorted(combination.keys())
+
+        return "_".join(["{}-{}".format(
+            shorten(k), shorten(combination[k])) for k in keys])
+
+    for i in range(len(combinations)):
+        c = combinations[i]
+        outdir = os.path.join(evaluations, summarize(c))
+        jobname = "bi-{}".format(summarize(c))
+        logfile = os.path.join(outdir, "log")
+        conffile = os.path.join(outdir, "conf.json")
+        options = {"ksp_type": SOLVER,
+                   "pc_type": PC,
+                   "sub_ksp_type": SUBSOLVER,
+                   "sub_pc_type": SUBPC}
+
+        for k, v in c.items():
+            options["sub_pc_factor_{}".format(k)] = v
+
+        os.makedirs(outdir)
+
+        with open(conffile, "w") as cf:
+            json.dump(c, cf)
+
+        with open(logfile, "w") as log:
+            petsc_args = createPetscArgs(options)
+
+            command = ["scripts/cluster/run", "--petsc-args", petsc_args,
+                       "--name", jobname]
+            command += rest
+            command += [outdir, ns, scenario]
+
+            subprocess.call(command, stdout=log, stderr=log)
+
+
+if __name__ == "__main__":
+    main()

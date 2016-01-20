@@ -1,3 +1,5 @@
+### Optimized configuration
+
 # General settings
 -ksp_converged_reason
 -ksp_atol 1e-6
@@ -5,7 +7,7 @@
 -ksp_max_it 100000
 
 # Solvers and Preconditioners
--ksp_type fgmres
+-ksp_type bcgs
 -pc_type asm
 -sub_ksp_type preonly
 -sub_pc_type ilu

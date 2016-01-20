@@ -177,12 +177,8 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     // compute the right hand side
     _rhsIterator.iterate();
 
-    timer->start("poisson");
-
     // solve for pressure
     _solver.solve();
-
-    timer->stop("poisson");
 
     timer->start("communication");
     timer->start("pressure-communication");

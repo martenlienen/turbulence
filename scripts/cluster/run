@@ -99,7 +99,10 @@ def parseArguments():
                         action="store_const",
                         const=True,
                         default=False,
-                        help="Run on local machine"),
+                        help="Run on local machine")
+    parser.add_argument("--petsc-args",
+                        default="petsc_commandline_arg",
+                        help="PETSc arguments file")
     parser.add_argument(
         "out",
         help="Directory to store job configuration and results")
@@ -110,17 +113,17 @@ def parseArguments():
     arguments = parser.parse_args()
 
     if not arguments.email and not arguments.local:
-        parser.error("You need to set your email address to run on the cluster")
+        parser.error(
+            "You need to set your email address to run on the cluster")
 
     return arguments
 
 
-def copyPetscArguments(jobdir):
+def copyPetscArguments(jobdir, argsfile):
     """Copy the petsc_commandline_arg file to the job directory.
 
     Our code expects a petsc_commandline_arg file in the working directory."""
-    shutil.copyfile("petsc_commandline_arg",
-                    os.path.join(jobdir, "petsc_commandline_arg"))
+    shutil.copyfile(argsfile, os.path.join(jobdir, "petsc_commandline_arg"))
 
 
 def configureScenario(out, templatepath, geometrypath, nx, ny, nz, sx, sy, sz,
@@ -194,10 +197,12 @@ def submitJob(jobpath, logfile):
 
 
 def runlocal(nranks, executable, scenario):
-    code = subprocess.call(
-        ["mpiexec", "-np", str(nranks), executable, scenario],
-        stdout=sys.stdout,
-        stderr=sys.stdout)
+    if nranks > 1:
+        command = ["mpiexec", "-np", str(nranks), executable, scenario]
+    else:
+        command = [executable, scenario]
+
+    code = subprocess.call(command, stdout=sys.stdout, stderr=sys.stdout)
     return code == 0
 
 
@@ -207,7 +212,7 @@ def main():
     options.out = os.path.realpath(options.out)
 
     if not os.path.isdir(options.out):
-        os.mkdir(options.out)
+        os.makedirs(options.out)
 
     t = time.strptime(options.time, "%H:%M")
     maxTime = time.strftime("%H:%M:00", t)
@@ -227,7 +232,7 @@ def main():
         os.mkdir(timingpath)
 
     with open(log, "w") as logfile:
-        copyPetscArguments(options.out)
+        copyPetscArguments(options.out, options.petsc_args)
 
         configureScenario(scenario, options.scenario, geometry, options.nx,
                           options.ny, options.nz, options.sx, options.sy,
@@ -237,8 +242,7 @@ def main():
         nranks = options.nx * options.ny * options.nz
 
         if options.local:
-            runlocal(nranks, os.path.realpath(options.executable), scenario,
-                     logfile)
+            runlocal(nranks, os.path.realpath(options.executable), scenario)
         else:
             createJob(jobpath, outpath, options.out, options.name, scenario,
                       options.architecture, nranks, options.email,
