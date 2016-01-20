@@ -9,6 +9,8 @@ option(SCOREP "Do you want to use scorep profiling?" OFF)
 
 option(PROFILING "Compile in extra profiling information for gprof" OFF)
 
+option(HDF5 "Build with HDF5 plotting" OFF)
+
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Debug")
   set(CMAKE_BUILD_TYPE "Debug")
@@ -52,9 +54,13 @@ find_package(PETSc REQUIRED)
 include_directories(${PETSC_INCLUDES})
 add_definitions(${PETSC_DEFINITIONS})
 
-find_package(HDF5 REQUIRED)
-include_directories(${HDF5_INCLUDE_DIRS})
-add_definitions(${HDF5_DEFINITIONS})
+if (HDF5)
+  find_package(HDF5 REQUIRED)
+  include_directories(${HDF5_INCLUDE_DIRS})
+  add_definitions(${HDF5_DEFINITIONS})
+
+  add_definitions(-DWITH_HDF5)
+endif()
 
 add_subdirectory("3rdparty/tinyxml2")
 include_directories("3rdparty/tinyxml2")

@@ -15,7 +15,9 @@
 #include "nseof/MeshsizeFactory.h"
 #include "nseof/MultiTimer.h"
 
+#ifdef WITH_HDF5
 #include "nseof/hdf5/HDF5Plotter.h"
+#endif
 
 int main(int argc, char *argv[]) {
   auto timer = nseof::MultiTimer::get();
@@ -105,13 +107,14 @@ int main(int argc, char *argv[]) {
 
   nseof::FLOAT time = 0.0;
   nseof::FLOAT timeVTK = parameters.vtk.interval;
-  nseof::FLOAT timeHDF5 = parameters.hdf5.interval;
   int timeSteps = 0;
 
   // TODO WS1: plot initial state
   simulation->deserialize();
   simulation->init();
 
+#ifdef WITH_HDF5
+  nseof::FLOAT timeHDF5 = parameters.hdf5.interval;
   int lastHDF5 = -1;
   std::unique_ptr<nseof::hdf5::HDF5Plotter> hdf5plotter;
   if (parameters.hdf5.enabled) {
@@ -119,6 +122,7 @@ int main(int argc, char *argv[]) {
         std::make_unique<nseof::hdf5::HDF5Plotter>(parameters, rank, nproc);
     hdf5plotter->plotFlowField(0, simulation->getFlowField());
   }
+#endif
 
   simulation->plotVTK(rank, 0);
 
@@ -151,6 +155,7 @@ int main(int argc, char *argv[]) {
       timeVTK += parameters.vtk.interval;
     }
 
+#ifdef WITH_HDF5
     if (time >= timeHDF5) {
       if (parameters.hdf5.enabled) {
         hdf5plotter->plotFlowField(timeSteps, simulation->getFlowField());
@@ -159,12 +164,14 @@ int main(int argc, char *argv[]) {
 
       timeHDF5 += parameters.hdf5.interval;
     }
+#endif
   }
 
   // TODO WS1: plot final output
   simulation->serialize();
   simulation->plotVTK(rank, timeSteps);
 
+#ifdef WITH_HDF5
   // Plot the final state if it was not plotted in the last iteration
   if (parameters.hdf5.enabled && timeSteps > lastHDF5) {
     hdf5plotter->plotFlowField(timeSteps, simulation->getFlowField());
@@ -173,6 +180,7 @@ int main(int argc, char *argv[]) {
   // Explicitly destroy the plotter here so that it finalizes the HDF5 file over
   // MPI before MPI is shut down via PetscFinalize.
   hdf5plotter.reset();
+#endif
 
   delete simulation;
   simulation = NULL;

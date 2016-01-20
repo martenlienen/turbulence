@@ -1,6 +1,8 @@
 #ifndef _NSEOF_PLOTTING_LAMBDA_READER_H_
 #define _NSEOF_PLOTTING_LAMBDA_READER_H_
 
+#ifdef WITH_HDF5
+
 // Ensure that mpi.h is included before everything else (otherwise MAC-Cluster
 // complains)
 #include <hdf5.h>
@@ -29,7 +31,6 @@ struct HDF5Types<double> {
   static hid_t getType() { return H5T_IEEE_F64LE; }
   static hid_t getNativeType() { return H5T_NATIVE_DOUBLE; }
 };
-
 
 template <typename T, typename FF, int n>
 class LambdaReader : public Reader {
@@ -101,5 +102,37 @@ void LambdaReader<T, FF, n>::write(const hid_t dataset, Parameters& params,
 }
 }
 }
+
+#endif  // WITH_HDF5
+
+#ifndef WITH_HDF5
+
+#include <array>
+#include <functional>
+#include <string>
+
+#include "Reader.h"
+
+namespace nseof {
+
+namespace plotting {
+
+template <typename T, typename FF, int n>
+class LambdaReader : public Reader {
+ public:
+  LambdaReader(FF& flowField, std::string name,
+               std::function<std::array<T, n>(FF&, int, int, int)> read){};
+
+  int getDim() { return 0; };
+  std::string getName() { return ""; };
+  int getHDF5Type() { return 0; };
+  int getHDF5NativeType() { return 0; };
+  void write(const hid_t dataset, Parameters& params,
+             nseof::hdf5::HDF5& hdf5){};
+};
+}
+}
+
+#endif  // !WITH_HDF5
 
 #endif  // _NSEOF_PLOTTING_LAMBDA_READER_H_
