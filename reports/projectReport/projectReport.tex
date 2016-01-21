@@ -4,6 +4,7 @@
 \usepackage{bookmark}
 \usepackage{multirow}
 
+
 %%
 \usepackage[framemethod=tikz]{mdframed}
 \usetikzlibrary{calc}
@@ -17,6 +18,9 @@
 errorsymbol/.style={%
     rectangle,draw=blue,
    ,scale=2,overlay}}
+
+\tikzstyle{line} = [ draw, -latex']  
+\usetikzlibrary{calc}
 
 \tikzset{
  lampsymbol/.style={%
@@ -87,6 +91,8 @@ errorsymbol/.style={%
 %breaklines=true
 %}
 
+\newcommand{\ke}{$k$-$\varepsilon$}
+
 \newcommand{\xmll}[2]{
     \lstset{
 numberstyle=\tiny,%5
@@ -152,7 +158,7 @@ basicstyle={\ttfamily},%
 \thesistype{Project Report}
 \author{Marten Lienen, Peter M\"unch, Walter Simson, Josef Winter}
 \matno{ a}
-\title{K-Epsilon turbulence model}
+\title{$k$-$\varepsilon$ Turbulence Model}
 \tutor{ b}{ c}
 
 
@@ -186,10 +192,11 @@ basicstyle={\ttfamily},%
 \pagenumbering{roman}
 \setcounter{page}{\thealteSeitenzahl}
 \appendix
-\include{chapters/appendixMain}
+%\include{chapters/appendixMain}
 
 %\listoffigures
-\bibliography{my_bachelor_thesis}{}
+\bibliography{projectReport}{}
+%\bibliography{my_bachelor_thesis}{}
 \bibliographystyle{plainnat}
 %\bibliography{my_bachelor_thesis}{}
 %\bibliographystyle{plainnat}

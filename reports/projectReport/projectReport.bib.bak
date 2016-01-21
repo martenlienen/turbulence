@@ -1,0 +1,134 @@
+% This file was created with JabRef 2.10b2.
+% Encoding: UTF-8
+
+
+@TechReport{adams2015,
+  Title                    = {Turbulente Str{\"o}mungen - Einfuehrung in die Theorie und Berechnung},
+  Author                   = {N. A. Adams},
+  Institution              = {Lehrstuhl f{\"u}r Aerodynamik - Technische Universit{\"a}t M{\"u}nchen},
+  Year                     = {2015},
+
+  Date-added               = {2016-01-20 21:07:30 +0000},
+  Date-modified            = {2016-01-20 21:13:19 +0000}
+}
+
+@Article{fan1993,
+  Title                    = {Low-Reynolds-number k-epsilon model for unsteady turbulent boundary-layer flows},
+  Author                   = {Fan, Sixin and Lakshminarayana, Budugur and Barnett, Mark},
+  Journal                  = {AIAA journal},
+  Year                     = {1993},
+  Number                   = {10},
+  Pages                    = {1777--1784},
+  Volume                   = {31},
+
+  Date-added               = {2016-01-20 20:36:32 +0000},
+  Date-modified            = {2016-01-20 20:39:40 +0000}
+}
+
+@Book{griebel1998,
+  Title                    = {Numerical Simulation in Fluid Dynamics},
+  Author                   = {Griebel, Michael Dormseifer, Thomas Neunhoffer, Tilman},
+  Publisher                = {Society for Industrial and Applied Mathematics},
+  Year                     = {1998},
+
+  Owner                    = {peterrum},
+  Timestamp                = {2016.01.21}
+}
+
+@Article{,
+  Title                    = {Turbulence statistics in fully developed channel flow at low Reynolds number},
+  Author                   = {Kim, John; Moin, Parviz; Moser, Robert},
+  Journal                  = {J. Fluid Mech.},
+  Year                     = {1987},
+  Pages                    = {133-166},
+  Volume                   = {177},
+
+  Owner                    = {peterrum},
+  Timestamp                = {2016.01.21}
+}
+
+@TechReport{koehler2015,
+  Title                    = {Untersuchung der unterkritischen Umstr \"omung eines zylindrischen K\"orpers bei Re=10.000-50.000},
+  Author                   = {Koehler, C and Korthales, T and Muench, Peter and Wirth, F},
+  Institution              = {Technische Universitaet Muenchen},
+  Year                     = {2015},
+  Type                     = {Lab course report},
+
+  Date-added               = {2016-01-20 23:08:58 +0000},
+  Date-modified            = {2016-01-20 23:10:56 +0000}
+}
+
+@Article{kuzmin2007,
+  Title                    = {On the implementation of the $\kappa$-$\varepsilon$ turbulence model in incompressible flow solvers based on a finite element discretisation},
+  Author                   = {Kuzmin, Dmitri and Mierka, Otto and Turek, Stefan},
+  Journal                  = {International Journal of Computing Science and Mathematics},
+  Year                     = {2007},
+  Number                   = {2-4},
+  Pages                    = {193--206},
+  Volume                   = {1},
+
+  Date-added               = {2016-01-20 20:40:14 +0000},
+  Date-modified            = {2016-01-20 20:40:23 +0000},
+  Publisher                = {Inderscience Publishers}
+}
+
+@Article{lew2001,
+  Title                    = {A Note on the Numerical Treatment of the k-epsilon Turbulence Model*},
+  Author                   = {ADRIAN J. LEW† and GUSTAVO C. BUSCAGLIA and PABLO M. CARRICA},
+  Journal                  = {International Journal of Computational Fluid Dynamics},
+  Year                     = {2001},
+  Number                   = {3},
+  Pages                    = {201-209},
+  Volume                   = {14},
+
+  Date-added               = {2016-01-20 21:06:18 +0000},
+  Date-modified            = {2016-01-20 21:06:59 +0000},
+  Doi                      = {10.1080/10618560108940724},
+  Eprint                   = {http://dx.doi.org/10.1080/10618560108940724},
+  Url                      = {http://dx.doi.org/10.1080/10618560108940724}
+}
+
+@TechReport{lienen2015,
+  Title                    = {Turbulent Flow Simulation, 2nd Sheet Report},
+  Author                   = {Lienen, Marten and Muench, Peter and Simson, Walter},
+  Institution              = {Technische Universitaet Muenchen},
+  Year                     = {2015},
+  Type                     = {Lab course report},
+
+  Date-added               = {2016-01-20 21:17:23 +0000},
+  Date-modified            = {2016-01-20 23:11:09 +0000}
+}
+
+@Article{michelassi1993,
+  Title                    = {Testing a low-Reynolds number k-epsilon turbulence model based on direct simulation data},
+  Author                   = {Michelassi, Vittorio and Rodi, Wolfgang and Zhu, J},
+  Journal                  = {AIAA journal},
+  Year                     = {1993},
+  Number                   = {9},
+  Pages                    = {1720--1723},
+  Volume                   = {31},
+
+  Date-added               = {2016-01-20 20:39:26 +0000},
+  Date-modified            = {2016-01-20 20:39:37 +0000}
+}
+
+@Book{pope2000,
+  Title                    = {Turbulent Flows},
+  Author                   = {Stephen B. Pope},
+  Publisher                = {Camebridge University Press},
+  Year                     = {2000},
+
+  Owner                    = {peterrum},
+  Timestamp                = {2016.01.21}
+}
+
+@TechReport{stemmer2015,
+  Title                    = {Grenzschichttheorie},
+  Author                   = {Christian Stemmer},
+  Institution              = {Lehrstuhl f{\"u}r Aerodynamik - Technische Universit{\"a}t M{\"u}nchen},
+  Year                     = {2015},
+
+  Date-added               = {2016-01-20 21:13:23 +0000},
+  Date-modified            = {2016-01-20 21:17:03 +0000}
+}
+

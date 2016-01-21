@@ -1,30 +1,26 @@
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}
-\contentsline {chapter}{\numberline {2}Turbulence modeling with k-Epsilon model}{2}{chapter.2}
+\contentsline {chapter}{\numberline {2}Turbulence modeling with $k$-$\varepsilon $\tmspace +\thinmuskip {.1667em} model}{2}{chapter.2}
 \contentsline {section}{\numberline {2.1}Governing equations}{2}{section.2.1}
 \contentsline {section}{\numberline {2.2}RANS equations}{2}{section.2.2}
-\contentsline {section}{\numberline {2.3}K-epsilon transport equations}{3}{section.2.3}
-\contentsline {section}{\numberline {2.4}Discretization}{4}{section.2.4}
-\contentsline {section}{\numberline {2.5}Modification 1: Low-Reynolds models for wall near region}{5}{section.2.5}
-\contentsline {section}{\numberline {2.6}Modification 2: Limitation of source and reaction terms in transport equtions}{7}{section.2.6}
-\contentsline {section}{\numberline {2.7}Modified equations and discretization}{7}{section.2.7}
-\contentsline {chapter}{\numberline {3}Algorithm}{8}{chapter.3}
-\contentsline {chapter}{\numberline {4}Performance, efficiency and further modifications}{11}{chapter.4}
-\contentsline {section}{\numberline {4.1}New scenarios}{11}{section.4.1}
-\contentsline {section}{\numberline {4.2}PETSC-optimization}{13}{section.4.2}
-\contentsline {section}{\numberline {4.3}Restart points}{14}{section.4.3}
-\contentsline {chapter}{\numberline {5}Validation of k-epsilon-model}{15}{chapter.5}
-\contentsline {section}{\numberline {5.1}Channel flow}{15}{section.5.1}
-\contentsline {subsubsection}{\nonumberline Comparison with the literature: velocity profile for Re=5600}{16}{section*.9}
-\contentsline {subsubsection}{\nonumberline Sublayers}{17}{section*.10}
-\contentsline {section}{\numberline {5.2}Boundary layer}{20}{section.5.2}
-\contentsline {chapter}{\numberline {6}Performance tests}{21}{chapter.6}
-\contentsline {chapter}{\numberline {7}Numerical results of DNS Simulations}{22}{chapter.7}
-\contentsline {section}{\numberline {7.1}Backward facing step}{22}{section.7.1}
-\contentsline {section}{\numberline {7.2}Karman vortex street - flow around a cylinder in a channel}{22}{section.7.2}
-\contentsline {chapter}{\numberline {8}Usability}{23}{chapter.8}
-\contentsline {section}{\numberline {8.1}Project folder}{23}{section.8.1}
-\contentsline {section}{\numberline {8.2}Configuration file}{25}{section.8.2}
-\contentsline {section}{\numberline {8.3}Geometry file}{29}{section.8.3}
-\contentsline {chapter}{\numberline {9}Conclusion}{30}{chapter.9}
-\contentsline {chapter}{\numberline {A}Details Concerning Consistent Linearization of 2D Mortar Contact}{v}{Appendix.a.A}
-\contentsline {chapter}{Bibliography}{vi}{appendix*.18}
+\contentsline {section}{\numberline {2.3}k-$\varepsilon $ transport equations}{3}{section.2.3}
+\contentsline {section}{\numberline {2.4}Modification 1: Low-Reynolds models for wall near region}{4}{section.2.4}
+\contentsline {section}{\numberline {2.5}Modification 2: Limitations in transport equations}{5}{section.2.5}
+\contentsline {section}{\numberline {2.6}Modified equations and discretization}{6}{section.2.6}
+\contentsline {chapter}{\numberline {3}Numerics and algorithm}{7}{chapter.3}
+\contentsline {chapter}{\numberline {4}Performance, efficiency and further modifications}{12}{chapter.4}
+\contentsline {section}{\numberline {4.1}New scenarios}{12}{section.4.1}
+\contentsline {section}{\numberline {4.2}PETSc-optimization}{14}{section.4.2}
+\contentsline {section}{\numberline {4.3}Restart points}{15}{section.4.3}
+\contentsline {chapter}{\numberline {5}Validation of the $k$-$\varepsilon $\tmspace +\thinmuskip {.1667em} model}{16}{chapter.5}
+\contentsline {section}{\numberline {5.1}Channel flow}{16}{section.5.1}
+\contentsline {section}{\numberline {5.2}Boundary layer}{21}{section.5.2}
+\contentsline {chapter}{\numberline {6}Performance tests}{23}{chapter.6}
+\contentsline {chapter}{\numberline {7}Numerical results of DNS simulations}{24}{chapter.7}
+\contentsline {section}{\numberline {7.1}Backward facing step}{24}{section.7.1}
+\contentsline {section}{\numberline {7.2}K\'{a}rm\'{a}n vortex street - flow around a cylinder in a channel}{30}{section.7.2}
+\contentsline {chapter}{\numberline {8}Usability}{34}{chapter.8}
+\contentsline {section}{\numberline {8.1}Project folder}{34}{section.8.1}
+\contentsline {section}{\numberline {8.2}Configuration file}{36}{section.8.2}
+\contentsline {section}{\numberline {8.3}Geometry file}{40}{section.8.3}
+\contentsline {chapter}{\numberline {9}Conclusions}{42}{chapter.9}
+\contentsline {chapter}{Bibliography}{iv}{appendix*.23}

@@ -1,7 +1,7 @@
 \chapter{Performance, efficiency and further modifications} % (fold)
 \label{cha:performance_efficiency_and_further_modifications}
 
-During simulations it was seen that the time steps decreased rapidly due to high eddy viscosity (especially at the inlet) and that the simulation takes a long time to reach steady state flow. This lead to very high computational times resulting us dealing with this situation (e.g. reducing the computational time with different methods).
+During simulations with the \ke\,model it was seen that the maximal time step size is much smaller than the one of a DNS simulation due to high eddy viscosity (especially near the inlet) and that the simulation takes a long time to reach steady state flow. This leads to very high computational times forcing us to deal with this situation (e.g. reducing the computational time with different methods).
 
 \noii Please note that this section also mentions further modifications not related to the topic.
  
@@ -26,37 +26,40 @@ The top and the back walls of the 'channel'-scenario are replaced by free slip c
 \qquad
 v = 0
 \qquad
+\left(
 \abl{k}{n}=0
 \qquad
 \abl{\varepsilon}{n}=0
+\right)
 \end{equation}  
 
-\noii The free slip condition is often imposed along a line or plane of symmetry  thereby reducing in this case the size of the domain where the flow has to be computed by a half respectively by a forth in the 2D and 3D case. This is a valid assumption for a channel flow if we neglect recirculations in the channel.
+\noii The free slip condition is often imposed along a line or plane of symmetry  thereby reducing in this case the size of the domain where the flow has to be computed by a half respectively by a forth in the 2D and 3D case \citep{griebel1998}. Symmetry is a valid assumption for a channel flow if recirculations are neglected\footnote{Recirculation cannot be captured by RANS. One would need more advanced/expensive turbulence models.}.
 
-\noii By the way: if the x- and y-ratio of a backwards facing step are specified, it is possible to simulate a free jet similar flow\footnote{Free jet is not a symmetrical phenomenon. A symmetric boundary condition leads obviously to non-physical deviation in the results.}.
+\noii By the way: if the x- and y-ratio of a backwards facing step are specified, it is possible to simulate a 2D free jet similar flow\footnote{Free jet is not a symmetrical phenomenon. A symmetric boundary condition leads obviously to non-physical deviation in the results.}.
 
 % subsubsection channel_section_with_symmetry_boundary_condition (end)
 
 \subsection*{Boundary layer over flat plate} % (fold)
 \label{sub:boundary_layer_over_flat_plate}
 
-For a 2D-simulation the top wall of the 'channel'-scenario was replaced by an opening (Neumann boundary condition).
+For a 2D-simulation, the top wall of the 'channel'-scenario was replaced with an opening (Neumann boundary condition).
 
-\noii With this scenario a boundary layer over a flat plat can be modelled provided that the heigth y is selected big enough compared the local boundary layer width.
+\noii With this scenario, a boundary layer over a flat plat can be modelled provided that the height $y$ is selected big enough compared to the local boundary layer width.
 
 \subsection*{Free} % (fold)
 \label{sub:free}
 
-In this scenario all wall boundary conditions of the 'channel'-scenario were removed and replaced by openings.
+In this scenario, all wall boundary conditions of the 'channel'-scenario were removed and replaced by openings.
 
 \subsection*{Arbitrary geometric obstacles} % (fold)
 \label{sub:arbitrary_geometric_obstacles}
 
-In any scenario an obstacle of any form (see section~XY) can be placed into the middle of the flow field. This way the free shear flow plane wake can be modelled. The most notable example is the flow around a circle with certain repeating flow patterns behind the obstacle also know the K\'{a}rm\'{a}n Vortex street (see section-XY).
+In any scenario, an obstacle of any form (see section~\ref{sec:geometry_file}) can be placed into the middle of the flow field. In this way, the free shear flow plane wake can be modelled. The most notable example is the flow around a circle with certain repeating flow patterns behind the obstacle also known as the K\'{a}rm\'{a}n vortex street (see section~\ref{sec:karman_vortex_street_flow_around_a_cylinder_in_a_channel}).
 
-\noii The capability to determining the wall distance to an arbitrary geometry was no problem for our k-D-tree implementation.
+\noii The wall distance manager (a k-D-tree implementation) was extended to handle the new scenarios and arbitrary geometries.
 
-\noii Limitation: 2D and 1 processor
+
+\noii Limitation: 2D and 1 processor.
 
 \infobox{
 nseof::geometry::GeometryManager, \\
@@ -66,7 +69,7 @@ nseof::WallDistanceManager
 % subsubsection arbitrary_geometric_obstacles (end)
 
 \newpage
-\section{PETSC-optimization} % (fold)
+\section{PETSc-optimization} % (fold)
 \label{sec:petsc_optimization}
 
 Marten und Walter
@@ -93,26 +96,27 @@ Respart points were created for the pupose of:
 
 \begin{tabular}{l  R{2cm}R{2cm}R{2cm}}\hline
  & DNS & Algebraic & $k$-$\varepsilon$\\\hline
-Pressure $p$      & \che & \che &  \che \\
-Velocity $u_i$          & \che & \che & \che \\\hline
-Eddy viscosity $\nu_t$        &      & \che &  \\
-Pressure + TKE $P$      &  & \che &  \che \\\hline
-Turbulent kinetic energy $k$            &      &      & \che \\
-Dissipation rate $\varepsilon$ &      &      & \che \\
-Additional $k$-source term $D$            &      &      & \che \\
-Additional $\varepsilon$-source term Factor $E$            &      &      & \che \\
-Factor $f_1$                                               &      &      & \che \\
-Factor $f_2$          &      &      & \che \\
-Factor $f_3$          &      &      & \che \\\hline
+Pressure $p$                                    & \che & \che &  \che \\
+Velocity $u_i$                                  & \che & \che & \che \\\hline
+Eddy viscosity $\nu_t$                          &      & \che &  \\
+Pressure + TKE $P$                              &      & \che &  \che \\\hline
+Turbulent kinetic energy $k$                    &      &      & \che \\
+Dissipation rate $\varepsilon$                  &      &      & \che \\
+Additional $k$-source term $D$                  &      &      & \che \\
+Additional $\varepsilon$-source term Factor $E$ &      &      & \che \\
+Factor $f_1$                                    &      &      & \che \\
+Factor $f_2$                                    &      &      & \che \\
+Factor $f_3$                                    &      &      & \che \\\hline
 \end{tabular}
 
 \end{center}
-It is possible also to use the backup file of one simulation type for an other one: e.g. DNS simulation can be started for a $k$-$\epsilon$ backup file and vice versa. For another simulation type unknown variables are set to be zero.
+It is possible also to use the backup file of a simulation type for an other one: e.g. DNS simulation can be started for a \ke\, backup file and vice versa. For the another simulation type unknown variables are set to be zero.
 
 \noii Please note that no interpolation function has been implemented: simulations can be only started from backup files with the same number of processors and the same mesh configuration.
 
 \infobox{
-MPIIterator.h, MPIIteratorReader.h, MPIIteratorWriter.h,\\ PetscSolver.h
+nseof::MPIIterator.h, nseof::MPIIteratorReader.h,\\
+nseof::MPIIteratorWriter.h, nseof::PetscSolver.h
 }
 
 

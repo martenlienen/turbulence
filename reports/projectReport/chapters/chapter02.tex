@@ -1,6 +1,156 @@
-\chapter{Algorithm} % (fold)
+\chapter{Numerics and algorithm} % (fold)
 \label{cha:algorithm}
 
+Please keep in mind the meaning of the 'exponents' $\left.\cdot^\circ\right.$ and $\left.\cdot^+\right.$: variable at this timestep and at the next timestep.
+
+\section*{Discretization}
+
+Following discretization was chosen to solve the equations given in \ref{eq:conti}, \ref{eq:RANSmodified}, \ref{eq:keTransport04} and \ref{eq:keTransport05}:
+\begin{itemize}
+\item spacial discretization: finite difference method
+\item time discretization: mixed treatment (pressure implicit with backward Euler; velocity, turbulent kinetic energy and dissipation rate explicit - see Griebel \citep{griebel1998}).
+\end{itemize}
+The discretization of the two additional transport equations is straight forward, with only two additional derivatives to be discretized, which are identical for both equations (here only presented in x-direction):
+
+\begin{align*}
+\left[\abl{}{x}\left(A\,\abl{B}{x}\right)\right]_{i,j,k}
+= \frac{2}{\Delta x_{i,j,k}}
+\left( 
+\frac{(\Delta x_{i+1,j,k}\cdot A_{i,j,k}+\Delta x_{i,j,k}\cdot A_{i+1,j,k}) \cdot (B_{i+1,j,k}-B_{i,j,k})}{(\Delta x_{i+1,j,k}+\Delta x_{i,j,k})^2} \right.\\
+-\left.
+\frac{(\Delta x_{i,j,k}\cdot A_{i-1,j,k}+\Delta x_{i-1,j,k}\cdot A_{i,j,k}) \cdot (B_{i,j,k}-B_{i-1,j,k})}{(\Delta x_{i,j,k}+\Delta x_{i-1,j,k})^2} 
+\right)
+\end{align*}
+
+\begin{align*}
+\left[\abl{(u\,B)}{x}\right]_{i,j,k}
+= 
+\frac{1}{\Delta x_{i,j,k}}\left(
+u_{i,j,k}\frac{\Delta x_{i+1,j,k}B_{i,j,k}+\Delta x_{i,j,k}B_{i+1,j,k}}{\Delta x_{i+1,j,k}+\Delta x_{i,j,k}}\right.
+\\-\left.
+u_{i-1,j,k}\frac{\Delta x_{i,j,k}B_{i-1,j,k}+\Delta x_{i-1,j,k}B_{i,j,k}}{\Delta x_{i,j,k}+\Delta x_{i-1,j,k}}
+\right)
+\end{align*}
+with:
+\begin{center}
+\begin{tabular}{lll}
+Equ. \ref{eq:keTransport04}: & $A=B_k$           & $B=k$\\
+Equ. \ref{eq:keTransport05}: & $A=B_\varepsilon$ & $B=\varepsilon$
+\end{tabular}
+\end{center}
+
+\newpage
+\section*{Timestep}
+A first guess for the new timestep is calculated with the same equation as implemented for the algebraic turbulence model:
+
+\begin{align}
+\Delta t < \min\left\lbrace
+\nu_{max}^{-1}\cdot
+\left( 
+\frac{1}{\Delta x^2}+
+\frac{1}{\Delta y^2}+
+\frac{1}{\Delta z^2}
+\right)^{-1}
+,
+\frac{\Delta x}{|u_{max}|},
+\frac{\Delta y}{|v_{max}|},
+\frac{\Delta z}{|w_{max}|}
+\right\rbrace
+\end{align}
+with:
+\begin{align}
+\nu_{max}=\nu_M = 2\cdot\left( \nu+\nu_T \right)
+\end{align}
+It was examined whether the diffusion terms of the $k$- and $\epsilon$- transport equations are more critical than the one from the momentum equation ($\nu_K$ and $\nu_E$). It has, however, proven that the diffusion rate of the momentum equation ($\nu_m$) is the highest:
+\begin{align}
+\nu_K = \nu+\frac{\nu_T}{\sigma_k}<\nu_M\\
+\nu_E = \nu+\frac{\nu_T}{\sigma_\varepsilon}<\nu_M
+\end{align}
+The timestep is reduced by so much that in the next timestep there are no negative $k$ and $\varepsilon$\footnote{The user can specify whether a certain error for $k$ and $\varepsilon$ is acceptable or not in the configuration file.}.
+
+\noii Big increases in the timestep were programmatically prevented:
+\begin{align*}
+\Delta\,t^+=\min{(\Delta\,t^\circ\cdot 1.1,\,\Delta\,t^+_{guess})}
+\end{align*} 
+for stability reasons.
+
+\newpage
+\section*{Algorithm}
+Following steps are performed in our program to solve the RANS with the help of the \ke\, model in each timestep (for a simplified graphical representation of the algorithm see figure~\ref{fig:alg}):
+\begin{itemize}
+\item[1.] Estimate $\Delta t$
+\item[2.] Calculate $k$ and $\varepsilon$ (first step):
+\begin{align}\label{KK1}
+K^\circ&=
+\abl{}{x_i}\left(\nu_t\,\abl{k}{x_i}\right)
+-
+\abl{(u_i\cdot k)}{x_i}
++
+\frac{1}{2}\nu_t
+(\,S_{i,j} \cdot S_{i,j})
+-
+\varepsilon
+\\\label{EE1}
+E^\circ&=\frac{c_\varepsilon}{c_\mu}\cdot
+\abl{}{x_i}\left(f_\mu\,\nu_T\,\abl{\varepsilon}{x_i}\right)
+-
+\abl{(u_i\cdot \varepsilon)}{x_i}
++
+\frac{c_1\,f_1}{2}k
+(\,S_{i,j} \cdot S_{i,j})
+-
+c_2\,f_2\frac{\varepsilon^2}{k}
+\end{align}\vspace{-0.5cm}
+
+
+
+\item[3.] Calculate temporal $k$ and $\varepsilon$ (second step):
+\begin{align}
+k^* &= k^\circ + \Delta t \cdot K^\circ\\
+\varepsilon^* &= \varepsilon^\circ + \Delta t \cdot E^\circ
+\end{align}\vspace{-0.5cm}
+
+Check for validity and if necessary adjust timesteps.
+
+\item[4.] Make temporal $k^*$ and $\varepsilon^*$ final ($k^+$ and $\varepsilon^+$)
+
+\item[5.] Calculate $F_i^\circ$:
+\begin{align}
+F_i^\circ=u_i^\circ+\Delta t\left(-\abl{u_i^\circ\,u_j^\circ}{x_j} +2\,\abl{}{x_j} \left( \,\left(\nu+\nu_T^\circ\right)S_{ij}^\circ\right)+f_i^\circ  \right)
+\end{align}
+\item[6.] Solve the Pressure-Poission-Equation for $(p^+/\rho)$ $\rightarrow$ \textsc{PETSc}:
+\begin{align}
+\frac{1}{\Delta t} \abl{F_i^\circ}{x_i}  =
+\frac{\partial^2 (p^+/\rho)}{\partial x_i\,\partial x_i}
+\end{align}
+\item[7.] Calculate velocities $u_i^+$:
+\begin{align}
+u_i^+
+=F_i^\circ-\frac{\Delta t}{\rho}\,\abl{(p^+/\rho)}{x_i}
+\end{align}
+\item[8.] Calculate eddy viscosity $\nu_T^\circ$:
+\begin{align}
+\nu_{t}^+=c_\mu\frac{\left(k^+\right)^2}{\varepsilon^+}
+\qquad\qquad\text{and}\qquad\qquad
+l_m = \sqrt{\frac{3}{2}} c_\mu\frac{\left(k^+\right)^{3/2}}{\varepsilon^+}
+\end{align}
+\vspace{-0.5cm}
+\item[9.] Calculate wall near correction factors ($f_1$, $f_2$, $f_2$, $f_{\mu}$, $D$ and $E$)
+\item[10.] Calculate additional useful variables: velocity fluctuation $u'$ and pressure $p$:
+\begin{align}
+u'=\sqrt{\frac{2}{3}k}\qquad\qquad
+\frac{{p}}{\rho}=\frac{{P}}{\rho}-\frac{2}{3}\,K=\frac{{P}}{\rho}-u'u'
+\end{align}
+\end{itemize}
+
+
+
+
+
+\clearpage
+\begin{center}
+
+\begin{figure}[!htb]
 
 % =================================================
 % Set up a few colours
@@ -51,111 +201,160 @@
 }
 % -------------------------------------------------
 % Start by placing the nodes
-\node [proc, densely dotted, it] (p0) {New trigger message thread};
+\node [proc, densely dotted, it] (p0) {input};
 % Use join to connect a node to the previous one 
-\node [term, join]      {Trigger scheduler};
-\node [proc, join] (p1) {Get quota $k > 1$};
-\node [proc, join]      {Open queue};
-\node [proc, join]      {Dispatch message};
-\node [test, join] (t1) {Got msg?};
+\node [proc, join, below=1.5cm of p0] (KoEo)  {Calc $K^\circ$ and $E^\circ$};
+\node [proc, join] (p1) {set $\Delta t$ and $n=5$};
+
+\node [test, join, below=2.5cm of p1] (adap) {$k^*<0$\\$\varepsilon^*<0$\\$n\ge 0$};
+
+\draw[thick,black] ($(adap.north west)+(-2.0,2.5)$)  rectangle ($(adap.south east)+(4.5,-0.8)$);
+
+%\path (adap.east) to node [near start, xshift=2.0em] {$yes$} (adap.north); 
+%  \draw [->,lcnorm] (adap.east) -- ($(adap.east) + (+1.0,+0.0)$) -- ($(adap.east) + (1.0,+1.5)$) -| (adap.north);
+  
+  
+\node [proc,above right = +1.0cm and +4.0cm of adap] (adapp)  {$\Delta t /=2$, $n-=1$}; 
+  
+  
+\path (adap.east) to node [near start, xshift=1.0em] {$yes$} (adapp.south); 
+  \draw [->,lcnorm] (adap.east)  -| (adapp.south);
+
+\path (adapp.north) to node [near start, xshift=2.0em] {$ $} (adap.north); 
+  \draw [->,lcnorm] (adapp.north) -- ($(adapp.north) + (+0.0,+0.4)$)  -| (adap.north);  
+
+\node [proc,below left = 3cm and -3.0cm of adap] (ke1)  {Calc $k^+$ and $\varepsilon^+$};
+
+\node [proc, below left = 3cm and +3.0cm of adap] (fgh1) {Calc $F^\circ_i$};
+
+\path [norm] (adap) |- (fgh1);
+\path [norm] (adap) |- (ke1);
+
+\node [proc, join, below=2cm of fgh1] (loop)  {Calc $p^+$};
+
+\draw[black,thick] ($(loop.north west)+(-1.0,0.3)$)  rectangle ($(loop.south east)+(1.0,-0.8)$);
+
+\node [proc, join, below=2cm of loop] (t1) {Calc $u^+$};
+
+\path [norm]  ($(loop.south east) + (-0.3,+0.0)$) -| ($(loop.south east) + (-0.3,-0.5)$) |- ($(loop.south east) + (0.7,-0.5)$) |- (loop);
+
+
+
 % No join for exits from test nodes - connections have more complex
 % requirements
 % We continue until all the blocks are positioned
-\node [proc] (p2) {$k \mathbin{{-}{=}} 1$};
-\node [proc, join] (p3) {Dispatch message};
-\node [test, join] (t2) {Got msg?};
-\node [test] (t3) {Capacity?};
-\node [test] (t4) {$k \mathbin{{-}{=}} 1$};
+\node [proc, below left = 2cm and -3.0cm of t1] (p2) {Calc: $\nu_t$, $f_1$, $f_2$, $f_\mu$, $D$, $E$, $t$};
+
+
+%\node [proc, join] (p3) {Dispatch message};
+
+\path [norm] (ke1) |- (p2);
+\path [norm] (t1)  |- (p2);
+
+
+\node [test, join] (t2) {$t<t_{end}$};
+
+\path (t2.west) to node [near start, xshift=-3em, yshift=-9.0em] {$yes$} (KoEo.north); 
+  \draw [->,lcnorm] (t2.west) -- ($(t2.west) + (-5.0,+0.0)$) -- ($(KoEo.north west) + (-5.0,+0.3)$) -| (KoEo.north);
+
+\draw[black,thick] ($(p1.north west)+(-7.0,1.9)$)  rectangle ($(t2.south east)+(6,-0.5)$);
+
+\node [term, join] (p10) {exit};
+
+\node[draw=none,fill=none] at (-1,-9.3) {PETSc};
+\node[draw=none,fill=none] at (+3.9,-1.8) {Adaptive timestep};
+
+
+%\node [test] (t3) {Capacity?};
+%\node [test] (t4) {$k \mathbin{{-}{=}} 1$};
 % We position the next block explicitly as the first block in the
 % second column.  The chain 'comes along with us'. The distance
 % between columns has already been defined, so we don't need to
 % specify it.
-\node [proc, fill=lcfree!25, right=of p1] (p4) {Reset congestion};
-\node [proc, join=by free] {Set \textsc{mq} wait flag};
-\node [proc, join=by free] (p5) {Dispatch message};
-\node [test, join=by free] (t5) {Got msg?};
-\node [test] (t6) {Capacity?};
+%\node [proc, fill=lcfree!25, right=of p1] (p4) {Reset congestion};
+%\node [proc, join=by free] {Set \textsc{mq} wait flag};
+%\node [proc, join=by free] (p5) {Dispatch message};
+%\node [test, join=by free] (t5) {Got msg?};
+%\node [test] (t6) {Capacity?};
 % Some more nodes specifically positioned (we could have avoided this,
 % but try it and you'll see the result is ugly).
-\node [test] (t7) [right=of t2] {$k \mathbin{{-}{=}} 1$};
-\node [proc, fill=lccong!25, right=of t3] (p8) {Set congestion};
-\node [proc, join=by cong, right=of t4] (p9) {Close queue};
-\node [term, join] (p10) {Exit trigger message thread};
+%\node [test] (t7) [right=of t2] {$k \mathbin{{-}{=}} 1$};
+%\node [proc, fill=lccong!25, right=of t3] (p8) {Set congestion};
+%\node [proc, join=by cong, right=of t4] (p9) {Close queue};
+
 % -------------------------------------------------
 % Now we place the coordinate nodes for the connectors with angles, or
 % with annotations. We also mark them for debugging.
-\node [coord, right=of t1] (c1)  {}; \cmark{1}   
-\node [coord, right=of t3] (c3)  {}; \cmark{3}   
-\node [coord, right=of t6] (c6)  {}; \cmark{6}   
-\node [coord, right=of t7] (c7)  {}; \cmark{7}   
-\node [coord, left=of t4]  (c4)  {}; \cmark{4}   
-\node [coord, right=of t4] (c4r) {}; \cmark[r]{4}
-\node [coord, left=of t7]  (c5)  {}; \cmark{5}   
+%\node [coord, right=of t1] (c1)  {}; \cmark{1}   
+%\node [coord, right=of t3] (c3)  {}; \cmark{3}   
+%\node [coord, right=of t6] (c6)  {}; \cmark{6}   
+%\node [coord, right=of t7] (c7)  {}; \cmark{7}   
+%\node [coord, left=of t4]  (c4)  {}; \cmark{4}   
+%\node [coord, right=of t4] (c4r) {}; \cmark[r]{4}
+%\node [coord, left=of t7]  (c5)  {}; \cmark{5}   
 % -------------------------------------------------
 % A couple of boxes have annotations
-\node [above=0mm of p4, it] {(Queue was empty)};
-\node [above=0mm of p8, it] {(Queue was not empty)};
+%\node [above=0mm of p4, it] {(Queue was empty)};
+%\node [above=0mm of p8, it] {(Queue was not empty)};
 % -------------------------------------------------
 % All the other connections come out of tests and need annotating
 % First, the straight north-south connections. In each case, we first
 % draw a path with a (consistently positioned) annotation node, then
 % we draw the arrow itself.
-\path (t1.south) to node [near start, xshift=1em] {$y$} (p2);
-  \draw [*->,lcnorm] (t1.south) -- (p2);
-\path (t2.south) to node [near start, xshift=1em] {$y$} (t3); 
-  \draw [*->,lcnorm] (t2.south) -- (t3);
-\path (t3.south) to node [near start, xshift=1em] {$y$} (t4); 
-  \draw [*->,lcnorm] (t3.south) -- (t4);
-\path (t5.south) to node [near start, xshift=1em] {$y$} (t6); 
-  \draw [*->,lcfree] (t5.south) -- (t6);
-\path (t6.south) to node [near start, xshift=1em] {$y$} (t7); 
-  \draw [*->,lcfree] (t6.south) -- (t7); 
+%\path (t1.south) to node [near start, xshift=1em] {$y$} (p2);
+%  \draw [*->,lcnorm] (t1.south) -- (p2);
+%\path (t2.south) to node [near start, xshift=1em] {$y$} (t3); 
+%  \draw [*->,lcnorm] (t2.south) -- (t3);
+%\path (t3.south) to node [near start, xshift=1em] {$y$} (t4); 
+%  \draw [*->,lcnorm] (t3.south) -- (t4);
+%\path (t5.south) to node [near start, xshift=1em] {$y$} (t6); 
+%  \draw [*->,lcfree] (t5.south) -- (t6);
+%\path (t6.south) to node [near start, xshift=1em] {$y$} (t7); 
+%  \draw [*->,lcfree] (t6.south) -- (t7); 
 % ------------------------------------------------- 
 % Now the straight east-west connections. To provide consistent
 % positioning of the test exit annotations, we have positioned
 % coordinates for the vertical part of the connectors. The annotation
 % text is positioned on a path to the coordinate, and then the whole
 % connector is drawn to its destination box.
-\path (t3.east) to node [near start, yshift=1em] {$n$} (c3); 
-  \draw [o->,lccong] (t3.east) -- (p8);
-\path (t4.east) to node [yshift=-1em] {$k \leq 0$} (c4r); 
-  \draw [o->,lcnorm] (t4.east) -- (p9);
+%\path (t3.east) to node [near start, yshift=1em] {$n$} (c3); 
+%  \draw [o->,lccong] (t3.east) -- (p8);
+%\path (t4.east) to node [yshift=-1em] {$k \leq 0$} (c4r); 
+%  \draw [o->,lcnorm] (t4.east) -- (p9);
 % -------------------------------------------------
 % Finally, the twisty connectors. Again, we place the annotation
 % first, then draw the connector
-\path (t1.east) to node [near start, yshift=1em] {$n$} (c1); 
-  \draw [o->,lcfree] (t1.east) -- (c1) |- (p4);
-\path (t2.east) -| node [very near start, yshift=1em] {$n$} (c1); 
-  \draw [o->,lcfree] (t2.east) -| (c1);
-\path (t4.west) to node [yshift=-1em] {$k>0$} (c4); 
-  \draw [*->,lcnorm] (t4.west) -- (c4) |- (p3);
-\path (t5.east) -| node [very near start, yshift=1em] {$n$} (c6); 
-  \draw [o->,lcfree] (t5.east) -| (c6); 
-\path (t6.east) to node [near start, yshift=1em] {$n$} (c6); 
-  \draw [o->,lcfree] (t6.east) -| (c7); 
-\path (t7.east) to node [yshift=-1em] {$k \leq 0$} (c7); 
-  \draw [o->,lcfree] (t7.east) -- (c7)  |- (p9);
-\path (t7.west) to node [yshift=-1em] {$k>0$} (c5); 
-  \draw [*->,lcfree] (t7.west) -- (c5) |- (p5);
+%\path (t1.east) to node [near start, yshift=1em] {$n$} (c1); 
+%  \draw [o->,lcfree] (t1.east) -- (c1) |- (p4);
+%\path (t2.east) -| node [very near start, yshift=1em] {$n$} (c1); 
+%  \draw [o->,lcfree] (t2.east) -| (c1);
+%\path (t4.west) to node [yshift=-1em] {$k>0$} (c4); 
+%  \draw [*->,lcnorm] (t4.west) -- (c4) |- (p3);
+%\path (t5.east) -| node [very near start, yshift=1em] {$n$} (c6); 
+%  \draw [o->,lcfree] (t5.east) -| (c6); 
+%\path (t6.east) to node [near start, yshift=1em] {$n$} (c6); 
+%  \draw [o->,lcfree] (t6.east) -| (c7); 
+%\path (t7.east) to node [yshift=-1em] {$k \leq 0$} (c7); 
+%  \draw [o->,lcfree] (t7.east) -- (c7)  |- (p9);
+%\path (t7.west) to node [yshift=-1em] {$k>0$} (c5); 
+%  \draw [*->,lcfree] (t7.west) -- (c5) |- (p5);
 % -------------------------------------------------
 % A last flourish which breaks all the rules
-\draw [->,purple, dotted, thick, shorten >=1mm]
-  (p9.south) -- ++(5mm,-3mm)  -- ++(27mm,0) 
-  |- node [black, near end, yshift=0.75em, it]
-    {(When message + resources available)} (p0);
+%\draw [->,purple, dotted, thick, shorten >=1mm]
+%  (p9.south) -- ++(5mm,-3mm)  -- ++(27mm,0) 
+%  |- node [black, near end, yshift=0.75em, it]
+%    {(When message + resources available)} (p0);
 % -------------------------------------------------
+
+
+
 \end{tikzpicture}
 % =================================================
+\label{fig:alg}
+\caption{Algorithm}
+\end{figure}
 
-\section*{Adaptive time stepping} % (fold)
-\label{sec:adaptive_time_stepping}
-
-Mathematical treatment:
-\begin{itemize}
-\item spacial discretization: finite difference method
-\item time discretization: mixed treatment (pressure implicit with backwards euler; velocity, turbulent kinetic energy and dissipation rate explicit - see Griebel)
-\item 
-\end{itemize}
+\end{center}
 
 
 % subsection adaptive_time_stepping (end)

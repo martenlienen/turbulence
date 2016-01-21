@@ -1,41 +1,62 @@
-\begin{thebibliography}{5}
+\begin{thebibliography}{9}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem[Farah(2012)]{farah2012}
-P.~Farah.
-\newblock Accurate and efficient numerical integration schemes for {2D}/{3D}
-  mortar contact simulations.
-\newblock Master's thesis, Technische Universit{\"a}t M{\"u}nchen, 2012.
+\bibitem[Adams(2015)]{adams2015}
+N.~A. Adams.
+\newblock Turbulente str{\"o}mungen - einfuehrung in die theorie und
+  berechnung.
+\newblock Technical report, Lehrstuhl f{\"u}r Aerodynamik - Technische
+  Universit{\"a}t M{\"u}nchen, 2015.
 
-\bibitem[Laursen and Simo(1993)]{laursen1993}
-T.~A. Laursen and J.~C. Simo.
-\newblock A continuum-based finite element formulation for the implicit
-  solution of multibody, large deformation-frictional contact problems.
-\newblock \emph{International Journal for Numerical Methods in Engineering},
-  36\penalty0 (20):\penalty0 3451--3485, 1993.
+\bibitem[Fan et~al.(1993)Fan, Lakshminarayana, and Barnett]{fan1993}
+S.~Fan, B.~Lakshminarayana, and M.~Barnett.
+\newblock Low-reynolds-number k-epsilon model for unsteady turbulent
+  boundary-layer flows.
+\newblock \emph{AIAA journal}, 31\penalty0 (10):\penalty0 1777--1784, 1993.
 
-\bibitem[Popp(2012)]{popp2012}
-A.~Popp.
-\newblock \emph{Mortar {M}ethods for {C}omputational {C}ontact {M}echanics and
-  {G}eneral {I}nterface {P}roblems}.
-\newblock PhD thesis, Technische Universit{\"a}t M{\"u}nchen, 2012.
+\bibitem[Griebel et~al.(1998)Griebel, Dormseifer, and Neunhoffer]{griebel1998}
+M.~Griebel, T.~Dormseifer, and T.~Neunhoffer.
+\newblock \emph{Numerical Simulation in Fluid Dynamics}.
+\newblock Society for Industrial and Applied Mathematics, 1998.
 
-\bibitem[Popp et~al.(2009)Popp, Gee, and Wall]{popp2009}
-A.~Popp, M.~W. Gee, and W.~A. Wall.
-\newblock A finite deformation mortar contact formulation using a primal-dual
-  active set strategy.
-\newblock \emph{International Journal for Numerical Methods in Engineering},
-  79:\penalty0 1354--1391, 2009.
+\bibitem[Kim et~al.(1987)Kim, Moin, and Moser]{kim1987}
+J.~Kim, P.~Moin, and R.~Moser.
+\newblock Turbulence statistics in fully developed channel flow at low reynolds
+  number.
+\newblock \emph{J. Fluid Mech.}, 177:\penalty0 133--166, 1987.
 
-\bibitem[Zavarise and Lorenzis(2009)]{zavarise2009}
-G.~Zavarise and L.~De Lorenzis.
-\newblock The node-to-segment algorithm for 2d frictionless contact: Classical
-  formulation and special cases.
-\newblock \emph{Computer Methods in Applied Mechanics and Engineering},
-  198\penalty0 (41--44):\penalty0 3428--3451, 2009.
+\bibitem[Koehler et~al.(2015)Koehler, Korthales, Muench, and
+  Wirth]{koehler2015}
+C.~Koehler, T.~Korthales, P.~Muench, and F.~Wirth.
+\newblock Untersuchung der unterkritischen umstr\"omung eines zylindrischen
+  k\"orpers bei re=10.000-50.000.
+\newblock Lab course report, Technische Universitaet Muenchen, 2015.
+
+\bibitem[Kuzmin et~al.(2007)Kuzmin, Mierka, and Turek]{kuzmin2007}
+D.~Kuzmin, O.~Mierka, and S.~Turek.
+\newblock On the implementation of the $\kappa$-$\varepsilon$ turbulence model
+  in incompressible flow solvers based on a finite element discretisation.
+\newblock \emph{International Journal of Computing Science and Mathematics},
+  1\penalty0 (2-4):\penalty0 193--206, 2007.
+
+\bibitem[Lienen et~al.(2015)Lienen, Muench, and Simson]{lienen2015}
+M.~Lienen, P.~Muench, and W.~Simson.
+\newblock Turbulent flow simulation, 2nd sheet report.
+\newblock Lab course report, Technische Universitaet Muenchen, 2015.
+
+\bibitem[Pope(2000)]{pope2000}
+S.~B. Pope.
+\newblock \emph{Turbulent Flows}.
+\newblock Cambridge University Press, 2000.
+
+\bibitem[Stemmer(2015)]{stemmer2015}
+C.~Stemmer.
+\newblock Grenzschichttheorie.
+\newblock Technical report, Lehrstuhl f{\"u}r Aerodynamik - Technische
+  Universit{\"a}t M{\"u}nchen, 2015.
 
 \end{thebibliography}
