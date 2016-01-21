@@ -21,7 +21,7 @@ Mesh      & 64\,$\times$\,128 & 64\,$\times$\,256 & 64\,$\times$\,512 \\\hline
 
 \subsubsection*{Velocities}
 
-Figure~\ref{fig:channel-u-profile} shows the u-velocity component along the cross section for a laminar simulation, an algebraic simulation and a $k$-$\epsilon$-simulation (both for Re$=5600$). The position of measurement and time were adjusted according to the case, so that the flow profile was stationary and fully developed.
+Figure~\ref{fig:channel-u-profile} shows the u-velocity component along the cross section for a laminar simulation, an algebraic simulation and a $k$-$\epsilon$\,simulation (both for Re$=5600$). The position of measurement and time were adjusted according to the case, so that the flow profile was stationary and fully developed.
 
 \begin{figure}[!htb]
 \centering
@@ -97,7 +97,7 @@ Figure~\ref{fig:sublayers_y+}-left shows the normalized velocity $w^+$  over $y^
 
 \subsubsection*{Comparison with the literature: TKE profile for Re=13750}
 
-In the following the single terms in the $k$-transport equation are examined in more detail. The implemented form of this equation has the following form:
+In the following, the single terms in the $k$-transport equation are examined in more detail. The implemented form of this equation has the following form:
 
 \begin{align}
 \abl{k}{t} + u_i\,\abl{k}{x_i}
@@ -130,7 +130,7 @@ with the diffusion term (1), the dissipation term (2) and the production term (3
 \begin{figure}[!htb]
 \centering
 \includegraphics[trim=60 20 60 15,clip,width=0.95\textwidth]{FIGURES/tkegainloss.eps}
-\caption{Terms of the TKE-transport equation for Re=13750 (in comparison with the literature \citep{pope2000} p. 285 scaled by 0.13)}
+\caption{Terms of the TKE-transport equation for Re=13750 (in comparison with the literature \citep{pope2000} p. 285, scaled by 0.13)}
 \label{fig:pop_tke}
 \end{figure} 
 
@@ -195,7 +195,7 @@ Furthermore, the final simulation time was chosen so that a quasi steady flow ha
 
 \noii In addition, figure~\ref{fig:boundarylayerpressure} shows exemplarily the pressure field at the last timestep for the laminar simulation. The pressure fields for both turbulent simulations are similar and are thus not shown here. Some distance behind the inlet, the pressure is nearly constant as can be seen easily. Due to that, the constant pressure assumptions made for the theoretical equations nearly match the simulation.
 
-\noii Comparing the overall spatial developing of the boundary layer thickness of the laminar and the turbulent simulations, their boundary layer thickness profile behaves as expected. The laminar boundary layer is thinner than in turbulent cases. In addition, some distance behind the inlet the \textit{k}-$\varepsilon$ simulation without a wall model results in a thicker boundary layer. This is due to the fact, that for this model the turbulent viscosity $\nu_T$ is not damped near the wall, and thus the wall normal momentum transport is also not damped compared to Chiens model. Near the inlet this behaviour can not be detected. Presumably this is due to the influence of the inlet boundary conditions.
+\noii Comparing the overall spatial developing of the boundary layer thickness of the laminar and the turbulent simulations, their boundary layer thickness profile behaves as expected. The laminar boundary layer is thinner than in turbulent cases. In addition, some distance behind the inlet the \textit{k}-$\varepsilon$ simulation without a wall model results in a thicker boundary layer. This is due to the fact, that for this model the turbulent viscosity $\nu_T$ is not damped near the wall, and thus the wall normal momentum transport is also not damped compared to Chiens model. Near the inlet, this behaviour can not be detected. Presumably this is due to the influence of the inlet boundary conditions.
 
 \noii The laminar simulation yields pretty good results when comparing to the Blasius solution. They match except for a scaling factor. For the turbulent simulations, the results deviate from the theoretical values of about $20\%$. Furthermore, the results without wall function tend to match the profile better.
 

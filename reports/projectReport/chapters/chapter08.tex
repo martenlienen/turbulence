@@ -1,8 +1,20 @@
 \chapter{Conclusions} % (fold)
 \label{cha:conclusion}
 
+The existing code framework NS-EOF was extended with a \ke\,model and with several wall models. The \ke\, model supplemented by Chien's wall model has proven to be stable and to provide particular good results for the 'channel flow' scenario:
 \begin{itemize}
-\item better separation of tasks (creating geometry and meshing outside of solver, geometry/mesh file to be loaded)
+\item velocity profile was nearly exact in the viscous sublayer
+\item the terms of the $k$-transport equation were predicted qualitatively well. 
 \end{itemize}
+It was shown how good the results of the algebraic turbulence model are in the wall distant region. The limitations of this model (e.g. overprediction of  the velocity slope at the wall) were also discussed.
+
+\noii The implemented \ke\, model has not proven to work satisfactorily for the scenarios 'backward facing step' and 'boundary layer'. This was among other things due to the chosen method of stabilising the simulation (limitation of the eddy viscosity). Further investigations into alternative methods might help. 
+
+\noii PETSc was optimized for DNS. The chosen combination of solver and preconditioner promises a speedup of up to a factor of 10. The same configuration, however, did not provide a satisfactory speedup for turbulent simulations.
+
+\noii Data management was improved by creating a project folder with all relevant files (e.g. geometry files with coordinates of the obstacle cells). We propose a better separation of tasks: creating of geometries and meshing should happen outside of the solver. A file with mesh information, comparable with VTK-files, should be loadable into NS-EOF.
+
+\noii The team implemented successfully binary restart points and binary ParaView visualization files with two different approaches (MPI-IO and HDF5). The logical further step would be to merge the visualization and the backup task into one method, where the user could specify which data are saved. During the project phase, the team successfully tested the restart of one simulation with a simulation of an other type. The implementation of an interpolation feature would further enhance the capabilities of the backup module.
+
 
 % chapter conclusion (end)

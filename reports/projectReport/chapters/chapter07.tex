@@ -12,15 +12,15 @@ NS-EOF can still be run by writing into the shell the following command:
 
 \bashh{SCENARIOS/run.txt}{1}
 
-\noii However, we advice to run the Python-script 'run' both on the cluster and locally to start the simulation\footnote{For more informations on the options, we refer to the help:
+\noii However, we advice to run the Python-script 'run' both on the cluster and locally to start the simulation\footnote{For more information on the options, we refer to the help:
 \bashh{SCENARIOS/runh.txt}{1}
 }:
 
 \bashh{SCENARIOS/runl.txt}{1}
 
-\noii By doing so, the simulation is started but also a new folder is created containing all relevant files of the simulation. This folder is referenced in the following as project folder.
+\noii By doing so, the simulation is started, but also a new folder is created containing all relevant files of the simulation. This folder is referenced in the following as project folder.
 
-\noii By copying and placing all the input files (configuration file, backup file for initialisation, geometry file) and all the result files (output, VTK files, backup file, timing results) into one folder the user is enabled to completely understand the simulation at a later time.
+\noii By copying and placing all the input files (configuration file, backup file for initialisation, geometry file) and all the result files (output, VTK files, backup file, timing results) into one folder, the user is enabled to completely understand the simulation at a later time.
 
 \noii The following tree shows the structure of the project folder:
 \dirtree{%
@@ -62,14 +62,14 @@ For the second worksheet, the group implemented an algebraic turbulence model wi
 
 \noii A laminar simulation with this implementation can be performed by setting $\nu_t$ to zero (type='laminar'). The results should be comparable with the DNS-simulation (\citep{lienen2015} p.~14).  
 
-\subsubsection*{k-$\varepsilon$ turbulence model}
+\subsubsection*{\ke\,turbulence model}
 
 The user can use alternatively to the algebraic turbulence model the k-$\varepsilon$ model to calculate the eddy viscosity. Following optional parameters can be set:
 \begin{itemize}
 \item model constants $C_{\varepsilon 1}$, $C_{\varepsilon 2}$, $\sigma_k$, $\sigma_\varepsilon$ and $C_{\mu}$ (see equation~\ref{equ:constants})
 \item wall near treatment (model=0: no wall modifications, =1: Lam and Bremhorst, =2: Chien, =3: Jones and Launder, =4 Fan and Lakshminarayana)
-\item adaptive time stepping (number of refinements and permitted error)
-\item solving quasi laminarily for the first 'start' seconds (not solving the transport equations for $k$ and $\varepsilon$ and setting $\nu_T=0$)
+\item adaptive time stepping (number of refinements and permitted errors)
+\item solving quasi laminarly for the first 'start' seconds (not solving the transport equations for $k$ and $\varepsilon$ and setting $\nu_T=0$)
 \end{itemize}
 
 \xmll{SCENARIOS/type-ke.xml}{2}
@@ -78,7 +78,7 @@ The user can use alternatively to the algebraic turbulence model the k-$\varepsi
 
 \subsubsection*{Scenarios}
 
-As described in section~\ref{sec:new_scenarios}, additional scenarios were added:
+As described in section~\ref{sec:new_scenarios}, following scenarios were added:
 
 \begin{itemize}
 \item symmetrical channel
@@ -135,10 +135,10 @@ The user specifies with a basic function which position is in the geometry and w
 \end{figure} 
 
 \item \underline{Drag \& Drop}:\\
-The second possibility to create arbitrary geometries is given by an interactive matlab script. The runnable script can be found in the script folder ns-eof-geogui and is called turbulence.m.
+The second possibility to create arbitrary geometries is given by an interactive Matlab-script. The runnable script can be found in the script folder ns-eof-geogui and is called turbulence.m.
 When running the script, a coordinate system with limits set according to the specified number of points in x- and y-direction shows up first. Based on this coordinate system, the surrounding line of an obstacle can be chosen.
 
-Therefore, the starting point of the surrounding line has to be specified by a mouse click by the user\footnote{ It is recommended to keep starting point in mind.}
+Therefore, the starting point of the surrounding line has to be specified by a mouse click by the user\footnote{ It is recommended to keep the starting point in mind.}.
 After that, the following points defining the surrounding line have to be chosen in the right consecutive order (lines between the already chosen points will show up in the coordinate frame).
 
 To close the geometry, the point which was chosen as starting point has to be clicked again. Afterwards, the edges of the geometry can be seen in the coordinate frame.

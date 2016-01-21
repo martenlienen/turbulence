@@ -16,9 +16,9 @@ were compared with experimental results given us by the department for aerodynam
 
 For DNS, 3 simulations with different inlet velocities were performed ($u=3.372,/s$, $=5.295,/s$, $=5.579,/s$).
 
-\noii The flow in the DNS-simulations is highly transient: vortices and secondary vortices are created created periodically behind the step. They are dragged by the main flow down the channel. Also vortices appear at the top wall. To be able to make reasonable conclusions we performed a stochastic analysis. The stochastic moments of the simulation were inserted into the same plot as the ones of the experimental results (see figure~\ref{fig:bfsA}, \ref{fig:bfsB} and \ref{fig:bfsC}). 
+\noii The flow in the DNS-simulations is highly transient: vortices and secondary vortices are created periodically behind the step. They are dragged by the main flow down the channel. Also vortices appear at the top wall. To be able to make reasonable conclusions, we performed a stochastic analysis. The stochastic moments of the simulation were inserted into the same plot as the ones of the experimental results (see figure~\ref{fig:bfsA}, \ref{fig:bfsB} and \ref{fig:bfsC}). 
 
-\noii It can be well seen that the maximum mean velocity tends to the bottom wall in the experiment after the step. This extreme behaviour could not be encountered in the simulation: the maximum velocity shifts gradually to the middle of the channel\footnote{The integral of the mean velocity over the paths seem to increase with increasing position x. Maybe the assumption of an incompressible flow is not given.}. The mean reattachment length for $u=3.372m/s$ could be determined to be between position D and E. This is much longer as the reattachment length of the experiment.
+\noii It can be well seen that the maximum mean velocity tends to the bottom wall in the experiment after the step. This extreme behaviour could not be encountered in the simulation: the maximum velocity shifts gradually to the middle of the channel\footnote{The integral of the mean velocity over the paths seem to increase with increasing position x. Maybe the assumption of an incompressible flow is not given.}. The mean reattachment length for $u=3.372m/s$ could be determined to be between positions D and E. This is much longer as the reattachment length of the experiment.
 
 \noii Please note that the variance at the inlet of the experimental backward facing step is quite high\footnote{No velocity fluctuation was assumed at the inlet of the simulations.}. This and different vortex patterns downstream of the step might be the reason for the discrepancy of the mean flow profile and the attachment length.
 
@@ -50,7 +50,7 @@ For DNS, 3 simulations with different inlet velocities were performed ($u=3.372,
 
 A simulation of the given backward facing step was performed with the algebraic and the \ke\, turbulence model for $u=5.579m/s$. In none of the simulations, instabilities were encountered. No stochastic analysis was needed.
 
-\noii The tendency that the jet is preferring the bottom wall could not be encountered in this simulations either (see figure~\ref{fig:bfsprofile}).
+\noii The tendency that the jet prefers the bottom wall could not be encountered in this simulations either (see figure~\ref{fig:bfsprofile}).
 
 \begin{figure}[!htb]
 \centering
@@ -61,15 +61,17 @@ A simulation of the given backward facing step was performed with the algebraic 
 
 
 
-\noii The reattachment occurs in the algebraic simulation between position C and D and in the \ke\,simulation far behind E. The unsatisfying result of the \ke\,simulation might be due to an underestimated eddy viscosity directly behind the step corner due to a limitation of $\nu_T<\nu\cdot 100$ (see figure~\ref{fig:bfsnut}).
+\noii The reattachment occurs in the algebraic simulation between positions C and D and in the \ke\,simulation far behind E. The unsatisfying result of the \ke\,simulation might be due to an underestimated eddy viscosity directly behind the step corner due to a limitation of $\nu_T<\nu\cdot 100$ (see figure~\ref{fig:bfsnut}).
 
-\begin{figure}[!htb]
+\begin{sidewaysfigure}
+%\begin{figure}[!htb]
 \centering
 \includegraphics[trim=0 200 0 200,clip,width=1.0\textwidth]{FIGURES/bfs-aturb.png}
 \includegraphics[trim=0 200 0 200,clip,width=1.0\textwidth]{FIGURES/bfs-ke.png}
-\caption{Contour plot of the eddy viscosity (top: algebraic, bottom: \ke)}
+\caption{Contour plots of the eddy viscosity (top: algebraic, bottom: \ke)}
 \label{fig:bfsnut}
-\end{figure} 
+%\end{figure} 
+\end{sidewaysfigure}
 
 % subsection backward_facing_step (end)
 
@@ -79,7 +81,7 @@ A simulation of the given backward facing step was performed with the algebraic 
 
 A cylinder (2D) was used to test how well the import of an arbitrary geometry works. The flow pattern in the wake of the cylinder is a well known and well studied phenomenon (K\'{a}rm\'{a}n vortex street). Measurements from an experiment conducted in a G\"ottingen-type wind tunnel during the lab course 'Praktikum Experimentelle Str\"omungsmechanik' 2015 was used to test the results for validity (see \citep{koehler2015}).
 
-\noii The results of two simulation are presented here. The setup is chosen according to the experimental setup. The two simulations differ only in the chosen scenario: 1) channel and 2) free. It was seen that the chosen boundary conditions have clear influence on the flow patterns\footnote{It was not possible to simulate a big enough flow field, so that no influence of the boundary conditions could be noticed: the code needs to be extended for parallel simulations to be able to handle an appropriate mesh size.}.
+\noii The results of two simulations are presented here. The setup is chosen according to the experimental setup. The two simulations differ only in the chosen scenario: 1) channel and 2) free. It was seen that the chosen boundary conditions have clear influence on the flow patterns\footnote{It was not possible to simulate a big enough flow field, so that no influence of the boundary conditions could be noticed: the code needs to be extended for parallel simulations to be able to handle an appropriate mesh size.}.
 
 
 
@@ -101,7 +103,7 @@ Mesh      & 256\,$\times$\,256 \\\hline
 f=\frac{Sr \cdot u}{d}=66.7Hz \qquad \text{with } Sr\approx0.2
 \end{align*}
 
-\noii Figure~\ref{fig:karman-stoch2} shows the stochastic analysis along a path downstream of cylinder with a distance $\Delta x = 0.100$. The stochastic analysis of the measured values are plotted in figure~\ref{fig:karman-stoch1}. The overall tendencies of the modes are both in the simulation and in the measurements similar. The influence of the boundary conditions is clearly visible leading to the discrepancies. For detailed evaluation of the experimental results (among other things modes along a path behind a cylinder) we would like to refer interested reader to \citep{koehler2015}. 
+\noii Figure~\ref{fig:karman-stoch2} shows the stochastic analysis along a path downstream of cylinder with a distance $\Delta x = 0.100$. The stochastic analysis of the measured values are plotted in figure~\ref{fig:karman-stoch1}. The overall tendencies of the modes are both in the simulation and in the measurements similar. The influence of the boundary conditions is clearly visible leading to the discrepancies. For detailed evaluation of the experimental results (among other things modes along a path behind a cylinder), we would like to refer interested readers to \citep{koehler2015}. 
 
 \newcommand{\inkarman}[1]{\includegraphics[trim=0 250 0 250,clip,width=0.8\textwidth]{#1}}
 

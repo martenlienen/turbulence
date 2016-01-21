@@ -22,7 +22,7 @@ Therein the operator $\langle \cdot \rangle$ denotes the mean, and the operator 
 
 \section{RANS equations} % (fold)
 \label{sec:rans_equations}
-Applying this approach to the dimensionless Navier-Stokes-equations and the continuity equation for incompressible flows yields the Reynolds-Averaged Navier-Stokes-equation (RANS):
+Applying this approach to the dimensionless Navier-Stokes-equations (the continuity equation and the momentum equations) for incompressible flows yields the Reynolds-Averaged Navier-Stokes-equation (RANS):
 \begin{equation}\label{eq:conti}
 	\abl{\langle u_i \rangle}{x_i} = 0
 \end{equation}
@@ -81,7 +81,7 @@ with
 		F   &= 2\,\nu_T\,S_{i,j}S_{i,j}.
 	\end{split}
 \end{equation}
-The first term on the left side therein denotes the material derivative of the TKE. Change in TKE can occur by either diffusion (first term on the right side), dissipation (second term on the right side) or production (third term on the right side). As will be seen in the following, the dissipation term can also be generalized to a reaction term.
+The first term on the left side therein denotes the material derivative of the TKE. Change in TKE can occur by diffusion (first term on the right side), dissipation (second term on the right side) or production (third term on the right side). As will be seen in the following, the dissipation term can also be generalized to a reaction term.
 
 \noii A transport equation for the dissipation $\varepsilon$, which also occurs in the TKE transport equation \eqref{tkeTransport}, can be derived mathematically. This yields
 \begin{equation}
@@ -103,7 +103,7 @@ with
 \end{equation}
 where $F$ is similarly defined as in \eqref{tkeTransport}. The interpretation of the single terms is analogous to the ones in the TKE-equation. 
 
-\noii The introducing the time scale $T = k/\varepsilon$ (see \citep{adams2015}) yields for the respective transport equation:
+\noii Introducing the time scale $T = k/\varepsilon$ (see \citep{adams2015}) yields for the respective transport equation:
 
 \begin{alignat}{3} \label{eq:keTransport00}
 		\abl{k}{t} + u_i\,\abl{k}{x_i}
@@ -122,7 +122,7 @@ where $F$ is similarly defined as in \eqref{tkeTransport}. The interpretation of
 		\underbrace{C_{\varepsilon 1}\,F}_{4}.
 \end{alignat}
 
-\noii Terms $1$, $2$, $3$ and $4$ can be interpeted as the material derivative, dissipation term, reaction term and production term respectively, as mentioned before. For \textit{k}-$\varepsilon$ models the turbulent viscosity can be calculated from the two new variables as
+\noii Terms $1$, $2$, $3$ and $4$ can be interpeted as the material derivative, dissipation term, reaction term and production term respectively, as mentioned before. For \textit{k}-$\varepsilon$ models, the turbulent viscosity can be calculated from the two new variables as
 \begin{align}
 	\nu_T = C_\mu\,\frac{k^2}{\varepsilon}.
 \end{align}
@@ -164,7 +164,7 @@ The turbulent viscosity is defined as
 \label{eq:nut}
 	\nu_T = C_\mu f_\mu \frac{k^2}{\varepsilon}.
 \end{align}
-Five model constants $C_{\mu}, \sigma_k, \sigma_{\epsilon}, C_{\epsilon 1}, C_{\epsilon 2}$ and five parameters $f_{\mu}, f_1, f_2, D, E$ can be identified in equations \ref{eq:keTransport02}, \ref{eq:keTransport02} and \ref{eq:nut}. The model constants are choosen as proposed in~\citep{fan1993} as
+Five model constants $C_{\mu}, \sigma_k, \sigma_{\epsilon}, C_{\epsilon 1}, C_{\epsilon 2}$ and five parameters $f_{\mu}, f_1, f_2, D, E$ can be identified in equations \ref{eq:keTransport02}, \ref{eq:keTransport02} and \ref{eq:nut}. The model constants are chosen as proposed in~\citep{fan1993} as
 \begin{align}\label{equ:constants}
     C_{\mu} = 0.09 \qquad
     \sigma_k = 1.0 \qquad
@@ -174,6 +174,8 @@ Five model constants $C_{\mu}, \sigma_k, \sigma_{\epsilon}, C_{\epsilon 1}, C_{\
 \end{align}
 
 \noii For the damping parameters, different models have been implemented. In the following, a table with the implemented models and the respective terms for the parameters is shown (see also~\citep{fan1993}).
+
+\vspace{1cm}
 
 \begin{adjustbox}{width=\textwidth,totalheight=\textheight,keepaspectratio}
     \begin{tabular}{| >{$}l<{$} | >{$}c<{$} | >{$}c<{$} | >{$}c<{$} | >{$}c<{$} | >{$}c<{$} |}
@@ -219,6 +221,8 @@ Five model constants $C_{\mu}, \sigma_k, \sigma_{\epsilon}, C_{\epsilon 1}, C_{\
       \hline
     \end{tabular}
 \end{adjustbox}
+
+\vspace{1cm}
 
 \noii Therein, for the model of Fan, an additional parameter $f_w$ is necessary. It is defined as
 \begin{equation}
