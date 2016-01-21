@@ -1,0 +1,99 @@
+\chapter{Binary Data Output with HDF5 and MPI-IO}
+\label{cha:hdf5}
+
+The original VTK output implemented within the scope of worksheet 1 is easy to
+implement and debug because it allows for inspection of the data with any text
+editing program. But at the same time it treats time and space wastefully by
+requiring a conversion to ASCII and using separator characters instead of a
+fixed-width format. Storing a double precision floating point value in a VTK
+file requires a conversion from binary data to ASCII string which takes time
+while also reducing the precision. Our current VTK writer generates ASCII
+representations of 8 characters length, which gives you a best case precision of
+7 digits for numbers like $1.234567$ because you have to subtract one byte for
+the dot and can only keep 6 decimal places. A number like $2.33 \cdot 10^{-5}$
+is truncated to $0.000002$ leaving only a single digit intact.
+
+A binary, fixed width format does away with these disadvantages at the cost of
+inspectability. Data can be written directly from memory without requiring a
+relatively costly transformation and you keep all the benefits of IEEE floating
+point numbers. So you can fit a precision 16 decimal places into the same 8
+bytes that gave you only 6 decimal places with VTK.
+
+First we looked into the library version of VTK that implements a new version 2
+of the VTK format with several interesting features, for example support for
+binary output but also built-in support for multiple writers. Sadly this
+foundered on that fact that documentation for this library is very sparse
+without a commercial subscription with KitWare. Additionally their plan for
+parallelism consists of every process writing its own file and linking them
+together with an index file and we were also looking for a way to have everyone
+write into the same file.
+
+This led us to HDF5 \footnote{https://www.hdfgroup.org/HDF5/}, the Hierarchical
+Data Format. This format has basically all the features we wished for.
+
+\begin{itemize}
+\item HDF5 is a binary format
+\item It has support for MPI built-in
+\item Everyone writes into the same file
+\item It is very well documented
+\end{itemize}
+
+There is unfortunately a unavoidable drawback in that this
+format alone is not directly understandable by visualizers like ParaView because
+HDF5 files are more or less file systems of arbitrary structure in a file. Thus,
+another program cannot make sense of the data without some kind of description
+of the structure. The solution to this problem is called XDMF, Extensible Data
+Model and Format \footnote{http://xdmf.org/index.php/Main\_Page}, which
+describes the structure of HDF5 files and lets you communicate facts like
+``/Data/Timestep-1/Pressure'' is the pressure data at timestep 1 to ParaView.
+
+Nonetheless this enabled us to implement a binary data output where all
+processes write into the same file using MPI-IO under the hood.
+
+\infobox{nseof::hdf5::HDF5, nseof::hdf5::XDMF, nseof::hdf5::HDF5Plotter}
+
+In beginning all processes collectively create an output file and then write
+there local flow field geometry into it. Then every $n$ timesteps all processes
+write all their plotting data into the binary file, e.g. the current pressure or
+dissipation rate. This requires some synchronization overhead to ensure that all
+data is actually written. In practice this means that all processes need to
+write their data collectively, i.e. process 1 needs to know where process 3 is
+writing its data. It does not have to wait for it (i.e. non-blocking), but has to
+know about it. If you try to drop this mapping, you will find that parts
+of the HDF5 output are missing. Finally all processes close the HDF5 file and
+the root process generates an XDMF description for ParaView.
+
+This improvement reduced the output file size by about 35\%. This is about what
+you would expect. When you read back to the first paragraph, you see that all
+the double values are still taking 8 bytes of storage space, the same as
+before. So effectively we only save the field separators and the local field
+geometries that are repeated in every VTK file. You also have to take into
+account the double values that we save now have more than double the amount of
+precision. In the end this means that while we only saved approximately 35\% of
+space, we increased the information density of our output by a factor of
+$\frac{1}{65\%} \cdot \frac{16}{7} \approx 3.5$ where $\frac{1}{65\%}$ is the
+information density of the binary output and $\frac{16}{7}$ is the increase of
+information by increasing the precision from $7$ to $16$ decimal places.
+
+\section{Limitations}
+
+Unfortunately there are two limitations that could not be resolved.
+
+\begin{itemize}
+\item There is no currently no combination of modules on the MAC-cluster that
+  allows the successful compilation with HDF5 enabled
+\item ParaView is not able to read/understand vector data
+\end{itemize}
+
+Our analysis of the first issue revealed that there the HDF5 module is compiled
+with multi-threading enabled while the MPI module version that we have to use
+because of other inter-module dependencies is compiled without multi-threading
+support (or the other way around). This leads to unresolvable inconsistencies
+during the linking process.
+
+Regarding the second issue it is not clear who the offender is. Are we writing
+invalid XDMF files or is there a bug in ParaView respectively libxdmf? That is
+not easy to answer because in contrast to HDF5 XDMF is maintained and developed
+by KitWare which means that, like VTK, useful documentation or even working
+examples of XDMF are few and far between. We were simply unable to find even one
+working example how to correctly describe vector data.
