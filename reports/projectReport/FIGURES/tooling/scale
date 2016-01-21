@@ -1,0 +1,3 @@
+scripts/cluster/scale --intel --strong --limit 64 \
+                      --sx 512 --sy 64 \
+                      ./results ./ns scenario.xml

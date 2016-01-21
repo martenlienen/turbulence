@@ -1,0 +1,182 @@
+\chapter{Tooling \& Utilities}
+\label{cha:tooling}
+
+Over the course of this semester we adopted several tools, restructured the code
+quite a bit and programmed several utilities to keep the software organized and
+automize recurring tasks.
+
+\section{Code Quality}
+
+\subsection{Namespaces}
+
+After the second worksheet there were slightly different versions of several
+classes right next to each other and it became hard to keep track of what
+belonged together. To better emphasize, which classes are coupled closely
+together, we grouped them classes into namespaces. First and foremost all code
+now lives under the \texttt{nseof} namespace. Inside of this we divided the code
+into
+
+\begin{itemize}
+\item \texttt{flowmodels} to group all classes related to flow modelling with
+  subnamespaces \texttt{laminar} for the base case, \texttt{turbulent} with
+  parent classes for all turbulence models, \texttt{algebraic} for the algebraic
+  model from the second worksheet and \texttt{ke} for the $k$-$\epsilon$
+  turbulence model
+\item \texttt{hdf5} for HDF5 data output
+\item \texttt{walldistance} for computing the wall distance of a cell with ANN
+\item several more
+\end{itemize}
+
+\subsection{Coding Style \& Formatters}
+
+Keeping a consistent coding and formatting style throughout a codebase helps
+keeping the code readable and even find bugs. Therefore we first agreed on a
+well-defined coding style to adhere to, in our case the one maintained by Google
+\footnote{http://google.github.io/styleguide/cppguide.html} because it had the
+most familiarity to how you program in Java.
+
+Secondly we configured the C++ code formatter clang-format to adhere to this
+style, so that we could automatically reformat the existing codebase and also
+check the style of newly written code before committing it into our repository.
+
+\section{Tools}
+
+Most importantly we replaced the original Makefile with CMake
+\footnote{https://cmake.org/}. CMake lets you easily script different aspects of
+your build. For example we implemented an option to use the special MPI compiler
+on the MAC cluster, another one to enable profiling with gprof and a another one
+to enable instrumentation with scorep, so that you can configure all those
+things command line switches instead of having to edit the Makefile. However the
+most important feature for us was that CMake has working dependency checking so
+that you can always just make and CMake will figure out, exactly which files
+need to be recompiled. This presents a remarkable saving of time compared to the
+original Makefile, where this was not guaranteed to work.
+
+Secondly we integrated Google's GTest
+\footnote{https://github.com/google/googletest} into our CMake configuration and
+created several tests to check the correctness of several of the derivative
+functions.
+
+\section{Utilities}
+
+We developed a few utilities to simplify tasks and shrink multi step processes
+into a single command.
+
+\subsection{Connecting to the Cluster}
+
+Whenever you want to run a simulation with a lot of cores you need to log on to
+the MAC cluster. But this is not so straight forward since the MAC cluster is
+only available inside the TUM network. This means you have to tunnel into
+university network and then connect throught that. All these things are managed
+by the following script, so that you do not have to care.
+
+\bashh{FIGURES/tooling/connect}{1}
+
+Additionally it can also mount your home and scratch directory.
+
+\subsection{Running Jobs}
+
+There is a \texttt{run} script that configures batch jobs and queues them. It is
+fully controlled by command line arguments so that you never have to edit
+files. The following call runs the scenario \texttt{scenario.xml} with
+$8 \times 2$ processes on intel nodes with a maximum run time of 30 minutes,
+puts the results into \texttt{./results} and sends you an email, when it is
+done.
+
+\bashh{FIGURES/tooling/run}{1}
+
+If you pass \texttt{-l} or \texttt{--local}, you can also use it on your own computer.
+
+\subsection{Performing Scaling Tests}
+
+The \texttt{scale} script performs a weak or strong scaling experiment for
+you. For example the following command would test strong scaling with the
+scenario \texttt{scenario.xml} on intel nodes with a grid size of
+$512 \times 64$ with $1, 4, 8, \dots, 64$ processes and put all results into
+\texttt{./results} for later analysis with one of the analysis and plotting
+scripts.
+
+\bashh{FIGURES/tooling/scale}{1}
+
+An interesting feature of this script is that it computes the optimal domain
+decomposition automatically for all numbers of processes that should be
+tested. In the lecture we established that an optimal decomposition consists of
+rectangles with a minimal ratio of surface area to volume because that is
+actually the same as the ratio of communication to computation.
+
+Say you want to run a $k$-dimensional simulation with $n$ cores on a domain with
+$s_{1} \cdot s_{2} \cdots s_{k}$ cells. Then we have to decompose $n$ into
+$n_{1}, \dots, n_{k}$ such that $\prod_{i = 1}^{k} n_{k} = n$. This means that
+all the $n_{i}$ have to be divisors of $n$ or more specifically all $n_{i}$ have
+to be either $1$ or a product of the prime divisors of $n$. Let
+$\mathcal{P}_{n}$ be the set of all prime divisors of $n$ with correct
+multiplicity. Furthermore let $\mathcal{C}_{n}$ be the set of all ordered
+products of $k$-partitions of $\mathcal{P}_{n}$. For example for $k = 3$ we have
+$\mathcal{P}_{12} = \{ 2, 2, 3 \}$ and
+\begin{equation*}
+  \mathcal{C}_{12} = \{ (12, 1, 1), (1, 12, 1), (1, 1, 12), (4, 3, 1), (4, 1, 3), (3, 4, 1), \dots \}
+\end{equation*}
+Let $(n_{1}, \dots, n_{k}) \in \mathcal{C}_{n}$ be a decomposition. This
+decomposition divides the domain into parts of surface area $A$ and volume $V$
+where
+\begin{equation*}
+  A = 2 \cdot \sum_{i = 1}^{k} \prod_{j = 1, j \ne i}^{k} \frac{s_{j}}{n_{j}} \qquad \textit{and} \qquad V = \frac{1}{n} \prod_{i = 1}^{k} s_{i}
+\end{equation*}
+Now remember that we are trying to minize the ratio of surface area to volume,
+i.e.
+\begin{align*}
+  \frac{A}{V} & = \frac{n}{\prod_{i = 1}^{k} s_{i}} \cdot 2 \cdot \sum_{i = 1}^{k} \prod_{j = 1, j \ne i}^{k} \frac{s_{j}}{n_{j}} = \frac{n}{\prod_{i = 1}^{k} s_{i}} \cdot 2 \cdot \sum_{i = 1}^{k} \frac{\prod_{j = 1, j \ne i}^{k} s_{j}}{\prod_{j = 1, j \ne i}^{k} n_{j}}\\
+  & = 2 \cdot \sum_{i = 1}^{k} \frac{\prod_{j = 1, j \ne i}^{k} s_{j}}{\prod_{i = 1}^{k} s_{i}} \cdot \frac{n}{\prod_{j = 1, j \ne i}^{k} n_{j}} = 2 \cdot \sum_{i = 1}^{k} \frac{1}{s_{i}} \cdot n_{i} = 2 \cdot \sum_{i = 1}^{k} \frac{n_{i}}{s_{i}}
+\end{align*}
+Minimizing this analytically is not trivial since we have to find solutions on a
+$k - 1$-dimensional submanifold that is described by a non-linear equation
+($\prod_{i = 1}^{k} n_{i} = n$). You can however work out special cases
+directly. Let for example be $k = 2$.
+\begin{equation*}
+  \frac{A}{V} = 2 \cdot \left( \frac{n_{1}}{s_{1}} + \frac{n_{2}}{s_{2}} \right) = 2 \cdot \left( \frac{n_{1}}{s_{1}} + \frac{n}{n_{1}s_{2}} \right) \qquad \left( \frac{A}{V} \right)' = 2 \cdot \left( \frac{1}{s_{1}} - \frac{n}{s_{2} n_{1}^{2}} \right)
+\end{equation*}
+where the derivative with respect to $n_{1}$ has a root at
+$n_{1} = \sqrt{\frac{ns_{1}}{s_{2}}}$. Though you are still not done, because
+you have to find the closest integer approximation to
+$\left( n_{1}, \frac{n}{n_{1}} \right)$.
+
+That is why the script uses a different algorithm to construct the same integer
+solutions directly. It is based on the observation that the subdomains will be
+squares when it holds for all $i, j$ that
+$\frac{s_{i}}{s_{j}} = \frac{n_{i}}{n_{j}}$, i.e. the number of cores along some
+dimensions have the same ration as the number of cells along these dimensions,
+because then the subdomains will be $k$-dimensional squares. The integer
+solution is constructed iteratively by starting with a decomposition of
+$(n_{1}, \dots, n_{k}) = (1, \dots, 1)$ and then multiplying the prime factors
+in descending order onto the $n_{i}$ whose ratio of $\frac{n_{i}}{s_{i}}$ is
+minimal because that is the one that is the furthest away from its optimal
+value, i.e. having the same ratio as all other $n_{i}$. Table
+\ref{fig:tooling-decompositions} shows a few example decompositions obtained in
+this manner.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{c|cc}
+    \hline
+    $n$ & $n_{1}$ & $n_{2}$\\
+    \hline
+    1 & 1 & 1\\
+    4 & 4 & 1\\
+    8 & 8 & 1\\
+    12 & 6 & 2\\
+    16 & 8 & 2\\
+    20 & 10 & 2\\
+    24 & 12 & 2\\
+    28 & 14 & 2\\
+    32 & 16 & 2\\
+    36 & 9 & 4\\
+    \hline
+  \end{tabular}
+  \caption{2-dimensional decompositions of a domain with $512 \times 128$ cells for $n$ processes}
+  \label{fig:tooling-decompositions}
+\end{table}
+
+Finally the script mangles the cell counts $s_{1}, \dots, s_{k}$ just a little
+by rounding up or down to the next multiple of $n_{k}$ so that $n_{k}$ divides
+$s_{k}$ because the simulation only accepts decompositions that divide the
+domain into parts of exactly equal size.

@@ -1,0 +1,3 @@
+scripts/cluster/run -e student@tum.de --intel \
+                    --nx 8 --ny 2 --time 0:30 \
+                    ./results ./ns scenario.xml
