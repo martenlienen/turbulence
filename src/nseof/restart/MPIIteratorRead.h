@@ -32,8 +32,12 @@ void MPIIteratorRead<FF, T>::iterate() {
   if (this->_fname == "") {
     return;
   }
+  
+  std::stringstream ss;
+  ss << this->_fname << ".bak";
+  std::string s = ss.str();
 
-  if (!this->is_file_exist(this->_fname.c_str())) {
+  if (!this->is_file_exist(s.c_str())) {
     return;
   }
 
@@ -48,14 +52,14 @@ void MPIIteratorRead<FF, T>::iterate() {
   // load simulation type
   if (this->_p.parallel.rank != 0) {
     file_open_error2 =
-        MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(this->_fname.c_str()),
+        MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(s.c_str()),
                       MPI_MODE_RDONLY, MPI_INFO_NULL, &fh2);
     MPI_File_close(&fh2);
 
   } else {
     // try to open file
     file_open_error2 =
-        MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(this->_fname.c_str()),
+        MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(s.c_str()),
                       MPI_MODE_RDONLY, MPI_INFO_NULL, &fh2);
 
     if (file_open_error2 != MPI_SUCCESS) {
@@ -88,7 +92,7 @@ void MPIIteratorRead<FF, T>::iterate() {
   // read data
   // try to open file
   file_open_error =
-      MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(this->_fname.c_str()),
+      MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(s.c_str()),
                     MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
 
   if (file_open_error != MPI_SUCCESS) {

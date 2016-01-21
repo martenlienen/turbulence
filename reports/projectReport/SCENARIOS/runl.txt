@@ -1,0 +1,1 @@
+scripts/cluster/run -l ns karman.xml

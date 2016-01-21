@@ -1,0 +1,1 @@
+mpirun -np 1 ./ns scenarios/conf_channel_circle_a.xml

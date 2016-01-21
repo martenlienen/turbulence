@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <.../>
+    <restart in="karman_dns" out="karman_ke" 
+             interval="10.0"/>
+    <.../>
+</configuration>

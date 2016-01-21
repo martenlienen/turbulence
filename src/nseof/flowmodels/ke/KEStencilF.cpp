@@ -117,6 +117,11 @@ void KEStencilF::apply(FlowField& flowField, int i, int j, int k) {
   // calculate factors
   calc();
 
+  // limitation for diffusion and reaction terms
+//   FLOAT gamma = flowField.getEpsilon(i,j,k)/max(1e-8, flowField.getTke(i,j,k));
+//   wop.f2 *= (wop.f2*gamma> 0.0) ? 1.0 : 0.0;
+//   wop.f3  = (       gamma> 0.0) ? 1.0 : 0.0; 
+
   // write factors
   flowField.getFmu(i, j, k) = wop.fmu;
   flowField.getF1(i, j, k) = wop.f1;

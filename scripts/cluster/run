@@ -127,7 +127,7 @@ def copyPetscArguments(jobdir, argsfile):
 
 
 def configureScenario(out, templatepath, geometrypath, nx, ny, nz, sx, sy, sz,
-                      vtkpath, enable_timing, timingpath, enable_vtk):
+                      vtkpath, enable_timing, timingpath, enable_vtk,initial,bakspath):
     """Configure a scenario template for parallel execution.
 
     The configured scenario is written into `out`."""
@@ -163,6 +163,16 @@ def configureScenario(out, templatepath, geometrypath, nx, ny, nz, sx, sy, sz,
         if "obstacle" in attrs and os.path.isfile(attrs["obstacle"]):
             shutil.copyfile(attrs["obstacle"], geometrypath)
             child.attrib["obstacle"] = geometrypath
+
+    for child in root.findall("restart"):
+        attrs = child.attrib
+
+        if "in" in attrs and os.path.isfile(attrs["in"] + ".bak"):
+            shutil.copyfile(attrs["in"] + ".bak", initial + ".bak")
+            child.attrib["in"] = initial
+
+        if "out" in attrs:
+            child.attrib["out"] = bakspath + "//" + child.attrib["out"]
 
     tree.write(out)
 
@@ -221,9 +231,14 @@ def main():
     outpath = os.path.join(options.out, "out")
     jobpath = os.path.join(options.out, "job.cmd")
     scenario = os.path.join(options.out, "scenario.xml")
-    geometry = os.path.join(options.out, "geometry.txt")
+    geometry = os.path.join(options.out, "geometry.geo")
+    initial = os.path.join(options.out, "initial")
+    initialp= os.path.join(options.out, "baks")
     vtkpath = os.path.join(options.out, "vtks")
     timingpath = os.path.join(options.out, "timing", "")
+
+    if not os.path.isdir(initialp):
+        os.mkdir(initialp)
 
     if not os.path.isdir(vtkpath):
         os.mkdir(vtkpath)
@@ -237,7 +252,7 @@ def main():
         configureScenario(scenario, options.scenario, geometry, options.nx,
                           options.ny, options.nz, options.sx, options.sy,
                           options.sz, vtkpath, options.timing, timingpath,
-                          options.vtk)
+                          options.vtk,initial,initialp)
 
         nranks = options.nx * options.ny * options.nz
 

@@ -126,27 +126,18 @@ class Simulation : public FlowFieldSimulation<FlowField> {
         _mpiir(*_flowField, parameters, _mpiiwvector2D, _mpiiwvector3D,
                [](FlowField &flowField, int i, int j, int k, double &p,
                   std::vector<int> & table) {
-                 flowField.getPressure().getScalar(i, j) =
-                     table[4] != -1 ? *(&p + table[4]) : 0.0;
-                 flowField.getVelocity().getVector(i, j)[0] =
-                     table[1] != -1 ? *(&p + table[1]) : 0.0;
-                 flowField.getVelocity().getVector(i, j)[1] =
-                     table[2] != -1 ? *(&p + table[2]) : 0.0;
-                 flowField.getNu(i, j) =
-                     table[3] != -1 ? *(&p + table[3]) : 0.0;
+                 flowField.getPressure().getScalar(i, j)    = table[4] != -1 ? *(&p + table[4]) : (table[0] != -1 ? *(&p + table[0]) : 0.0);
+                 flowField.getVelocity().getVector(i, j)[0] = table[1] != -1 ? *(&p + table[1]) : 0.0;
+                 flowField.getVelocity().getVector(i, j)[1] = table[2] != -1 ? *(&p + table[2]) : 0.0;
+                 flowField.getNu(i, j)                      = table[3] != -1 ? *(&p + table[3]) : 0.0;
                },
                [](FlowField &flowField, int i, int j, int k, double &p,
                   std::vector<int> & table) {
-                 flowField.getPressure().getScalar(i, j, k) =
-                     table[5] != -1 ? *(&p + table[5]) : 0.0;
-                 flowField.getVelocity().getVector(i, j, k)[0] =
-                     table[1] != -1 ? *(&p + table[1]) : 0.0;
-                 flowField.getVelocity().getVector(i, j, k)[1] =
-                     table[2] != -1 ? *(&p + table[2]) : 0.0;
-                 flowField.getVelocity().getVector(i, j, k)[2] =
-                     table[3] != -1 ? *(&p + table[3]) : 0.0;
-                 flowField.getNu(i, j, k) =
-                     table[4] != -1 ? *(&p + table[4]) : 0.0;
+                 flowField.getPressure().getScalar(i, j, k)    = table[5] != -1 ? *(&p + table[5]) : (table[0] != -1 ? *(&p + table[0]) : 0.0);
+                 flowField.getVelocity().getVector(i, j, k)[0] = table[1] != -1 ? *(&p + table[1]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[1] = table[2] != -1 ? *(&p + table[2]) : 0.0;
+                 flowField.getVelocity().getVector(i, j, k)[2] = table[3] != -1 ? *(&p + table[3]) : 0.0;
+                 flowField.getNu(i, j, k)                      = table[4] != -1 ? *(&p + table[4]) : 0.0;
                }),
         _nutst(parameters),
         _nutit(*_flowField, _parameters, _nutst, 1, 0),

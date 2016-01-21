@@ -45,6 +45,7 @@ void MPIIteratorWrite<FF, T>::iterate() {
   if (this->_fname == "") {
     return;
   }
+  this->counter = 0;
 
   MPI_File fh;
   MPI_Status status;
@@ -64,8 +65,12 @@ void MPIIteratorWrite<FF, T>::iterate() {
   // load data from flowfield
   MPIIterator<FF, T>::iterate();
 
+  std::stringstream ss;
+  ss << this->_fname << "." << this->_p.timestep.timeSteps <<".bak";
+  std::string s = ss.str();
+  
   // Write data to file
-  MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(this->_fname.c_str()),
+  MPI_File_open(MPI_COMM_WORLD, const_cast<char*>(s.c_str()),
                 MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
   MPI_File_seek(fh, my_offset, MPI_SEEK_SET);
   MPI_File_write(fh, this->_data.data(), this->_sizetotal, MPI_DOUBLE, &status);

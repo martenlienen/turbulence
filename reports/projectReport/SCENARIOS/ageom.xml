@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <.../>
+    <geometry ...
+              obstacle="geometries/channel_versetzt.geo"/>
+        <...>
+    </geometry>
+    <.../>
+</configuration>

@@ -430,6 +430,7 @@ void Configuration::loadParameters(Parameters &parameters,
     if (node) {
       readStringOptional(parameters.restart.in, node, "in");
       readStringOptional(parameters.restart.out, node, "out");
+      readFloatOptional(parameters.restart.interval,node,"interval",1.0);
     }
 
     // Start neighbors on null in case that no parallel configuration is used
@@ -608,6 +609,7 @@ void Configuration::loadParameters(Parameters &parameters,
 
   MPI_Bcast(&parameters.timing.enabled, 1, MPI_INT, 0, communicator);
   broadcastString(parameters.timing.prefix, communicator);
+  MPI_Bcast(&(parameters.restart.interval), 1, MY_MPI_FLOAT, 0, communicator);
 
   // broadcast restart parameters
   broadcastString(parameters.restart.in, communicator);

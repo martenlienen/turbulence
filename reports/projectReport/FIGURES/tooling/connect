@@ -1,0 +1,2 @@
+scripts/cluster/connect -u <lrz-user> -cu di34muX \
+                        -m ~/cluster

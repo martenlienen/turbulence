@@ -7,3 +7,9 @@ _region_.tex
 *.pdf_tex
 *.synctex.gz
 _minted-*
+*.fdb_latexmk
+*.out
+*.fls
+.idx
+.ilg
+.ind

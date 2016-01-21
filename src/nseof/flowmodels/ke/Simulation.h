@@ -172,7 +172,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
             [](FlowField &flowField, int i, int j, int k, double &p,
                std::vector<int> & table) {
               // clang-format off
-                 flowField.getPressure().getScalar(i, j)    = table[10] != -1 ? *(&p + table[10]) : 0.0;
+                 flowField.getPressure().getScalar(i, j)    = table[10] != -1 ? *(&p + table[10]) : (table[0] != -1 ? *(&p + table[0]) : 0.0);
                  flowField.getVelocity().getVector(i, j)[0] = table[1]  != -1 ? *(&p + table[ 1]) : 0.0;
                  flowField.getVelocity().getVector(i, j)[1] = table[2]  != -1 ? *(&p + table[ 2]) : 0.0;
                  flowField.getTke(i, j)                     = table[3]  != -1 ? *(&p + table[ 3]) : 0.0;
@@ -187,7 +187,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
             [](FlowField &flowField, int i, int j, int k, double &p,
                std::vector<int> & table) {
               // clang-format off
-                 flowField.getPressure().getScalar(i, j, k)    = table[11] != -1 ? *(&p + table[11]) : 0.0;
+                 flowField.getPressure().getScalar(i, j, k)    = table[11] != -1 ? *(&p + table[11]) : (table[0] != -1 ? *(&p + table[0]) : 0.0);
                  flowField.getVelocity().getVector(i, j, k)[0] = table[1]  != -1 ? *(&p + table[ 1]) : 0.0;
                  flowField.getVelocity().getVector(i, j, k)[1] = table[2]  != -1 ? *(&p + table[ 2]) : 0.0;
                  flowField.getVelocity().getVector(i, j, k)[2] = table[3]  != -1 ? *(&p + table[ 3]) : 0.0;
@@ -374,25 +374,25 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   }
 
   virtual void solveTimestep() {
+    FLOAT olddt = _parameters.timestep.dt;
+    
     // determine and set max. timestep which is allowed in this simulation
     setTimeStep();
     int icounter = 0;
 
     // calculate laminar or turbulent?
-    if (_parameters.timestep.time > _parameters.kEpsilon.start) {
-      // calculate rhs of epsilon and tke
-
-      _parameters.timestep.dt *= 2.0;
-
-      std::cout << _parameters.timestep.timeSteps << std::endl;
-
+    if (_parameters.timestep.time >= _parameters.kEpsilon.start) {
       // calculate rhs of epsilon- & tke-transport-equv. and check
-      int tempGlobal;
 
+      // calculate rhs of epsilon and tke
+      _keRHSit.iterate();
+
+      // determin new timestep
+      int tempGlobal;
+      _parameters.timestep.dt *= 2.0;
       do {
         _tsBool.reset();
         _parameters.timestep.dt /= 2.0;
-        _keRHSit.iterate();
         _tiBool.iterate();
 
         int tempLocal = (_tsBool.getValue() &&
@@ -402,6 +402,11 @@ class Simulation : public FlowFieldSimulation<FlowField> {
                       PETSC_COMM_WORLD);
       } while (tempGlobal);
 
+      
+      // prevent too high dt jumps
+      _parameters.timestep.dt = _parameters.timestep.dt/olddt > 1.1 ?
+        olddt*1.1 : _parameters.timestep.dt;
+      
       keloopcounter += icounter;
 
       std::cout << "ke-loop: " << icounter << " of " << keloopcounter << std::endl;
@@ -444,6 +449,15 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   virtual void serialize() { _mpiiw.iterate(); }
 
   virtual void deserialize() { _mpiir.iterate(); }
+  
+  virtual void init() {
+    // from super
+    FlowFieldSimulation::init();
+
+    // compute vortex viscosity
+    _nutit.iterate();
+
+  }
 
  protected:
   /** sets the time step*/
