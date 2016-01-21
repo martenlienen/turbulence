@@ -1,11 +1,11 @@
-\chapter{Tooling \& Utilities}
+\chapter{Tooling \& utilities}
 \label{cha:tooling}
 
 Over the course of this semester we adopted several tools, restructured the code
 quite a bit and programmed several utilities to keep the software organized and
 automize recurring tasks.
 
-\section{Code Quality}
+\section{Code quality}
 
 \subsection{Namespaces}
 
@@ -27,7 +27,7 @@ into
 \item several more
 \end{itemize}
 
-\subsection{Coding Style \& Formatters}
+\subsection{Coding Style \& formatters}
 
 Keeping a consistent coding and formatting style throughout a codebase helps
 keeping the code readable and even find bugs. Therefore we first agreed on a
@@ -62,7 +62,7 @@ functions.
 We developed a few utilities to simplify tasks and shrink multi step processes
 into a single command.
 
-\subsection{Connecting to the Cluster}
+\subsection{Connecting to the cluster}
 
 Whenever you want to run a simulation with a lot of cores you need to log on to
 the MAC cluster. But this is not so straight forward since the MAC cluster is
@@ -74,7 +74,7 @@ by the following script, so that you do not have to care.
 
 Additionally it can also mount your home and scratch directory.
 
-\subsection{Running Jobs}
+\subsection{Running jobs}
 
 There is a \texttt{run} script that configures batch jobs and queues them. It is
 fully controlled by command line arguments so that you never have to edit
@@ -87,7 +87,7 @@ done.
 
 If you pass \texttt{-l} or \texttt{--local}, you can also use it on your own computer.
 
-\subsection{Performing Scaling Tests}
+\subsection{Performing scaling tests}
 
 The \texttt{scale} script performs a weak or strong scaling experiment for
 you. For example the following command would test strong scaling with the

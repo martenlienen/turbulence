@@ -7,20 +7,37 @@
 \contentsline {section}{\numberline {2.5}Modification 2: Limitations in transport equations}{5}{section.2.5}
 \contentsline {section}{\numberline {2.6}Modified equations and discretization}{6}{section.2.6}
 \contentsline {chapter}{\numberline {3}Numerics and algorithm}{7}{chapter.3}
-\contentsline {chapter}{\numberline {4}Performance, efficiency and further modifications}{12}{chapter.4}
-\contentsline {section}{\numberline {4.1}New scenarios}{12}{section.4.1}
-\contentsline {section}{\numberline {4.2}PETSc-optimization}{14}{section.4.2}
-\contentsline {section}{\numberline {4.3}Restart points}{15}{section.4.3}
-\contentsline {chapter}{\numberline {5}Validation of the $k$-$\varepsilon $\tmspace +\thinmuskip {.1667em} model}{16}{chapter.5}
-\contentsline {section}{\numberline {5.1}Channel flow}{16}{section.5.1}
-\contentsline {section}{\numberline {5.2}Boundary layer}{21}{section.5.2}
-\contentsline {chapter}{\numberline {6}Performance tests}{23}{chapter.6}
-\contentsline {chapter}{\numberline {7}Numerical results of DNS simulations}{24}{chapter.7}
-\contentsline {section}{\numberline {7.1}Backward facing step}{24}{section.7.1}
-\contentsline {section}{\numberline {7.2}K\'{a}rm\'{a}n vortex street - flow around a cylinder in a channel}{30}{section.7.2}
-\contentsline {chapter}{\numberline {8}Usability}{34}{chapter.8}
-\contentsline {section}{\numberline {8.1}Project folder}{34}{section.8.1}
-\contentsline {section}{\numberline {8.2}Configuration file}{36}{section.8.2}
-\contentsline {section}{\numberline {8.3}Geometry file}{40}{section.8.3}
-\contentsline {chapter}{\numberline {9}Conclusions}{42}{chapter.9}
-\contentsline {chapter}{Bibliography}{iv}{appendix*.23}
+\contentsline {chapter}{\numberline {4}Performance, efficiency and further modifications}{11}{chapter.4}
+\contentsline {section}{\numberline {4.1}New scenarios}{11}{section.4.1}
+\contentsline {section}{\numberline {4.2}Restart points}{13}{section.4.2}
+\contentsline {chapter}{\numberline {5}Validation of the $k$-$\varepsilon $\tmspace +\thinmuskip {.1667em} model}{14}{chapter.5}
+\contentsline {section}{\numberline {5.1}Channel flow}{14}{section.5.1}
+\contentsline {section}{\numberline {5.2}Boundary layer}{20}{section.5.2}
+\contentsline {chapter}{\numberline {6}PETSc-Optimization}{22}{chapter.6}
+\contentsline {section}{\numberline {6.1}Approach}{23}{section.6.1}
+\contentsline {section}{\numberline {6.2}Preselection}{23}{section.6.2}
+\contentsline {section}{\numberline {6.3}Searching the parameter space}{23}{section.6.3}
+\contentsline {section}{\numberline {6.4}Scaling tests}{24}{section.6.4}
+\contentsline {chapter}{\numberline {7}Binary data output with HDF5 and MPI-IO}{34}{chapter.7}
+\contentsline {section}{\numberline {7.1}Limitations}{35}{section.7.1}
+\contentsline {chapter}{\numberline {8}Numerical results of DNS simulations}{37}{chapter.8}
+\contentsline {section}{\numberline {8.1}Backward facing step}{37}{section.8.1}
+\contentsline {section}{\numberline {8.2}K\'{a}rm\'{a}n vortex street - flow around a cylinder in a channel}{43}{section.8.2}
+\contentsline {chapter}{\numberline {9}Instrumentation with ScoreP}{47}{chapter.9}
+\contentsline {section}{\numberline {9.1}Introduction}{47}{section.9.1}
+\contentsline {section}{\numberline {9.2}Goals and approach}{48}{section.9.2}
+\contentsline {chapter}{\numberline {10}Tooling \& utilities}{49}{chapter.10}
+\contentsline {section}{\numberline {10.1}Code quality}{49}{section.10.1}
+\contentsline {subsection}{\numberline {10.1.1}Namespaces}{49}{subsection.10.1.1}
+\contentsline {subsection}{\numberline {10.1.2}Coding Style \& formatters}{49}{subsection.10.1.2}
+\contentsline {section}{\numberline {10.2}Tools}{50}{section.10.2}
+\contentsline {section}{\numberline {10.3}Utilities}{50}{section.10.3}
+\contentsline {subsection}{\numberline {10.3.1}Connecting to the cluster}{50}{subsection.10.3.1}
+\contentsline {subsection}{\numberline {10.3.2}Running jobs}{50}{subsection.10.3.2}
+\contentsline {subsection}{\numberline {10.3.3}Performing scaling tests}{51}{subsection.10.3.3}
+\contentsline {chapter}{\numberline {11}Usability}{53}{chapter.11}
+\contentsline {section}{\numberline {11.1}Project folder}{53}{section.11.1}
+\contentsline {section}{\numberline {11.2}Configuration file}{55}{section.11.2}
+\contentsline {section}{\numberline {11.3}Geometry file}{59}{section.11.3}
+\contentsline {chapter}{\numberline {12}Conclusions}{61}{chapter.12}
+\contentsline {chapter}{Bibliography}{v}{appendix*.23}

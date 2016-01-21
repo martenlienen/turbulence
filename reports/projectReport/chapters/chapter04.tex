@@ -19,8 +19,8 @@ Mesh      & 64\,$\times$\,128 & 64\,$\times$\,256 & 64\,$\times$\,512 \\\hline
 \end{tabular}
 \end{center}
 
-\subsubsection*{Velocities}
 
+\subsubsection*{Velocities}
 Figure~\ref{fig:channel-u-profile} shows the u-velocity component along the cross section for a laminar simulation, an algebraic simulation and a $k$-$\epsilon$\,simulation (both for Re$=5600$). The position of measurement and time were adjusted according to the case, so that the flow profile was stationary and fully developed.
 
 \begin{figure}[!htb]
@@ -33,6 +33,7 @@ Figure~\ref{fig:channel-u-profile} shows the u-velocity component along the cros
 
 \noii The velocities behave as expected. In the laminar case, the velocity profile has a parabolic form with a maximum of 1.5m/s. The turbulent simulations result in lower maximum velocities (u $\le$ 1.5m/s) and in a higher slope of the velocities near the wall: the results for both turbulent models are comparable (for a more detailed comparison see the following sections).
 
+\newpage
 \subsubsection*{Shear stress}
 
 Figure~\ref{fig:channel-tau} shows the shear stress profile along the cross section for each turbulent case. The shear stress components are normalized with $\tau_{net}=\tau_v+\tau_r$:
@@ -52,7 +53,7 @@ Figure~\ref{fig:channel-tau} shows the shear stress profile along the cross sect
 \noindent Additionally, the shear stress components are plotted over $y^+$. Self-similarity is clearly recognisable.
 
 
-
+\newpage
 \subsubsection*{Comparison with the literature: velocity profile for Re=5600}\label{ssub:litkim}
 Following additional values have been estimated for the turbulent Re=5600 case:
 \begin{align}
@@ -94,7 +95,7 @@ Figure~\ref{fig:sublayers_y+}-left shows the normalized velocity $w^+$  over $y^
 
 \noindent Figure~\ref{fig:sublayers_y+}-right also shows a modified normalized velocity $w^+$ over $y^+$ for the algebraic turbulence model for Re=5600. In this case, $l^+$ and $u_{\tau}$ were calculated with the $\tau_w$-value estimated with the help of the \ke\, simulation: the results correspond well in the logarithmic sublayer, not that well in the linear sublayer. As expected, the slope of the velocity is too high near the wall for the algebraic model.
 
-
+\newpage
 \subsubsection*{Comparison with the literature: TKE profile for Re=13750}
 
 In the following, the single terms in the $k$-transport equation are examined in more detail. The implemented form of this equation has the following form:

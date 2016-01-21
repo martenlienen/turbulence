@@ -6,15 +6,18 @@ A level-1 auxiliary file: chapters/chapter01.aux
 A level-1 auxiliary file: chapters/chapter02.aux
 A level-1 auxiliary file: chapters/chapter03.aux
 A level-1 auxiliary file: chapters/chapter04.aux
-A level-1 auxiliary file: chapters/chapter05.aux
+A level-1 auxiliary file: chapters/chapter-petsc.aux
+A level-1 auxiliary file: chapters/chapter-hdf5.aux
 A level-1 auxiliary file: chapters/chapter06.aux
+A level-1 auxiliary file: chapters/chapter-scorep.aux
+A level-1 auxiliary file: chapters/chapter-tooling.aux
 A level-1 auxiliary file: chapters/chapter07.aux
 A level-1 auxiliary file: chapters/chapter08.aux
 The style file: plainnat.bst
 Database file #1: projectReport.bib
 You've used 9 entries,
             2773 wiz_defined-function locations,
-            649 strings with 6353 characters,
+            652 strings with 6437 characters,
 and the built_in function-call counts, 3637 in all, are:
 = -- 316
 > -- 219

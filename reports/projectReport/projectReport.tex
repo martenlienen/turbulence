@@ -1,9 +1,12 @@
 \input{header}
 
+\usepackage{parskip}
+
 \usepackage{hyperref}
 \usepackage{bookmark}
 \usepackage{multirow}
 \usepackage{rotating}
+
 
 %%
 \usepackage[framemethod=tikz]{mdframed}
@@ -45,7 +48,7 @@ errorsymbol/.style={%
     },%
 ]{bbbb}
 
-\newcommand{\infobox}[1]{\begin{bbbb}[frametitle={Reference to NS-EOF namespaces}]#1\end{bbbb}}
+\newcommand{\infobox}[1]{\vspace{3mm}\begin{bbbb}[frametitle={Reference to NS-EOF namespaces}]#1\end{bbbb}}
 
 
 
@@ -75,7 +78,7 @@ errorsymbol/.style={%
 \definecolor{darkblue}{rgb}{0,0,.3}
 
 \newcommand{\noi}{\noindent}
-\newcommand{\noii}{\vspace{3mm}\noindent}
+\newcommand{\noii}{}
 
 \newcommand{\abl}[2]{\frac{\partial\,#1}{\partial\,#2}}
 \newcommand{\abll}[2]{\frac{\partial^2\,#1}{\partial\,#2^2}}
