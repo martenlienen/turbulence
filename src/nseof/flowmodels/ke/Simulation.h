@@ -381,7 +381,7 @@ class Simulation : public FlowFieldSimulation<FlowField> {
     int icounter = 0;
 
     // calculate laminar or turbulent?
-    if (_parameters.timestep.time > _parameters.kEpsilon.start) {
+    if (_parameters.timestep.time >= _parameters.kEpsilon.start) {
       // calculate rhs of epsilon- & tke-transport-equv. and check
 
       // calculate rhs of epsilon and tke
@@ -449,6 +449,15 @@ class Simulation : public FlowFieldSimulation<FlowField> {
   virtual void serialize() { _mpiiw.iterate(); }
 
   virtual void deserialize() { _mpiir.iterate(); }
+  
+  virtual void init() {
+    // from super
+    FlowFieldSimulation::init();
+
+    // compute vortex viscosity
+    _nutit.iterate();
+
+  }
 
  protected:
   /** sets the time step*/

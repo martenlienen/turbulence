@@ -2,7 +2,7 @@
 <configuration>
     <flow Re="1000" type="turbulent"/>
     <simulation finalTime="1.0">
-        <type nulimiter="0">algebraic</type>
+        <type nulimiter="0">dns</type>
         <scenario uniform="true">channel</scenario>
     </simulation>
     <keparameter
@@ -17,7 +17,7 @@
     <geometry dim="2" lengthX="2.0" lengthY="1.0" lengthZ="1.0"
               sizeX="256" sizeY="256" sizeZ="20"
               stretchX="false" stretchY="true" stretchZ="true"
-	      obstacle="geometries/airfoil-geo.txt">
+	      obstacle="scenarios/airfoil/airfoil.geo">
         <mesh>uniform</mesh>
     </geometry>
     <environment gx="0" gy="0" gz="0"/>

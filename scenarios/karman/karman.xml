@@ -17,7 +17,7 @@
     <geometry dim="2" lengthX="5.0" lengthY="1.0" lengthZ="1.0"
               sizeX="256" sizeY="128" sizeZ="20"
               stretchX="false" stretchY="true" stretchZ="true"
-              obstacle="scenarios/karman-geo.txt">
+              obstacle="scenarios/karman/karman.geo">
         <mesh t="uniform">uniform</mesh>
     </geometry>
     <environment gx="0" gy="0" gz="0"/>
