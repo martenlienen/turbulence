@@ -15,6 +15,9 @@
 % Place things at absolute positions
 \usepackage[absolute,overlay]{textpos}
 
+% Vertically align table content
+\usepackage{array}
+
 % Disable navigation buttons
 \beamertemplatenavigationsymbolsempty
 
@@ -112,5 +115,20 @@
 \end{frame}
 
 \section{Automatic Domain Decomposition}
+
+\begin{frame}
+  \frametitle{Decomposing a $5 \times 1$ Domain Into $n = 60$ Subdomains}
+  Prime factorization of $n = \{ 2, 2, 3, 5 \}$
+  \vspace{1em}
+  \begin{center}
+    \begin{tabular}{>{\centering\arraybackslash} m{1cm} m{4cm}}
+      $(1, 1)$ & \includegraphics[width=.5\textwidth]{decomp/1x1}\\
+      $(5, 1)$ & \includegraphics[width=.5\textwidth]{decomp/5x1}\\
+      $(15, 1)$ & \includegraphics[width=.5\textwidth]{decomp/15x1}\\
+      $(15, 2)$ & \includegraphics[width=.5\textwidth]{decomp/15x2}\\
+      $(15, 4)$ & \includegraphics[width=.5\textwidth]{decomp/15x4}
+    \end{tabular}
+  \end{center}
+\end{frame}
 
 \end{document}
