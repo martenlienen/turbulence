@@ -13,3 +13,8 @@ _minted-*
 .idx
 .ilg
 .ind
+
+# Beamer files
+*.nav
+*.snm
+*.toc
