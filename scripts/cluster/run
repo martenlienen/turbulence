@@ -127,7 +127,8 @@ def copyPetscArguments(jobdir, argsfile):
 
 
 def configureScenario(out, templatepath, geometrypath, nx, ny, nz, sx, sy, sz,
-                      vtkpath, enable_timing, timingpath, enable_vtk,initial,bakspath):
+                      vtkpath, enable_timing, timingpath, enable_vtk, initial,
+                      bakspath):
     """Configure a scenario template for parallel execution.
 
     The configured scenario is written into `out`."""
@@ -206,13 +207,16 @@ def submitJob(jobpath, logfile):
     return code == 0
 
 
-def runlocal(nranks, executable, scenario):
+def runlocal(cwd, nranks, executable, scenario):
     if nranks > 1:
         command = ["mpiexec", "-np", str(nranks), executable, scenario]
     else:
         command = [executable, scenario]
 
-    code = subprocess.call(command, stdout=sys.stdout, stderr=sys.stdout)
+    code = subprocess.call(command,
+                           cwd=cwd,
+                           stdout=sys.stdout,
+                           stderr=sys.stdout)
     return code == 0
 
 
@@ -233,7 +237,7 @@ def main():
     scenario = os.path.join(options.out, "scenario.xml")
     geometry = os.path.join(options.out, "geometry.geo")
     initial = os.path.join(options.out, "initial")
-    initialp= os.path.join(options.out, "baks")
+    initialp = os.path.join(options.out, "baks")
     vtkpath = os.path.join(options.out, "vtks")
     timingpath = os.path.join(options.out, "timing", "")
 
@@ -252,12 +256,13 @@ def main():
         configureScenario(scenario, options.scenario, geometry, options.nx,
                           options.ny, options.nz, options.sx, options.sy,
                           options.sz, vtkpath, options.timing, timingpath,
-                          options.vtk,initial,initialp)
+                          options.vtk, initial, initialp)
 
         nranks = options.nx * options.ny * options.nz
 
         if options.local:
-            runlocal(nranks, os.path.realpath(options.executable), scenario)
+            runlocal(options.out, nranks, os.path.realpath(options.executable),
+                     scenario)
         else:
             createJob(jobpath, outpath, options.out, options.name, scenario,
                       options.architecture, nranks, options.email,
