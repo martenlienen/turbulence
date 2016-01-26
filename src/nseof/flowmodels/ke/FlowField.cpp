@@ -61,7 +61,7 @@ FlowField::FlowField(const Parameters& parameters)
   // turbulent kinetic energy
   readers.push_back(
       std::make_unique<nseof::plotting::LambdaReader<FLOAT, FlowField, 1>>(
-          *this, "lm", [](FlowField& ff, int i, int j, int k) {
+          *this, "tke", [](FlowField& ff, int i, int j, int k) {
             return std::array<FLOAT, 1>{ff.getTke(i, j, k)};
           }));
 
