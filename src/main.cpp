@@ -121,11 +121,16 @@ int main(int argc, char *argv[]) {
   if (parameters.hdf5.enabled) {
     hdf5plotter =
         std::make_unique<nseof::hdf5::HDF5Plotter>(parameters, rank, nproc);
+
+    timer->start("hdf5");
     hdf5plotter->plotFlowField(0, simulation->getFlowField());
+    timer->stop("hdf5");
   }
 #endif
 
+  timer->start("vtk");
   simulation->plotVTK(rank, 0);
+  timer->stop("vtk");
 
   timer->stop("initialization");
 
@@ -150,7 +155,9 @@ int main(int argc, char *argv[]) {
     // TODO WS1: trigger VTK output
     if (time >= timeVTK) {
       if (time >= parameters.vtk.start) {
+        timer->start("vtk");
         simulation->plotVTK(rank, timeSteps);
+        timer->stop("vtk");
       }
 
       timeVTK += parameters.vtk.interval;
@@ -159,7 +166,10 @@ int main(int argc, char *argv[]) {
 #ifdef WITH_HDF5
     if (time >= timeHDF5) {
       if (parameters.hdf5.enabled) {
+        timer->start("hdf5");
         hdf5plotter->plotFlowField(timeSteps, simulation->getFlowField());
+        timer->stop("hdf5");
+
         lastHDF5 = timeSteps;
       }
 
@@ -175,12 +185,16 @@ int main(int argc, char *argv[]) {
 
   // TODO WS1: plot final output
   simulation->serialize();
+  timer->start("vtk");
   simulation->plotVTK(rank, timeSteps);
+  timer->stop("vtk");
 
 #ifdef WITH_HDF5
   // Plot the final state if it was not plotted in the last iteration
   if (parameters.hdf5.enabled && timeSteps > lastHDF5) {
+    timer->start("hdf5");
     hdf5plotter->plotFlowField(timeSteps, simulation->getFlowField());
+    timer->stop("hdf5");
   }
 
   // Explicitly destroy the plotter here so that it finalizes the HDF5 file over
