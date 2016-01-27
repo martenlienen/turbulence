@@ -1,0 +1,26 @@
+
+
+<Xdmf Version="2.0">
+  <Domain>
+    <Topology TopologyType="3DSMesh" Dimensions="65 65"/>
+    <Geometry GeometryType="XYZ" Name="Rank-0">
+      <DataItem Format="HDF">result.h5:/Geometries/Rank-0</DataItem>
+    </Geometry>
+    <Geometry GeometryType="XYZ" Name="Rank-1">
+      <DataItem Format="HDF">result.h5:/Geometries/Rank-1</DataItem>
+    </Geometry>
+    <Grid GridType="Collection" CollectionType="Temporal">
+      <Grid GridType="Collection" CollectionType="Spacial">
+        <Time Value="0"/>
+        <Grid>
+          <Topology Reference="/Xdmf/Domain/Topology"/>
+          <Geometry Reference="/Xdmf/Domain/Geometry[@Name=&apos;Rank-0&apos;]"/>
+          <Attribute Name="Pressure" Center="Cell" AttributeType="Scalar">
+            <DataItem Format="HDF">result.h5:/Data/Time-0/Rank-0/Pressure</DataItem>
+          </Attribute>
+        </Grid>
+      </Grid>
+      <!-- ... -->
+    </Grid>
+  </Domain>
+</Xdmf>
