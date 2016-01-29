@@ -1,5 +1,12 @@
 # Turbulent Flow Simulation
 
+## Authors (in alphabetic order)
+
+- Marten Lienen
+- Peter Münch
+- Walter Simson
+- Josef Winter
+
 ## Libraries
 
 We require the following libraries
